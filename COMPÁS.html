@@ -6575,6 +6575,41 @@ function actualizarMunicipio() {
     // *** RESETEAR EL COMPILADOR AL CAMBIAR DE MUNICIPIO ***
     resetearPlanLocal();
     
+    // *** RESETEAR PRIORIZACIÓN CIUDADANA Y ESTADO RELAS ***
+    window.datosParticipacionCiudadana = null;
+    window._origenParticipacionCiudadana = null;
+    try {
+        if (typeof relas_lastSimResult !== 'undefined') relas_lastSimResult = null;
+        if (typeof relas_simState !== 'undefined') relas_simState = { sh: [], sp: [], sc: [] };
+        if (typeof vrelas_votosActo !== 'undefined') vrelas_votosActo = [];
+    } catch (eRelas) {
+        console.warn('No se pudo resetear completamente el estado RELAS', eRelas);
+    }
+    // Limpiar UI básica de priorización ciudadana (acordeón + badge)
+    var seccionPop = document.getElementById('seccion-priorizacion-popular');
+    if (seccionPop) seccionPop.innerHTML = '';
+    var estPop = document.getElementById('estado-priorizacion-popular');
+    if (estPop) {
+        estPop.innerHTML = '<span style="color:#94a3b8;">⏳ Pendiente de realizar en Tab 3</span>';
+    }
+    var badgePrio = document.getElementById('badge-priorizacion');
+    if (badgePrio) {
+        badgePrio.style.cssText = '';
+        badgePrio.textContent = '🗳️ Priorización: --';
+    }
+    // Invalidar sesión RELAS en localStorage si pertenece a otro municipio
+    try {
+        var storedSesion = localStorage.getItem('vrelas_session');
+        if (storedSesion) {
+            var sessObj = JSON.parse(storedSesion);
+            if (sessObj && sessObj.municipio && sessObj.municipio !== key) {
+                localStorage.removeItem('vrelas_session');
+            }
+        }
+    } catch (eSess) {
+        console.warn('No se pudo validar sesión RELAS en localStorage', eSess);
+    }
+    
     // *** LIMPIAR INPUTS DE DETERMINANTES ***
     document.querySelectorAll('.det-input').forEach(input => input.value = '');
     
@@ -15570,6 +15605,7 @@ function generarFlyerPapel() {
 
 // Variable global para datos de participación ciudadana
 window.datosParticipacionCiudadana = null;
+window._origenParticipacionCiudadana = null; // 'firebase:votacionRelas' | 'firebase:participacionCiudadana' | 'simulador' | 'manual'
 
 // ══════════════════════════════════════════════════════════════════════════════
 // NORMALIZADOR DE PARTICIPACIÓN CIUDADANA
@@ -15651,35 +15687,132 @@ function normalizarParticipacion(p) {
     };
 }
 
-// Cargar participación ciudadana al cargar municipio
+/**
+ * Punto único para resolver la priorización ciudadana de un municipio.
+ * Lee Firebase (votacionRelas → participacionCiudadana) y, opcionalmente,
+ * si no hay nada en Firebase pero existen votos RELAS en memoria, genera
+ * una priorización simulada y la persiste.
+ *
+ * @param {string} municipio
+ * @param {{usarSimulacion?: boolean}} [opciones]
+ * @returns {Promise<{fuente:string|null, origen:string|null, normalizado:any|null, raw:any|null}>}
+ */
+async function resolverPriorizacionCiudadana(municipio, opciones) {
+    const opts = opciones || {};
+    const usarSimulacion = opts.usarSimulacion !== false; // por defecto true
+    const resultadoVacio = { fuente: null, origen: null, normalizado: null, raw: null };
+
+    if (!municipio || typeof db === 'undefined') {
+        window.datosParticipacionCiudadana = null;
+        window._origenParticipacionCiudadana = null;
+        return resultadoVacio;
+    }
+
+    const basePath = 'estrategias/' + estrategiaActual + '/municipios/' + municipio + '/';
+    let raw = null;
+    let origen = null;
+
+    try {
+        // 1) Fuente preferente: votacionRelas (RELAS – 10 temas)
+        const snapVrelas = await db.ref(basePath + 'votacionRelas').once('value');
+        const vrelasData = snapVrelas.val();
+        if (vrelasData && Object.keys(vrelasData).length > 0) {
+            raw = vrelasData;
+            origen = 'firebase:votacionRelas';
+        } else {
+            // 2) Fallback: participacionCiudadana (formato EPVSA legacy)
+            const snapEpvsa = await db.ref(basePath + 'participacionCiudadana').once('value');
+            const data = snapEpvsa.val();
+            if (data && Object.keys(data).length > 0) {
+                raw = data;
+                origen = 'firebase:participacionCiudadana';
+            }
+        }
+
+        // 3) Si no hay nada en Firebase y se permite, usar votos RELAS en memoria
+        if (!raw && usarSimulacion && typeof vrelas_obtenerVotosCombinados === 'function') {
+            const todos = vrelas_obtenerVotosCombinados();
+            if (todos && todos.length) {
+                const n = todos.length;
+                const temasFreq = {};
+                for (let i = 1; i <= 10; i++) temasFreq[i] = 0;
+                todos.forEach(function(v) {
+                    (v.temas || []).forEach(function(k) { temasFreq[k] = (temasFreq[k] || 0) + 1; });
+                });
+                raw = {
+                    fuente: 'votacion_relas_simulada',
+                    n: n,
+                    temasFreq: temasFreq,
+                    votos: Object.keys(temasFreq).map(function(k) {
+                        const nombreTema = (typeof VRELAS_TEMAS !== 'undefined' && VRELAS_TEMAS[k]) || ('Tema ' + k);
+                        return { nombre: nombreTema, votos: temasFreq[k] };
+                    })
+                };
+                origen = 'simulador';
+                try {
+                    await db.ref(basePath + 'votacionRelas').set(raw);
+                    console.log('✅ Priorización ciudadana simulada persistida en Firebase para', municipio);
+                } catch (eSet) {
+                    console.error('❌ Error persistiendo priorización simulada en Firebase', eSet);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('❌ Error en resolverPriorizacionCiudadana:', e);
+        window.datosParticipacionCiudadana = null;
+        window._origenParticipacionCiudadana = null;
+        return resultadoVacio;
+    }
+
+    if (!raw) {
+        window.datosParticipacionCiudadana = null;
+        window._origenParticipacionCiudadana = null;
+        return resultadoVacio;
+    }
+
+    const normalizado = normalizarParticipacion(raw);
+    window.datosParticipacionCiudadana = raw;
+    window._origenParticipacionCiudadana = origen;
+
+    const fuenteCanonica = normalizado && normalizado.esVrelas ? 'votacion_relas' : 'participacion_ciudadana';
+    return {
+        fuente: fuenteCanonica,
+        origen: origen,
+        normalizado: normalizado,
+        raw: raw
+    };
+}
+
+// Cargar participación ciudadana al cargar municipio (solo Firebase, sin simulación)
 function cargarParticipacionCiudadana(municipio) {
-    // Primero intentar cargar votacionRelas (VRELAS — fuente preferente)
-    db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/votacionRelas').once('value', function(snapVrelas) {
-        var vrelasData = snapVrelas.val();
-        if (vrelasData && vrelasData.temasFreq) {
-            window.datosParticipacionCiudadana = vrelasData;
-            console.log('✅ Priorización VRELAS cargada:', vrelasData);
-            actualizarIndicadorParticipacion(true, vrelasData.n || vrelasData.totalParticipantes);
+    if (!municipio || typeof db === 'undefined') {
+        window.datosParticipacionCiudadana = null;
+        window._origenParticipacionCiudadana = null;
+        actualizarIndicadorParticipacion(false);
+        if (typeof renderizarSeccionPriorizacion === 'function') renderizarSeccionPriorizacion();
+        if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
+        return;
+    }
+
+    resolverPriorizacionCiudadana(municipio, { usarSimulacion: false })
+        .then(function(resultado) {
+            if (resultado && resultado.raw) {
+                var nPart = (resultado.normalizado && resultado.normalizado.n) ||
+                            resultado.raw.totalParticipantes ||
+                            resultado.raw.n ||
+                            0;
+                actualizarIndicadorParticipacion(true, nPart);
+            } else {
+                actualizarIndicadorParticipacion(false);
+            }
             if (typeof renderizarSeccionPriorizacion === 'function') renderizarSeccionPriorizacion();
             if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
-        } else {
-            // Fallback: intentar participacionCiudadana (formato EPVSA legacy)
-            db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/participacionCiudadana').once('value', function(snapEpvsa) {
-                var data = snapEpvsa.val();
-                if (data) {
-                    window.datosParticipacionCiudadana = data;
-                    console.log('📊 Participación ciudadana (EPVSA) cargada:', data);
-                    actualizarIndicadorParticipacion(true, data.totalParticipantes);
-                    if (typeof renderizarSeccionPriorizacion === 'function') renderizarSeccionPriorizacion();
-                    if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
-                } else {
-                    window.datosParticipacionCiudadana = null;
-                    actualizarIndicadorParticipacion(false);
-                    if (typeof renderizarSeccionPriorizacion === 'function') renderizarSeccionPriorizacion();
-                }
-            });
-        }
-    });
+        })
+        .catch(function(err) {
+            console.error('❌ Error cargando participación ciudadana:', err);
+            actualizarIndicadorParticipacion(false);
+            if (typeof renderizarSeccionPriorizacion === 'function') renderizarSeccionPriorizacion();
+        });
 }
 
 // Indicador visual de participación ciudadana
