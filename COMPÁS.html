@@ -14978,108 +14978,204 @@ function exportarVotacionCSV() {
 }
 
 function incorporarResultadosAlPlan() {
-    if (votacionRespuestas.length === 0) {
-        alert('No hay datos de votación para incorporar');
-        return;
-    }
-    
     const municipio = getMunicipioActual();
+
     if (!municipio) {
         alert('Seleccione un municipio primero');
         return;
     }
-    
-    // Calcular objetivo más votado (compatible con arrays)
-    const conteoObjetivos = {};
-    votacionRespuestas.forEach(v => {
-        if (v.objetivos_epvsa && Array.isArray(v.objetivos_epvsa)) {
-            v.objetivos_epvsa.forEach(objId => {
-                conteoObjetivos[objId] = (conteoObjetivos[objId] || 0) + 1;
-            });
-        } else if (v.objetivo_epvsa) {
-            conteoObjetivos[v.objetivo_epvsa] = (conteoObjetivos[v.objetivo_epvsa] || 0) + 1;
-        }
-    });
-    const objetivosOrdenados = Object.entries(conteoObjetivos).sort((a, b) => b[1] - a[1]);
-    const objetivoTop = objetivosOrdenados[0];
-    
-    // Calcular colectivo más votado (compatible con arrays)
-    const conteoColectivos = {};
-    votacionRespuestas.forEach(v => {
-        if (v.colectivos && Array.isArray(v.colectivos)) {
-            v.colectivos.forEach(colId => {
-                conteoColectivos[colId] = (conteoColectivos[colId] || 0) + 1;
-            });
-        } else if (v.colectivo) {
-            conteoColectivos[v.colectivo] = (conteoColectivos[v.colectivo] || 0) + 1;
-        }
-    });
-    const colectivosOrdenados = Object.entries(conteoColectivos).sort((a, b) => b[1] - a[1]);
-    const colectivoTop = colectivosOrdenados[0];
-    
-    const objInfo = OBJETIVOS_EPVSA.find(o => o.id == objetivoTop[0]);
-    const colInfo = COLECTIVOS_PRIORITARIOS.find(c => c.id == colectivoTop[0]);
-    
-    // Preparar datos para Firebase
-    const datosParticipacion = {
-        fechaVotacion: new Date().toISOString(),
-        totalParticipantes: votacionRespuestas.length,
-        objetivoPrioritario: {
-            id: parseInt(objetivoTop[0]),
-            texto: objInfo ? objInfo.texto : 'Objetivo ' + objetivoTop[0],
-            icono: objInfo ? objInfo.icono : '🎯',
-            votos: objetivoTop[1],
-            porcentaje: Math.round((objetivoTop[1] / votacionRespuestas.length) * 100)
-        },
-        colectivoPrioritario: {
-            id: parseInt(colectivoTop[0]),
-            texto: colInfo ? colInfo.texto : 'Colectivo ' + colectivoTop[0],
-            icono: colInfo ? colInfo.icono : '👥',
-            votos: colectivoTop[1],
-            porcentaje: Math.round((colectivoTop[1] / votacionRespuestas.length) * 100)
-        },
-        desglose: {
-            objetivos: conteoObjetivos,
-            colectivos: conteoColectivos
-        },
-        rankingObjetivos: objetivosOrdenados.slice(0, 5).map(([id, votos]) => {
-            const obj = OBJETIVOS_EPVSA.find(o => o.id == id);
-            return {
-                id: parseInt(id),
-                texto: obj ? obj.texto : 'Objetivo ' + id,
-                icono: obj ? obj.icono : '🎯',
-                votos,
-                porcentaje: Math.round((votos / votacionRespuestas.length) * 100)
-            };
-        }),
-        rankingColectivos: colectivosOrdenados.slice(0, 5).map(([id, votos]) => {
-            const col = COLECTIVOS_PRIORITARIOS.find(c => c.id == id);
-            return {
-                id: parseInt(id),
-                texto: col ? col.texto : 'Colectivo ' + id,
-                icono: col ? col.icono : '👥',
-                votos,
-                porcentaje: Math.round((votos / votacionRespuestas.length) * 100)
-            };
-        })
-    };
-    
-    // Guardar en Firebase
-    db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/participacionCiudadana').set(datosParticipacion)
-        .then(() => {
-            // Guardar en variable global para acceso inmediato
-            window.datosParticipacionCiudadana = datosParticipacion;
-            
-            console.log('✅ Participación ciudadana guardada en Firebase:', datosParticipacion);
-            mostrarNotificacion('✅ Datos de participación ciudadana incorporados correctamente', 'success');
-            
-            // Mostrar modal de priorización dual
-            mostrarPriorizacionDual();
-        })
-        .catch(err => {
-            console.error('Error guardando participación:', err);
-            mostrarNotificacion('❌ Error al guardar: ' + err.message, 'error');
+    if (typeof db === 'undefined') {
+        mostrarNotificacion('Firebase no está disponible. No se pueden guardar los resultados ahora.', 'error');
+        return;
+    }
+
+    // 1) Construir participación base (EPVSA desde la votación en pantalla si existe)
+    let baseRaw = null;
+    let baseNormalizada = null;
+
+    if (Array.isArray(votacionRespuestas) && votacionRespuestas.length > 0) {
+        // Calcular objetivo más votado (compatible con arrays)
+        const conteoObjetivos = {};
+        votacionRespuestas.forEach(v => {
+            if (v.objetivos_epvsa && Array.isArray(v.objetivos_epvsa)) {
+                v.objetivos_epvsa.forEach(objId => {
+                    conteoObjetivos[objId] = (conteoObjetivos[objId] || 0) + 1;
+                });
+            } else if (v.objetivo_epvsa) {
+                conteoObjetivos[v.objetivo_epvsa] = (conteoObjetivos[v.objetivo_epvsa] || 0) + 1;
+            }
         });
+        const objetivosOrdenados = Object.entries(conteoObjetivos).sort((a, b) => b[1] - a[1]);
+        const objetivoTop = objetivosOrdenados[0];
+
+        // Calcular colectivo más votado (compatible con arrays)
+        const conteoColectivos = {};
+        votacionRespuestas.forEach(v => {
+            if (v.colectivos && Array.isArray(v.colectivos)) {
+                v.colectivos.forEach(colId => {
+                    conteoColectivos[colId] = (conteoColectivos[colId] || 0) + 1;
+                });
+            } else if (v.colectivo) {
+                conteoColectivos[v.colectivo] = (conteoColectivos[v.colectivo] || 0) + 1;
+            }
+        });
+        const colectivosOrdenados = Object.entries(conteoColectivos).sort((a, b) => b[1] - a[1]);
+        const colectivoTop = colectivosOrdenados[0];
+
+        if (!objetivoTop || !colectivoTop) {
+            alert('No se han podido calcular objetivo o colectivo prioritario a partir de las respuestas.');
+            return;
+        }
+
+        const objInfo = OBJETIVOS_EPVSA.find(o => o.id == objetivoTop[0]);
+        const colInfo = COLECTIVOS_PRIORITARIOS.find(c => c.id == colectivoTop[0]);
+
+        const total = votacionRespuestas.length;
+
+        baseRaw = {
+            fechaVotacion: new Date().toISOString(),
+            totalParticipantes: total,
+            objetivoPrioritario: {
+                id: parseInt(objetoTop[0]),
+                texto: objInfo ? objInfo.texto : 'Objetivo ' + objetoTop[0],
+                icono: objInfo ? objInfo.icono : '🎯',
+                votos: objetivoTop[1],
+                porcentaje: Math.round((objetivoTop[1] / total) * 100)
+            },
+            colectivoPrioritario: {
+                id: parseInt(colectivoTop[0]),
+                texto: colInfo ? colInfo.texto : 'Colectivo ' + colectivoTop[0],
+                icono: colInfo ? colInfo.icono : '👥',
+                votos: colectivoTop[1],
+                porcentaje: Math.round((colectivoTop[1] / total) * 100)
+            },
+            desglose: {
+                objetivos: conteoObjetivos,
+                colectivos: conteoColectivos
+            },
+            rankingObjetivos: objetivosOrdenados.slice(0, 5).map(([id, votos]) => {
+                const obj = OBJETIVOS_EPVSA.find(o => o.id == id);
+                return {
+                    id: parseInt(id),
+                    texto: obj ? obj.texto : 'Objetivo ' + id,
+                    icono: obj ? obj.icono : '🎯',
+                    votos,
+                    porcentaje: Math.round((votos / total) * 100)
+                };
+            }),
+            rankingColectivos: colectivosOrdenados.slice(0, 5).map(([id, votos]) => {
+                const col = COLECTIVOS_PRIORITARIOS.find(c => c.id == id);
+                return {
+                    id: parseInt(id),
+                    texto: col ? col.texto : 'Colectivo ' + id,
+                    icono: col ? col.icono : '👥',
+                    votos,
+                    porcentaje: Math.round((votos / total) * 100)
+                };
+            })
+        };
+
+        baseNormalizada = normalizarParticipacion(baseRaw);
+    } else if (window.datosParticipacionCiudadana) {
+        // Reutilizar lo que ya exista en memoria (puede ser VRELAS o EPVSA legacy)
+        baseRaw = window.datosParticipacionCiudadana;
+        baseNormalizada = normalizarParticipacion(baseRaw);
+    } else {
+        // Intentar cargar desde Firebase sin simulación
+        resolverPriorizacionCiudadana(municipio, { usarSimulacion: false }).then(function(res) {
+            if (!res || !res.raw) {
+                mostrarNotificacion('No hay datos de participación ciudadana disponibles para este municipio.', 'warning');
+                return;
+            }
+            window.datosParticipacionCiudadana = res.raw;
+            window._origenParticipacionCiudadana = res.origen || null;
+            // Relanzar el flujo una vez que tenemos datos
+            incorporarResultadosAlPlan();
+        }).catch(function(err) {
+            console.error('❌ Error intentando resolver priorización ciudadana:', err);
+            mostrarNotificacion('❌ Error al leer datos de participación ciudadana: ' + err.message, 'error');
+        });
+        return;
+    }
+
+    if (!baseNormalizada) {
+        mostrarNotificacion('No se han podido normalizar los datos de participación ciudadana.', 'error');
+        return;
+    }
+
+    const esVrelas = !!baseNormalizada.esVrelas;
+    const n = baseNormalizada.n || 0;
+
+    // 2) Objeto canónico para decisionPriorizacion
+    const objetivoP = baseNormalizada.objetivoPrioritario || null;
+    const colectivoP = baseNormalizada.colectivoPrioritario || null;
+
+    const areasResultantes = esVrelas
+        ? (baseNormalizada.top5Temas || []).map(t => t.texto)
+        : (baseNormalizada.rankingObjetivos || []).slice(0, 3).map(o => o.texto);
+
+    const decisionPriorizacion = {
+        metodo: 'ciudadana',
+        fechaDecision: new Date().toISOString(),
+        justificacion: '',
+        areasResultantes: areasResultantes,
+        colectivoResultante: colectivoP ? colectivoP.texto : null,
+        fuenteEpidemiologica: [],
+        fuenteCiudadana: {
+            objetivo: objetivoP,
+            colectivo: colectivoP,
+            participantes: n
+        }
+    };
+
+    // 3) Back-compat: ruta de datos de participación según tipo
+    const basePath = 'estrategias/' + estrategiaActual + '/municipios/' + municipio + '/';
+    const updates = {};
+
+    if (esVrelas) {
+        // Si ya venía de VRELAS, usamos el raw tal cual (para no inflar n)
+        const rawV = baseRaw || baseNormalizada.raw;
+        updates[basePath + 'votacionRelas'] = rawV;
+    } else {
+        const rawE = baseRaw || baseNormalizada.raw || {};
+        updates[basePath + 'participacionCiudadana'] = rawE;
+    }
+
+    updates[basePath + 'decisionPriorizacion'] = decisionPriorizacion;
+
+    db.ref().update(updates).then(function() {
+        // 4) Sincronizar estado en memoria e interfaz
+        if (esVrelas) {
+            window.datosParticipacionCiudadana = updates[basePath + 'votacionRelas'];
+            window._origenParticipacionCiudadana = 'firebase:votacionRelas';
+        } else {
+            window.datosParticipacionCiudadana = updates[basePath + 'participacionCiudadana'];
+            window._origenParticipacionCiudadana = 'firebase:participacionCiudadana';
+        }
+        window.decisionPriorizacionActual = decisionPriorizacion;
+
+        console.log('✅ Resultados de participación ciudadana incorporados al plan:', {
+            tipo: esVrelas ? 'VRELAS' : 'EPVSA',
+            n: n
+        });
+
+        mostrarNotificacion('✅ Datos de participación ciudadana incorporados correctamente', 'success');
+
+        if (typeof renderizarSeccionPriorizacion === 'function') {
+            renderizarSeccionPriorizacion();
+        }
+        if (typeof actualizarChecklistIA === 'function') {
+            actualizarChecklistIA();
+        }
+
+        // Reabrir / refrescar el modal de priorización dual con los datos ya normalizados
+        if (typeof mostrarPriorizacionDual === 'function') {
+            mostrarPriorizacionDual();
+        }
+    }).catch(function(err) {
+        console.error('❌ Error guardando participación ciudadana y decisión de priorización:', err);
+        mostrarNotificacion('❌ Error al guardar datos de participación: ' + err.message, 'error');
+    });
 }
 
 // ============================================
