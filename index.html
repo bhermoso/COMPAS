@@ -7934,6 +7934,25 @@ function actualizarMunicipio() {
 // las genera automáticamente usando el motor de análisis salutogénico
 // =====================================================
 
+/**
+ * Elimina recursivamente propiedades con valor undefined de un objeto antes
+ * de enviarlo a Firebase. Firebase rechaza undefined con:
+ *   "values argument contains undefined in property '...'"
+ * null está permitido (elimina el nodo); '' es el fallback preferido para strings.
+ */
+function _sanitizarParaFirebase(obj) {
+    if (obj === null || obj === undefined) return null;
+    if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
+    const clean = {};
+    for (const [k, v] of Object.entries(obj)) {
+        if (v === undefined) continue; // omitir — Firebase lo rechaza
+        clean[k] = (v !== null && typeof v === 'object' && !Array.isArray(v))
+            ? _sanitizarParaFirebase(v)
+            : v;
+    }
+    return clean;
+}
+
 // [AUDIT] verificarYGenerarAnalisisAutomatico — ejecuta motor v2 (analizarDatosMunicipio),
 // motor expert system (ejecutarMotorExpertoCOMPAS) y motor v3 (window.COMPAS_ejecutarMotorV3).
 // Desde 2026-03-10: ruta automática alineada con ruta manual (generarAnalisisIA + hook v3).
@@ -8035,34 +8054,36 @@ async function verificarYGenerarAnalisisAutomatico() {
             auto: true
         };
         analisis.priorizacion.slice(0, 8).forEach((p, idx) => {
-            priorizacionObj.areas[p.areaKey || p.area.toLowerCase().replace(/\s+/g, '_')] = {
-                nombre: p.area,
+            const key = p.areaKey || (p.area || '').toLowerCase().replace(/\s+/g, '_') || ('area_' + (idx + 1));
+            priorizacionObj.areas[key] = {
+                nombre: p.area || p.label || key,
                 prioridad: idx + 1,
-                justificacion: p.justificacion,
-                lineaEPVSA: p.lineaEPVSA,
-                objetivoEPVSA: p.objetivoEPVSA
+                justificacion: p.justificacion || '',
+                lineaEPVSA: p.lineaEPVSA || '',
+                objetivoEPVSA: p.objetivoEPVSA || ''
             };
         });
         updates['municipios/' + municipio + '/priorizacion'] = priorizacionObj;
         generados.push('priorización');
     }
-    
-    // Guardar narrativa salutogénica si se generó
-    if (analisis.narrativa) {
+
+    // Guardar narrativa salutogénica si se generó (solo si tiene contenido real)
+    if (analisis.narrativa && typeof analisis.narrativa === 'object' &&
+        (analisis.narrativa.contexto || analisis.narrativa.activos || analisis.narrativa.sintesis)) {
         updates['municipios/' + municipio + '/narrativa'] = {
-            contexto: analisis.narrativa.contexto,
-            activos: analisis.narrativa.activos,
-            oportunidades: analisis.narrativa.oportunidades,
-            patrones: analisis.narrativa.patrones,
-            sintesis: analisis.narrativa.sintesis,
+            contexto: analisis.narrativa.contexto || '',
+            activos: analisis.narrativa.activos || '',
+            oportunidades: analisis.narrativa.oportunidades || '',
+            patrones: analisis.narrativa.patrones || '',
+            sintesis: analisis.narrativa.sintesis || '',
             fecha: new Date().toISOString()
         };
     }
-    
+
     // Guardar en Firebase si hay algo que guardar
     if (Object.keys(updates).length > 0) {
         try {
-            await db.ref().update(updates);
+            await db.ref().update(_sanitizarParaFirebase(updates));
             console.log('✅ Análisis automático guardado:', generados.join(', '));
             
             // Notificar al usuario

@@ -150,7 +150,15 @@ function _calcularAnalisisModular(contextoIA) {
             }))
             .sort((a, b) => b.score - a.score)
             .forEach((area, idx) => {
-                priorizacion.push({ ...area, orden: idx + 1 });
+                const pct = Math.round(area.score * 100);
+                priorizacion.push({
+                    ...area,
+                    areaKey: area.area,
+                    orden: idx + 1,
+                    justificacion: area.nAMejorar > 0
+                        ? `${area.nAMejorar} de ${area.nConDatos} indicadores con tendencia desfavorable (${pct}%).`
+                        : `${area.nConDatos} indicadores analizados. Sin tendencias desfavorables destacadas.`,
+                });
             });
     }
 
