@@ -3625,7 +3625,7 @@
     <!-- Franja signature -->
     <div style="height:4px; background:linear-gradient(90deg,#0074c8 0%,#00acd9 20%,#94d40b 40%,#ffb61b 60%,#ff6600 80%,#dc143c 100%); flex-shrink:0;"></div>
     <!-- iframe con el monitor -->
-    <iframe id="iframe-monitor-ibse" src="monitor_ibse.html" style="flex:1; border:none; width:100%;" allow="same-origin"></iframe>
+    <iframe id="iframe-monitor-ibse" src="./monitor_ibse.html" style="flex:1; border:none; width:100%;" allow="same-origin"></iframe>
 </div>
 
 <!-- Modal Cuestionario Ciudadano IBSE [I7] -->
@@ -28182,7 +28182,7 @@ function ibse_abrirMonitor() {
     var nombre = (typeof getNombreMunicipio  === 'function') ? getNombreMunicipio(key)   : key;
     var iframe = document.getElementById('iframe-monitor-ibse');
     if (iframe) {
-        var nuevaSrc = 'monitor_ibse.html?municipio=' + encodeURIComponent(key) + '&nombre=' + encodeURIComponent(nombre);
+        var nuevaSrc = './monitor_ibse.html?municipio=' + encodeURIComponent(key) + '&nombre=' + encodeURIComponent(nombre);
         if (iframe.dataset.munActual !== key) {
             iframe.src = nuevaSrc;
             iframe.dataset.munActual = key;

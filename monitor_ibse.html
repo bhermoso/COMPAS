@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -2466,3 +2467,400 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor IBSE — COMPÁS</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: #f8fafc; color: #1e293b; font-size: 14px; }
+
+  /* Franja signature COMPÁS */
+  .franja {
+    height: 4px;
+    background: linear-gradient(90deg,#0074c8 0%,#00acd9 20%,#94d40b 40%,#ffb61b 60%,#ff6600 80%,#dc143c 100%);
+  }
+
+  .header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .header .logo {
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    background: linear-gradient(90deg,#0074c8,#00acd9,#94d40b,#ffb61b,#ff6600,#dc143c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .sep { color: #cbd5e1; }
+  .header .titulo { font-weight: 700; color: #0074c8; font-size: 0.9rem; }
+
+  .contenido { padding: 1rem; max-width: 800px; margin: 0 auto; }
+
+  .mun-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    margin-bottom: 0.75rem;
+  }
+
+  .firebase-path {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+    font-family: monospace;
+  }
+
+  /* Tarjeta semáforo */
+  .card-semaforo {
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  .card-semaforo .emoji { font-size: 2.5rem; line-height: 1; }
+  .card-semaforo .valor { font-size: 1.5rem; font-weight: 900; }
+  .card-semaforo .meta  { font-size: 0.75rem; color: #64748b; margin-top: 0.2rem; }
+  .niveles { display: flex; gap: 0.25rem; margin-top: 0.4rem; flex-wrap: wrap; }
+  .nivel-pill {
+    padding: 0.18rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  /* Factores grid */
+  .factores-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  @media (min-width: 480px) { .factores-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .factor-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    text-align: center;
+  }
+  .factor-label { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+  .factor-valor { font-size: 1.25rem; font-weight: 900; color: #0074c8; margin: 0.2rem 0; }
+  .factor-bar   { width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+  .factor-fill  { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#0074c8,#00acd9); }
+
+  /* Sexo grid */
+  .sexo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .sexo-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+  }
+  .sexo-header { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; }
+  .sexo-emoji  { font-size: 1.3rem; }
+  .sexo-nombre { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+  .sexo-valor  { font-size: 1.15rem; font-weight: 900; }
+  .sexo-n      { font-size: 0.65rem; color: #94a3b8; margin-left: auto; }
+
+  /* Análisis textual */
+  .analisis-box {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #475569;
+    margin-bottom: 0.75rem;
+  }
+  .analisis-box strong { color: #1e293b; }
+  .brecha-warn { color: #f59e0b; }
+
+  /* Sin datos */
+  .sin-datos {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    color: #92400e;
+  }
+  .sin-datos .icono { font-size: 2rem; margin-bottom: 0.5rem; }
+  .sin-datos p { font-size: 0.82rem; line-height: 1.5; }
+
+  /* Spinner */
+  .spinner-wrap { display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #0074c8;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="franja"></div>
+
+<div class="header">
+  <span class="logo">COMPÁS</span>
+  <span class="sep">·</span>
+  <span class="titulo">📊 Monitor IBSE</span>
+</div>
+
+<div class="contenido">
+
+  <div class="mun-badge" id="mun-badge">📍 —</div>
+  <div class="firebase-path" id="firebase-path"></div>
+
+  <!-- Spinner de carga -->
+  <div class="spinner-wrap" id="spinner">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Sin datos -->
+  <div class="sin-datos" id="sin-datos" style="display:none;">
+    <div class="icono">📭</div>
+    <p>No hay datos IBSE disponibles para este municipio.<br>
+       Carga un CSV desde COMPÁS o registra respuestas del cuestionario ciudadano.</p>
+  </div>
+
+  <!-- Contenido principal (oculto hasta cargar) -->
+  <div id="contenido-principal" style="display:none;">
+
+    <!-- Semáforo -->
+    <div id="semaforo" class="card-semaforo" style="background:#f8fafc; border:1px solid #e2e8f0;"></div>
+
+    <!-- Factores -->
+    <div class="factores-grid" id="factores"></div>
+
+    <!-- Distribución por sexo -->
+    <div class="sexo-grid" id="sexo-grid" style="display:none;"></div>
+
+    <!-- Análisis textual -->
+    <div class="analisis-box" id="analisis"></div>
+
+  </div>
+
+</div><!-- /contenido -->
+
+<script>
+// ── Firebase config (idéntica a COMPÁS principal) ─────────────────────────────
+firebase.initializeApp({
+    apiKey:      "AIzaSyCdAivJATiX76xuOJAMc4Yt7sLq-3GDuDw",
+    authDomain:  "itaca-3ba7b.firebaseapp.com",
+    databaseURL: "https://itaca-3ba7b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:   "itaca-3ba7b",
+});
+var db = firebase.database();
+
+// ── Leer parámetros de querystring ────────────────────────────────────────────
+var params     = new URLSearchParams(window.location.search);
+var municipio  = params.get('municipio') || '';
+var nombre     = params.get('nombre')    || municipio || '—';
+
+document.getElementById('mun-badge').textContent = '📍 ' + (nombre || '—');
+
+// ── Fórmula IBSE (Bericat 2014) — idéntica a calcularIBSE() en COMPÁS ────────
+function _calcular(d) {
+    var dep = +(d.ibse_deprimido), fel = +(d.ibse_feliz);
+    var sol = +(d.ibse_solo),      dis = +(d.ibse_disfrutar);
+    var ene = +(d.ibse_energia),   tra = +(d.ibse_tranquilo);
+    var opt = +(d.ibse_optimista), bm  = +(d.ibse_bienmismo);
+    if ([dep,fel,sol,dis,ene,tra,opt,bm].some(isNaN)) return null;
+    var fV = (((5-dep)+(5-sol))/2-1)*25;
+    var fS = (((fel+1)+(dis+1))/2-1)*25;
+    var fC = (((ene+1)+(tra+1))/2-1)*25;
+    var fP = (((6-opt)+(6-bm))/2-1)*25;
+    return { factorVinculo:fV, factorSituacion:fS, factorControl:fC, factorPersona:fP,
+             total:(fV+fS+fC+fP)/4 };
+}
+
+// ── Renderizado ───────────────────────────────────────────────────────────────
+function renderizar(r) {
+    document.getElementById('spinner').style.display = 'none';
+
+    var n = r.length;
+    if (n === 0) { sinDatos(); return; }
+
+    var media = r.reduce(function(s,x){return s+(x.total||x.ibse_total||0);},0)/n;
+    var fV    = r.reduce(function(s,x){return s+(x.factorVinculo  ||x.factor_vinculo  ||0);},0)/n;
+    var fS    = r.reduce(function(s,x){return s+(x.factorSituacion||x.factor_situacion||0);},0)/n;
+    var fC    = r.reduce(function(s,x){return s+(x.factorControl  ||x.factor_control  ||0);},0)/n;
+    var fP    = r.reduce(function(s,x){return s+(x.factorPersona  ||x.factor_persona  ||0);},0)/n;
+
+    var nivel = media >= 76 ? {lbl:'ALTO',    col:'#10b981', bg:'#dcfce7', em:'😊'} :
+                media >= 51 ? {lbl:'MODERADO',col:'#f59e0b', bg:'#fef9c3', em:'😐'} :
+                media >= 26 ? {lbl:'BAJO',    col:'#f97316', bg:'#ffedd5', em:'😟'} :
+                              {lbl:'MUY BAJO',col:'#ef4444', bg:'#fee2e2', em:'😢'};
+
+    var bajo = r.filter(function(x){ return (x.total||x.ibse_total||0)<50; }).length;
+
+    // ── Semáforo ──────────────────────────────────────────────────────
+    var rangos = ['76-100','51-75','26-50','0-25'];
+    var cols   = ['#10b981','#f59e0b','#f97316','#ef4444'];
+    var activo = media>=76?0 : media>=51?1 : media>=26?2 : 3;
+    var pillsHTML = rangos.map(function(r,i){
+        var active = i===activo;
+        return '<span class="nivel-pill" style="background:'+(active?cols[i]:'#e5e7eb')+';color:'+(active?'white':'#94a3b8')+';">'+r+'</span>';
+    }).join('');
+
+    document.getElementById('semaforo').style.background  = nivel.bg;
+    document.getElementById('semaforo').style.border      = '1px solid ' + nivel.col + '40';
+    document.getElementById('semaforo').innerHTML =
+        '<div class="emoji">'+nivel.em+'</div>' +
+        '<div style="flex:1;">' +
+          '<div class="valor" style="color:'+nivel.col+';">'+media.toFixed(1)+' — '+nivel.lbl+'</div>' +
+          '<div class="meta">IBSE Global · Escala 0-100 · n='+n+' · IBSE&lt;50: '+bajo+' casos ('+((bajo/n*100).toFixed(1))+'%)</div>' +
+          '<div class="niveles">'+pillsHTML+'</div>' +
+        '</div>';
+
+    // ── Factores ──────────────────────────────────────────────────────
+    var factores = [
+        { lbl:'Vínculo',   v:fV },
+        { lbl:'Situación', v:fS },
+        { lbl:'Control',   v:fC },
+        { lbl:'Persona',   v:fP },
+    ];
+    document.getElementById('factores').innerHTML = factores.map(function(f){
+        var pct = Math.max(0,Math.min(100,f.v));
+        return '<div class="factor-card">' +
+               '<div class="factor-label">'+f.lbl+'</div>' +
+               '<div class="factor-valor">'+f.v.toFixed(1)+'</div>' +
+               '<div class="factor-bar"><div class="factor-fill" style="width:'+pct+'%;"></div></div>' +
+               '</div>';
+    }).join('');
+
+    // ── Distribución por sexo ─────────────────────────────────────────
+    var h = r.filter(function(x){return +x.sexo===1;}),
+        m = r.filter(function(x){return +x.sexo===2;});
+    var mH = h.length ? h.reduce(function(s,x){return s+(x.total||x.ibse_total||0);},0)/h.length : null;
+    var mM = m.length ? m.reduce(function(s,x){return s+(x.total||x.ibse_total||0);},0)/m.length : null;
+
+    var sexoGrid = document.getElementById('sexo-grid');
+    if (mH !== null || mM !== null) {
+        sexoGrid.style.display = '';
+        var items = [[mH,h.length,'👨','#5b8dd9','HOMBRES'],[mM,m.length,'👩','#e8789a','MUJERES']];
+        sexoGrid.innerHTML = items.filter(function(s){return s[0]!==null;}).map(function(s){
+            return '<div class="sexo-card">' +
+                   '<div class="sexo-header"><span class="sexo-emoji">'+s[2]+'</span>' +
+                   '<div><div class="sexo-nombre">'+s[4]+'</div>' +
+                   '<div class="sexo-valor" style="color:'+s[3]+';">'+s[0].toFixed(1)+'</div></div>' +
+                   '<span class="sexo-n">n='+s[1]+'</span></div>' +
+                   '<div class="factor-bar"><div class="factor-fill" style="width:'+s[0]+'%;background:'+s[3]+';"></div></div>' +
+                   '</div>';
+        }).join('');
+    }
+
+    // ── Análisis textual ──────────────────────────────────────────────
+    var orden = [{n:'Vínculo',v:fV},{n:'Situación',v:fS},{n:'Control',v:fC},{n:'Persona',v:fP}]
+        .sort(function(a,b){return b.v-a.v;});
+    var txt = '<strong>Análisis IBSE (n='+n+')</strong><br>' +
+              'IBSE Global: <strong>'+media.toFixed(2)+'</strong> · Nivel: <strong>'+nivel.lbl+'</strong><br>' +
+              'Factor más alto: <strong>'+orden[0].n+'</strong> ('+orden[0].v.toFixed(1)+') · ' +
+              'Factor a mejorar: <strong>'+orden[3].n+'</strong> ('+orden[3].v.toFixed(1)+')<br>' +
+              'Prevalencia IBSE&lt;50 (bienestar bajo): <strong>'+((bajo/n*100).toFixed(1))+'%</strong> (n='+bajo+')';
+
+    if (mH !== null && mM !== null) {
+        var dif = Math.abs(mH-mM);
+        txt += '<br>Brecha de género: <strong>'+dif.toFixed(1)+' pts</strong> ('+(mH>mM?'hombres':'mujeres')+' con mayor bienestar)';
+        if (dif > 5) txt += ' · <span class="brecha-warn">⚠️ Brecha relevante (&gt;5 pts)</span>';
+    }
+    document.getElementById('analisis').innerHTML = txt;
+
+    document.getElementById('contenido-principal').style.display = '';
+}
+
+function sinDatos() {
+    document.getElementById('spinner').style.display   = 'none';
+    document.getElementById('sin-datos').style.display = '';
+}
+
+// ── Carga desde Firebase ──────────────────────────────────────────────────────
+// Ruta primaria: ibse_respuestas/{mun}  (respuestas individuales con total calculado)
+// Fallback:      ibse_monitor/{mun}     (agregado o colección legada)
+function cargar() {
+    if (!municipio) { sinDatos(); return; }
+
+    var refPrimaria = db.ref('ibse_respuestas/' + municipio);
+    var refLegacy   = db.ref('ibse_monitor/'    + municipio);
+
+    refPrimaria.once('value', function(snap) {
+        var datos = snap.val();
+        if (datos && typeof datos === 'object' && Object.keys(datos).length > 0) {
+            document.getElementById('firebase-path').textContent = 'Firebase: ibse_respuestas/' + municipio;
+            var arr = Object.values(datos).map(function(d) {
+                if (d.total !== undefined) return d;
+                var calc = _calcular(d);
+                return calc ? Object.assign({}, d, calc) : null;
+            }).filter(Boolean);
+            renderizar(arr);
+        } else {
+            // Fallback: ibse_monitor/{mun} puede ser agregado o colección
+            refLegacy.once('value', function(snapL) {
+                var datosL = snapL.val();
+                if (!datosL || typeof datosL !== 'object') { sinDatos(); return; }
+
+                var vals = Object.values(datosL);
+                // Si es un agregado directo (tiene campo n/media) → convertirlo a array de 1 elemento
+                if (datosL.n !== undefined && datosL.media !== undefined) {
+                    // Reconstruir array sintético desde agregado para renderizado uniforme
+                    var arr = [];
+                    for (var i = 0; i < datosL.n; i++) {
+                        arr.push({
+                            total:           datosL.media,
+                            factorVinculo:   datosL.factorVinculo   || datosL.factor_vinculo   || 0,
+                            factorSituacion: datosL.factorSituacion || datosL.factor_situacion || 0,
+                            factorControl:   datosL.factorControl   || datosL.factor_control   || 0,
+                            factorPersona:   datosL.factorPersona   || datosL.factor_persona   || 0,
+                        });
+                    }
+                    document.getElementById('firebase-path').textContent = 'Firebase: ibse_monitor/' + municipio + ' (agregado)';
+                    renderizar(arr);
+                } else {
+                    var arrL = vals.filter(function(d){ return d.ibse_total !== undefined || d.total !== undefined; });
+                    if (!arrL.length) { sinDatos(); return; }
+                    document.getElementById('firebase-path').textContent = 'Firebase: ibse_monitor/' + municipio;
+                    renderizar(arrL);
+                }
+            });
+        }
+    });
+}
+
+cargar();
+</script>
+</body>
+</html>
+>>>>>>> a3a35ad (Fix: crear monitor_ibse.html y corregir rutas 404 en GitHub Pages)
