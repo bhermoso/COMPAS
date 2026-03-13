@@ -27906,6 +27906,9 @@ function ibse_guardarAgregado(municipio, agregado) {
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/ibseDatos').set(agregado);
     // Ruta del monitor IBSE (monitor_ibse.html lee de aquí)
     db.ref('ibse_monitor/' + municipio).set(agregado);
+    // Forzar recarga del monitor en la próxima apertura (datos actualizados)
+    var iframe = document.getElementById('iframe-monitor-ibse');
+    if (iframe) iframe.dataset.munActual = '';
 }
 
 // ── Firebase: recalcular agregado desde respuestas individuales ───────
@@ -27914,7 +27917,15 @@ function ibse_recalcularAgregado(municipio) {
     db.ref('ibse_respuestas/' + municipio).once('value', function(snap) {
         var respuestas = [];
         snap.forEach(function(child) { respuestas.push(child.val()); });
-        if (!respuestas.length) return;
+        if (!respuestas.length) {
+            // Sin respuestas: limpiar agregado en todas las rutas
+            db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/ibseDatos').remove();
+            db.ref('ibse_monitor/' + municipio).remove();
+            window.datosIBSE = null;
+            renderizarPanelIBSE();
+            if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
+            return;
+        }
         var suma = { fV: 0, fS: 0, fC: 0, fP: 0, tot: 0 };
         respuestas.forEach(function(r) {
             suma.fV  += r.factorVinculo   || 0;
@@ -28147,8 +28158,12 @@ function ibse_borrarDatos() {
     if (typeof db !== 'undefined') {
         db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/ibseDatos').remove();
         db.ref('ibse_respuestas/' + municipio).remove();
+        db.ref('ibse_monitor/' + municipio).remove();
     }
     window.datosIBSE = null;
+    // Forzar recarga del monitor en la próxima apertura
+    var iframe = document.getElementById('iframe-monitor-ibse');
+    if (iframe) iframe.dataset.munActual = '';
     renderizarPanelIBSE();
     if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
 }
