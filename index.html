@@ -29938,13 +29938,14 @@ function _fallbackMotorHeredado() {
             }
         };
 
+        console.info('[COMPÁS modular] motores IA cargados');
         console.log('[COMPÁS modular] window.__COMPAS_ejecutarMotorSintesis registrado ✓');
 
     } catch (errImport) {
         // Si los módulos no cargan (error de ruta, sintaxis, etc.),
         // window.__COMPAS_ejecutarMotorSintesis queda undefined y las funciones
         // heredadas usan el fallback inline definido en cada punto de llamada.
-        console.warn('[COMPÁS modular] No se cargaron módulos IA. Fallback heredado activo.', errImport.message);
+        console.warn('[COMPÁS modular] No se cargaron módulos IA. Fallback heredado activo.', errImport.message, errImport);
     }
 })();
 </script>

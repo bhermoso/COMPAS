@@ -53,6 +53,7 @@ if (!window.COMPAS.mapa) {
 window.COMPAS.__modular          = true;
 window.COMPAS.__bootstrapVersion = '3.0.0'; // actualizado en iteración 3
 window.COMPAS.__bootstrapFecha   = new Date().toISOString();
+console.info('[COMPÁS modular] core cargado');
 
 // ─── 3. INICIALIZACIÓN DEL ESTADO GLOBAL ────────────────────────────────────
 //
@@ -164,6 +165,7 @@ console.log('  window.COMPAS.__contextoTerritorial disponible:', !!window.COMPAS
 console.log('  window.COMPAS.__dominio disponible:', !!window.COMPAS.__dominio);
 console.log('  RegistroPlanes:', registroPlanes.totalAmbitos, 'ámbitos,', registroPlanes.totalPlanes, 'planes');
 console.groupEnd();
+console.info('[COMPÁS modular] bootstrap completo | window.COMPAS.__modular ===', window.COMPAS.__modular);
 
 // ─── 8. IMPORTACIONES FUTURAS (pendientes de extracción) ────────────────────
 //
