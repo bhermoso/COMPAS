@@ -7934,6 +7934,21 @@ function actualizarMunicipio() {
 // las genera automáticamente usando el motor de análisis salutogénico
 // =====================================================
 
+// Elimina recursivamente claves con valor undefined antes de escribir en Firebase.
+// Firebase rechaza cualquier `undefined`; esta función actúa como última barrera.
+function _sanitizarParaFirebase(obj) {
+    if (obj === null || obj === undefined) return null;
+    if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
+    const clean = {};
+    for (const [k, v] of Object.entries(obj)) {
+        if (v === undefined) continue;
+        clean[k] = (v !== null && typeof v === 'object' && !Array.isArray(v))
+            ? _sanitizarParaFirebase(v)
+            : v;
+    }
+    return clean;
+}
+
 // [AUDIT] verificarYGenerarAnalisisAutomatico — ejecuta motor v2 (analizarDatosMunicipio),
 // motor expert system (ejecutarMotorExpertoCOMPAS) y motor v3 (window.COMPAS_ejecutarMotorV3).
 // Desde 2026-03-10: ruta automática alineada con ruta manual (generarAnalisisIA + hook v3).
@@ -8035,34 +8050,36 @@ async function verificarYGenerarAnalisisAutomatico() {
             auto: true
         };
         analisis.priorizacion.slice(0, 8).forEach((p, idx) => {
-            priorizacionObj.areas[p.areaKey || p.area.toLowerCase().replace(/\s+/g, '_')] = {
-                nombre: p.area,
-                prioridad: idx + 1,
-                justificacion: p.justificacion,
-                lineaEPVSA: p.lineaEPVSA,
-                objetivoEPVSA: p.objetivoEPVSA
+            const key = p.areaKey || p.area.toLowerCase().replace(/\s+/g, '_');
+            priorizacionObj.areas[key] = {
+                nombre:        p.area        || p.label || key,
+                prioridad:     idx + 1,
+                justificacion: p.justificacion    != null ? p.justificacion    : '',
+                lineaEPVSA:    p.lineaEPVSA    != null ? p.lineaEPVSA    : '',
+                objetivoEPVSA: p.objetivoEPVSA != null ? p.objetivoEPVSA : '',
             };
         });
         updates['municipios/' + municipio + '/priorizacion'] = priorizacionObj;
         generados.push('priorización');
     }
     
-    // Guardar narrativa salutogénica si se generó
-    if (analisis.narrativa) {
+    // Guardar narrativa salutogénica si se generó (guard: objeto con contenido real, no {})
+    if (analisis.narrativa && typeof analisis.narrativa === 'object' &&
+            (analisis.narrativa.contexto || analisis.narrativa.activos || analisis.narrativa.sintesis)) {
         updates['municipios/' + municipio + '/narrativa'] = {
-            contexto: analisis.narrativa.contexto,
-            activos: analisis.narrativa.activos,
-            oportunidades: analisis.narrativa.oportunidades,
-            patrones: analisis.narrativa.patrones,
-            sintesis: analisis.narrativa.sintesis,
-            fecha: new Date().toISOString()
+            contexto:      analisis.narrativa.contexto      || '',
+            activos:       analisis.narrativa.activos       || '',
+            oportunidades: analisis.narrativa.oportunidades || '',
+            patrones:      analisis.narrativa.patrones      || '',
+            sintesis:      analisis.narrativa.sintesis      || '',
+            fecha:         new Date().toISOString()
         };
     }
     
     // Guardar en Firebase si hay algo que guardar
     if (Object.keys(updates).length > 0) {
         try {
-            await db.ref().update(updates);
+            await db.ref().update(_sanitizarParaFirebase(updates));
             console.log('✅ Análisis automático guardado:', generados.join(', '));
             
             // Notificar al usuario
@@ -26030,6 +26047,60 @@ var _VRELAS_A_LE1 = {
     10: { obj: '1.2', progs: ['P02','P01'], acts: ['P02-A04','P02-A06','P01-A06'], desc: 'prevención de accidentes' }
 };
 
+// ── Puente: adapta SalidaMotor modular al formato que espera renderizarPropuestaIA ──
+// Reconstruye {justificacion_global, fortalezas, oportunidades, propuestaEPVSA, _seleccion}
+// desde la salida normalizada de motorPlanAccion.
+function adaptarSalidaMotorPlanAFormatoUI(salidaMotor, municipio, fuentesUsadas, pop) {
+    var d = salidaMotor.datos;
+    var analisisBase = d.analisisBase || window.analisisActual || {};
+    var fp = analisisBase.fuentes || {};
+
+    // Fortalezas — reconstruidas desde el análisis base
+    var fortalezas = [];
+    if (fp.tienePopular && pop) fortalezas.push({
+        area: 'Participación ciudadana',
+        texto: 'Se dispone de datos de priorización popular con ' + pop.n + ' participantes, lo que otorga legitimidad democrática al plan.'
+    });
+    if (fp.tieneInforme) fortalezas.push({
+        area: 'Diagnóstico epidemiológico',
+        texto: 'El municipio cuenta con Informe de Situación de Salud que fundamenta las decisiones con evidencia local objetiva.'
+    });
+    if (fp.tieneEstudios) fortalezas.push({
+        area: 'Estudios complementarios',
+        texto: 'Se dispone de estudios complementarios que enriquecen el diagnóstico local.'
+    });
+    if (analisisBase.fortalezas && analisisBase.fortalezas.length) {
+        var areasF = [];
+        analisisBase.fortalezas.forEach(function(f) { if (f.area && areasF.indexOf(f.area) < 0) areasF.push(f.area); });
+        fortalezas.push({ area: 'Activos de salud (EAS)', texto: 'Indicadores favorables en: ' + areasF.slice(0, 3).join(', ') + ' (estimación EAS).' });
+    }
+    if (!fortalezas.length) fortalezas.push({
+        area: 'Proceso de planificación',
+        texto: 'El municipio ha iniciado un proceso estructurado de planificación local de salud.'
+    });
+
+    // Oportunidades
+    var oportunidades = [];
+    if (analisisBase.alertasInequidad && analisisBase.alertasInequidad.length) oportunidades.push({
+        area: 'Equidad',
+        texto: analisisBase.alertasInequidad.length + ' alerta(s) de inequidad detectada(s). Intervención prioritaria con perspectiva de equidad y universalismo proporcional.'
+    });
+    oportunidades.push({ area: 'RELAS', texto: 'La Red Local de Acción en Salud (RELAS) es el instrumento central para vehicular las actuaciones comunitarias de forma intersectorial.' });
+    oportunidades.push({ area: 'EPVSA 2024-2030', texto: 'El marco estratégico autonómico proporciona programas y actuaciones-tipo ya diseñadas que facilitan la implementación local.' });
+
+    return {
+        justificacion_global: d.justificacionGlobal || '',
+        fortalezas:           fortalezas,
+        oportunidades:        oportunidades,
+        propuestaEPVSA:       d.lineasPropuestas    || [],
+        _seleccion:           d.seleccionNormalizada || [],
+        _origenCalculo:       'motor_modular',
+        _gradoConfianza:      salidaMotor.gradoConfianza,
+        _trazabilidadId:      salidaMotor.trazabilidadId,
+        _motorId:             salidaMotor.motorId,
+    };
+}
+
 function generarPropuestaIA() {
     const municipio = getNombreMunicipio(getMunicipioActual()) || 'el municipio';
     const datos = datosMunicipioActual || {};
@@ -26052,32 +26123,75 @@ function generarPropuestaIA() {
         return;
     }
 
-    // UI: simular progreso (instantáneo, pero mantiene coherencia visual)
+    // UI: simular progreso
     document.getElementById('auto-ia-estado-inicial').style.display = 'none';
     document.getElementById('auto-ia-progreso').style.display = 'block';
     document.getElementById('propuesta-automatica-container').style.display = 'none';
 
-    // Pequeño timeout para que el navegador pinte el progreso antes de ejecutar
+    // ── 2. Motor modular (import dinámico) con fallback al heredado ───────────
     setTimeout(function() {
-        try {
-            var resultado = _generarPropuestaLocal(municipio, datos, pop, analisis);
+        Promise.all([
+            import('./ia/motores/motorPlanAccion.js'),
+            import('./ia/contextoIA.js'),
+        ]).then(function(modulos) {
+            var motorMod = modulos[0];
+            var ctxMod   = modulos[1];
 
-            // Guardar en Firebase
-            var municipioId = getMunicipioActual();
-            if (municipioId && typeof db !== 'undefined') {
-                db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipioId + '/propuestaIA').set(
-                    Object.assign({}, resultado, { fechaGeneracion: new Date().toISOString(), fuentes: fuentesUsadas })
-                );
+            var ctx = ctxMod.contextoDesdeGlobalesHeredados();
+            if (!ctx) throw new Error('Sin contexto territorial activo para el motor modular.');
+
+            return motorMod.motorPlanAccion.ejecutar(ctx).then(function(salidaMotor) {
+                if (salidaMotor.sinDatos || !salidaMotor.datos ||
+                        !(salidaMotor.datos.lineasPropuestas || []).length) {
+                    throw new Error('Motor modular sin datos: ' + (salidaMotor.error || 'propuesta vacía'));
+                }
+
+                var resultado = adaptarSalidaMotorPlanAFormatoUI(salidaMotor, municipio, fuentesUsadas, pop);
+
+                console.group('[COMPÁS] 🤖 motorPlanAccion — propuesta modular activa');
+                console.log('  Motor:', salidaMotor.motorId, 'v' + (salidaMotor.motorVersion || '?'));
+                console.log('  Confianza:', salidaMotor.gradoConfianza, '(' + salidaMotor.gradoConfianzaLabel + ')');
+                console.log('  TrazabilidadId:', salidaMotor.trazabilidadId);
+                console.log('  Estado revisión:', salidaMotor.estadoRevisionHumana);
+                console.log('  Líneas propuestas:', (salidaMotor.datos.lineasPropuestas || []).length);
+                console.log('  Origen: motor_modular');
+                console.groupEnd();
+
+                var municipioId = getMunicipioActual();
+                if (municipioId && typeof db !== 'undefined') {
+                    db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipioId + '/propuestaIA').set(
+                        Object.assign({}, resultado, {
+                            fechaGeneracion:  new Date().toISOString(),
+                            fuentes:          fuentesUsadas,
+                            _origenCalculo:   'motor_modular',
+                            _trazabilidadId:  salidaMotor.trazabilidadId,
+                            _gradoConfianza:  salidaMotor.gradoConfianza,
+                        })
+                    );
+                }
+
+                renderizarPropuestaIA(resultado, municipio, fuentesUsadas);
+            });
+
+        }).catch(function(err) {
+            // Fallback: motor heredado (_generarPropuestaLocal directo)
+            console.warn('[COMPÁS] motorPlanAccion fallo — usando motor heredado. Causa:', err.message);
+            try {
+                var resultado = _generarPropuestaLocal(municipio, datos, pop, analisis);
+                var municipioId = getMunicipioActual();
+                if (municipioId && typeof db !== 'undefined') {
+                    db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipioId + '/propuestaIA').set(
+                        Object.assign({}, resultado, { fechaGeneracion: new Date().toISOString(), fuentes: fuentesUsadas })
+                    );
+                }
+                renderizarPropuestaIA(resultado, municipio, fuentesUsadas);
+            } catch(fallbackErr) {
+                document.getElementById('auto-ia-progreso').style.display = 'none';
+                document.getElementById('auto-ia-estado-inicial').style.display = 'block';
+                alert('❌ Error al generar propuesta: ' + fallbackErr.message);
+                console.error(fallbackErr);
             }
-
-            renderizarPropuestaIA(resultado, municipio, fuentesUsadas);
-
-        } catch(err) {
-            document.getElementById('auto-ia-progreso').style.display = 'none';
-            document.getElementById('auto-ia-estado-inicial').style.display = 'block';
-            alert('❌ Error al generar propuesta: ' + err.message);
-            console.error(err);
-        }
+        });
     }, 400);
 }
 
