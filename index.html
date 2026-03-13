@@ -3625,7 +3625,7 @@
     <!-- Franja signature -->
     <div style="height:4px; background:linear-gradient(90deg,#0074c8 0%,#00acd9 20%,#94d40b 40%,#ffb61b 60%,#ff6600 80%,#dc143c 100%); flex-shrink:0;"></div>
     <!-- iframe con el monitor -->
-    <iframe id="iframe-monitor-ibse" src="./monitor_ibse.html" style="flex:1; border:none; width:100%;" allow="same-origin"></iframe>
+    <iframe id="iframe-monitor-ibse" src="monitor_ibse.html" style="flex:1; border:none; width:100%;" allow="same-origin"></iframe>
 </div>
 
 <!-- Modal Cuestionario Ciudadano IBSE [I7] -->
@@ -7934,25 +7934,6 @@ function actualizarMunicipio() {
 // las genera automáticamente usando el motor de análisis salutogénico
 // =====================================================
 
-/**
- * Elimina recursivamente propiedades con valor undefined de un objeto antes
- * de enviarlo a Firebase. Firebase rechaza undefined con:
- *   "values argument contains undefined in property '...'"
- * null está permitido (elimina el nodo); '' es el fallback preferido para strings.
- */
-function _sanitizarParaFirebase(obj) {
-    if (obj === null || obj === undefined) return null;
-    if (typeof obj !== 'object' || Array.isArray(obj)) return obj;
-    const clean = {};
-    for (const [k, v] of Object.entries(obj)) {
-        if (v === undefined) continue; // omitir — Firebase lo rechaza
-        clean[k] = (v !== null && typeof v === 'object' && !Array.isArray(v))
-            ? _sanitizarParaFirebase(v)
-            : v;
-    }
-    return clean;
-}
-
 // [AUDIT] verificarYGenerarAnalisisAutomatico — ejecuta motor v2 (analizarDatosMunicipio),
 // motor expert system (ejecutarMotorExpertoCOMPAS) y motor v3 (window.COMPAS_ejecutarMotorV3).
 // Desde 2026-03-10: ruta automática alineada con ruta manual (generarAnalisisIA + hook v3).
@@ -8054,36 +8035,34 @@ async function verificarYGenerarAnalisisAutomatico() {
             auto: true
         };
         analisis.priorizacion.slice(0, 8).forEach((p, idx) => {
-            const key = p.areaKey || (p.area || '').toLowerCase().replace(/\s+/g, '_') || ('area_' + (idx + 1));
-            priorizacionObj.areas[key] = {
-                nombre: p.area || p.label || key,
+            priorizacionObj.areas[p.areaKey || p.area.toLowerCase().replace(/\s+/g, '_')] = {
+                nombre: p.area,
                 prioridad: idx + 1,
-                justificacion: p.justificacion || '',
-                lineaEPVSA: p.lineaEPVSA || '',
-                objetivoEPVSA: p.objetivoEPVSA || ''
+                justificacion: p.justificacion,
+                lineaEPVSA: p.lineaEPVSA,
+                objetivoEPVSA: p.objetivoEPVSA
             };
         });
         updates['municipios/' + municipio + '/priorizacion'] = priorizacionObj;
         generados.push('priorización');
     }
-
-    // Guardar narrativa salutogénica si se generó (solo si tiene contenido real)
-    if (analisis.narrativa && typeof analisis.narrativa === 'object' &&
-        (analisis.narrativa.contexto || analisis.narrativa.activos || analisis.narrativa.sintesis)) {
+    
+    // Guardar narrativa salutogénica si se generó
+    if (analisis.narrativa) {
         updates['municipios/' + municipio + '/narrativa'] = {
-            contexto: analisis.narrativa.contexto || '',
-            activos: analisis.narrativa.activos || '',
-            oportunidades: analisis.narrativa.oportunidades || '',
-            patrones: analisis.narrativa.patrones || '',
-            sintesis: analisis.narrativa.sintesis || '',
+            contexto: analisis.narrativa.contexto,
+            activos: analisis.narrativa.activos,
+            oportunidades: analisis.narrativa.oportunidades,
+            patrones: analisis.narrativa.patrones,
+            sintesis: analisis.narrativa.sintesis,
             fecha: new Date().toISOString()
         };
     }
-
+    
     // Guardar en Firebase si hay algo que guardar
     if (Object.keys(updates).length > 0) {
         try {
-            await db.ref().update(_sanitizarParaFirebase(updates));
+            await db.ref().update(updates);
             console.log('✅ Análisis automático guardado:', generados.join(', '));
             
             // Notificar al usuario
@@ -28182,7 +28161,7 @@ function ibse_abrirMonitor() {
     var nombre = (typeof getNombreMunicipio  === 'function') ? getNombreMunicipio(key)   : key;
     var iframe = document.getElementById('iframe-monitor-ibse');
     if (iframe) {
-        var nuevaSrc = './monitor_ibse.html?municipio=' + encodeURIComponent(key) + '&nombre=' + encodeURIComponent(nombre);
+        var nuevaSrc = 'monitor_ibse.html?municipio=' + encodeURIComponent(key) + '&nombre=' + encodeURIComponent(nombre);
         if (iframe.dataset.munActual !== key) {
             iframe.src = nuevaSrc;
             iframe.dataset.munActual = key;
@@ -29959,14 +29938,13 @@ function _fallbackMotorHeredado() {
             }
         };
 
-        console.info('[COMPÁS modular] motores IA cargados');
         console.log('[COMPÁS modular] window.__COMPAS_ejecutarMotorSintesis registrado ✓');
 
     } catch (errImport) {
         // Si los módulos no cargan (error de ruta, sintaxis, etc.),
         // window.__COMPAS_ejecutarMotorSintesis queda undefined y las funciones
         // heredadas usan el fallback inline definido en cada punto de llamada.
-        console.warn('[COMPÁS modular] No se cargaron módulos IA. Fallback heredado activo.', errImport.message, errImport);
+        console.warn('[COMPÁS modular] No se cargaron módulos IA. Fallback heredado activo.', errImport.message);
     }
 })();
 </script>
