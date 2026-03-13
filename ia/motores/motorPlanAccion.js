@@ -50,7 +50,9 @@ function _normalizarPropuesta(resultado, contextoIA, fuentesUsadas) {
     if (!resultado) return { sinDatos: true, mensaje: 'El motor no produjo propuesta.' };
 
     const propuestaEPVSA       = resultado.propuestaEPVSA        || [];
-    const seleccionNormalizada = resultado.seleccionNormalizada  || [];
+    // _generarPropuestaLocal devuelve la selección en _seleccion (con guión bajo),
+    // no en seleccionNormalizada. Se lee ambas claves para cubrir ambas fuentes.
+    const seleccionNormalizada = resultado.seleccionNormalizada || resultado._seleccion || [];
 
     if (!propuestaEPVSA.length) {
         return { sinDatos: true, mensaje: 'La propuesta está vacía. Puede que falten datos o la estructura EPVSA no esté disponible.' };

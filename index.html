@@ -26148,12 +26148,35 @@ function generarPropuestaIA() {
 
                 var resultado = adaptarSalidaMotorPlanAFormatoUI(salidaMotor, municipio, fuentesUsadas, pop);
 
+                // Asignar propuestaActual explícitamente antes de renderizar.
+                // resultado._seleccion tiene formato [{lineaId, objetivos:[{objetivoIdx,...}],
+                // programas:[{programaIdx,...}]}] — exactamente lo que espera aceptarPropuesta().
+                // propuestaActual debe ser un array plano; los metadatos van en variable auxiliar.
+                propuestaActual = resultado._seleccion && resultado._seleccion.length
+                    ? resultado._seleccion
+                    : (resultado.propuestaEPVSA || []);
+                window.propuestaActual = propuestaActual;
+
+                // Metadatos del motor accesibles para depuración y trazabilidad
+                window.__ultimaPropuestaPlanMotor = {
+                    motorId:           salidaMotor.motorId,
+                    motorVersion:      salidaMotor.motorVersion,
+                    trazabilidadId:    salidaMotor.trazabilidadId,
+                    gradoConfianza:    salidaMotor.gradoConfianza,
+                    gradoConfianzaLabel: salidaMotor.gradoConfianzaLabel,
+                    origenCalculo:     'motor_modular',
+                    estadoRevision:    salidaMotor.estadoRevisionHumana,
+                    nLineas:           (salidaMotor.datos.lineasPropuestas || []).length,
+                    fechaGeneracion:   new Date().toISOString(),
+                };
+
                 console.group('[COMPÁS] 🤖 motorPlanAccion — propuesta modular activa');
                 console.log('  Motor:', salidaMotor.motorId, 'v' + (salidaMotor.motorVersion || '?'));
                 console.log('  Confianza:', salidaMotor.gradoConfianza, '(' + salidaMotor.gradoConfianzaLabel + ')');
                 console.log('  TrazabilidadId:', salidaMotor.trazabilidadId);
                 console.log('  Estado revisión:', salidaMotor.estadoRevisionHumana);
                 console.log('  Líneas propuestas:', (salidaMotor.datos.lineasPropuestas || []).length);
+                console.log('  propuestaActual.length:', propuestaActual.length);
                 console.log('  Origen: motor_modular');
                 console.groupEnd();
 
