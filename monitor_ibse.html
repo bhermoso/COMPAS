@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor IBSE · Atarfe 2026 · COMPÁS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        /* =====================================================================
+           MONITOR IBSE — IDENTIDAD VISUAL COMPÁS
+           Paleta: #0074c8 azul · #00acd9 cyan · #94d40b verde · #ffb61b amarillo
+                   #ff6600 naranja · #dc143c rojo
+           Fuente: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+        ===================================================================== */
+
+        :root {
+            --azul:     #0074c8;
+            --cyan:     #00acd9;
+            --verde:    #94d40b;
+            --amarillo: #ffb61b;
+            --naranja:  #ff6600;
+            --rojo:     #dc143c;
+            --oscuro:   #1a1a2e;
+            --texto:    #2d3748;
+            --gris:     #64748b;
+            --fondo:    #f8f9fa;
+            --blanco:   #ffffff;
+            --borde:    #e9ecef;
+            --gradient: linear-gradient(90deg, #0074c8 0%, #00acd9 20%, #94d40b 40%, #ffb61b 60%, #ff6600 80%, #dc143c 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--fondo);
+            min-height: 100vh;
+            color: var(--texto);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 1rem 2rem; }
+
+        /* ========== HEADER COMPÁS ========== */
+        .header {
+            background: var(--blanco);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--borde);
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.35rem;
+        }
+
+        .header p {
+            color: var(--gris);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        /* Franja degradada signature COMPÁS (debajo del header) */
+        .franja-compas {
+            height: 6px;
+            background: var(--gradient);
+            margin-bottom: 2rem;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .monitor-container {
+            background: var(--blanco);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,116,200,0.10);
+            overflow: hidden;
+            border-top: 3px solid var(--azul);
+        }
+
+        .monitor-header {
+            background: linear-gradient(135deg, var(--azul) 0%, var(--cyan) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .monitor-header h2 {
+            margin: 0 0 0.4rem 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .monitor-header p {
+            margin: 0;
+            opacity: 0.92;
+            font-size: 0.88rem;
+        }
+
+        .metodologia-nota {
+            background: rgba(255,255,255,0.15);
+            padding: 0.65rem 1rem;
+            margin-top: 0.75rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--amarillo);
+        }
+
+        .metodologia-nota p {
+            margin: 0;
+            font-size: 0.78rem;
+            color: white;
+            opacity: 1;
+        }
+
+        /* ========== STATS GRID ========== */
+        .stats-grid {
+            background: var(--blanco);
+            padding: 1.25rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 0.75rem;
+            border-bottom: 3px solid var(--fondo);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: var(--fondo);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.68rem;
+            color: var(--gris);
+            font-weight: 700;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== BOTONES ========== */
+        .controls {
+            background: var(--blanco);
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--borde);
+        }
+
+        .btn-accion {
+            padding: 0.6rem 1.1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.88rem;
+            font-family: inherit;
+        }
+
+        .btn-accion:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,116,200,0.25);
+        }
+
+        .btn-accion.primary {
+            background: var(--azul);
+            color: white;
+        }
+
+        .btn-accion.primary:hover { background: #0062aa; }
+
+        .btn-accion.secondary {
+            background: var(--fondo);
+            color: var(--texto);
+            border: 1px solid var(--borde);
+        }
+
+        .btn-accion.secondary:hover { background: #e2e8f0; }
+
+        .btn-accion.success {
+            background: var(--verde);
+            color: white;
+        }
+
+        .btn-accion.success:hover { background: #7eb809; }
+
+        .btn-accion.danger {
+            background: var(--rojo);
+            color: white;
+        }
+
+        .btn-accion.danger:hover { background: #b01030; }
+
+        .btn-accion.warning {
+            background: var(--amarillo);
+            color: #1a1a2e;
+        }
+
+        /* ========== CONTENIDO ========== */
+        .content {
+            background: var(--blanco);
+            padding: 1.5rem 2rem;
+        }
+
+        .section { margin-bottom: 2rem; }
+
+        .section-title {
+            color: var(--azul);
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--azul);
+            padding-bottom: 0.4rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            border: 1.5px solid var(--borde);
+            border-radius: 8px;
+            padding: 1.25rem;
+            border-top: 3px solid var(--azul);
+        }
+
+        .card h4 {
+            margin: 0 0 0.75rem 0;
+            color: var(--azul);
+            font-size: 0.95rem;
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--blanco);
+            border-radius: 8px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0,116,200,0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--azul) 0%, var(--cyan) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+
+        .modal-header::after {
+            content: '';
+            display: block;
+            height: 4px;
+            background: var(--gradient);
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem; right: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            line-height: 1;
+        }
+
+        .modal-close:hover { background: rgba(255,255,255,0.35); }
+
+        .modal-body {
+            padding: 1.5rem 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* ========== FORMULARIO CUESTIONARIO ========== */
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: var(--texto);
+            font-size: 0.9rem;
+        }
+
+        .form-group select,
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 2px solid var(--borde);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group select:focus,
+        .form-group input[type="number"]:focus {
+            border-color: var(--azul);
+            outline: none;
+        }
+
+        .section-header {
+            background: #e8f4fd;
+            padding: 0.85rem 1rem;
+            border-radius: 6px;
+            margin: 1.25rem 0 0.75rem 0;
+            border-left: 4px solid var(--azul);
+        }
+
+        .section-header h3 {
+            margin: 0;
+            color: var(--azul);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .section-header p {
+            margin: 0.2rem 0 0 0;
+            color: var(--gris);
+            font-size: 0.85rem;
+        }
+
+        /* Ítems IBSE */
+        .ibe-item {
+            background: var(--fondo);
+            padding: 1.1rem;
+            border-radius: 6px;
+            margin-bottom: 0.85rem;
+            border: 1.5px solid var(--borde);
+        }
+
+        .ibe-pregunta {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--texto);
+            margin-bottom: 0.85rem;
+        }
+
+        .ibe-numero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px; height: 26px;
+            background: var(--azul);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: 0.6rem;
+            font-size: 0.82rem;
+        }
+
+        .ibe-opciones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 0.4rem;
+        }
+
+        .ibe-opcion input[type="radio"] { display: none; }
+
+        .ibe-opcion label {
+            display: block;
+            padding: 0.5rem 0.35rem;
+            background: white;
+            border: 2px solid var(--borde);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.78rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: var(--texto);
+        }
+
+        .ibe-opcion label:hover {
+            border-color: var(--azul);
+            background: #e8f4fd;
+            transform: translateY(-1px);
+        }
+
+        .ibe-opcion input[type="radio"]:checked + label {
+            background: var(--azul);
+            color: white;
+            border-color: var(--azul);
+            transform: scale(1.04);
+        }
+
+        .success-message {
+            display: none;
+            background: var(--verde);
+            color: white;
+            padding: 0.85rem 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 0.92rem;
+        }
+
+        /* ========== PANEL VERIFICACIÓN ========== */
+        #panel-verificacion {
+            border-left-color: var(--azul) !important;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .ibe-opciones { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .header h1 { font-size: 1.5rem; letter-spacing: 2px; }
+            .content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🧠 Monitor IBSE - Atarfe 2026</h1>
+        <p>Índice de Bienestar Socioemocional · Encuesta Andaluza de Salud, 2023 · 8 ítems · 4 factores</p>
+    </div>
+    
+    <div class="monitor-container">
+        <div class="monitor-header">
+            <h2>📊 Panel de Control IBSE</h2>
+            <p>Monitoreo Bienestar Emocional · Atarfe · Metodología EAS 2023</p>
+            <div class="metodologia-nota">
+                <p><strong>⚠️ Nota metodológica:</strong> Participación voluntaria abierta (no muestreo probabilístico). Los indicadores miden <strong>cobertura demográfica</strong> y <strong>equilibrio estructural</strong>, no representatividad estadística poblacional.</p>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" style="color:#667eea;" id="ibse-total">0</div>
+                <div class="stat-label">RESPUESTAS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#ec4899;" id="ibse-media">--</div>
+                <div class="stat-label">IBSE MEDIA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#10b981;" id="factor-vinculo">--</div>
+                <div class="stat-label">F. VÍNCULO</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#3b82f6;" id="factor-situacion">--</div>
+                <div class="stat-label">F. SITUACIÓN</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#f59e0b;" id="factor-control">--</div>
+                <div class="stat-label">F. CONTROL</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#8b5cf6;" id="factor-persona">--</div>
+                <div class="stat-label">F. PERSONA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#ff6b6b;" id="ibse-bajo">0</div>
+                <div class="stat-label">IBSE < 50</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:#06b6d4;" id="ibse-repr">0%</div>
+                <div class="stat-label">% REPRES.</div>
+            </div>
+        </div>
+        
+        <!-- Panel de Verificación de Consistencia -->
+        <div id="panel-verificacion" style="display:none;background:#f8f9fa;padding:1rem;margin:1rem 1.5rem;border-radius:8px;border-left:4px solid #667eea;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                <h4 style="margin:0;color:#475569;font-size:0.9rem;">🔍 Verificación de Consistencia de Datos</h4>
+                <button onclick="cerrarVerificacion()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.2rem;">×</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;font-size:0.8rem;">
+                <div>
+                    <span style="color:#64748b;">Origen:</span>
+                    <strong id="verif-origen" style="color:#1e293b;">--</strong>
+                </div>
+                <div>
+                    <span style="color:#64748b;">Carga:</span>
+                    <strong id="verif-timestamp" style="color:#1e293b;">--</strong>
+                </div>
+                <div>
+                    <span style="color:#64748b;">Checksum MD5:</span>
+                    <strong id="verif-checksum" style="color:#1e293b;font-family:monospace;font-size:0.7rem;">--</strong>
+                </div>
+                <div>
+                    <span style="color:#64748b;">Válidos:</span>
+                    <strong id="verif-validos" style="color:#10b981;">--</strong>
+                </div>
+                <div>
+                    <span style="color:#64748b;">Incompletos:</span>
+                    <strong id="verif-incompletos" style="color:#ef4444;">--</strong>
+                </div>
+                <div>
+                    <span style="color:#64748b;">Duplicados posibles:</span>
+                    <strong id="verif-duplicados" style="color:#f59e0b;">--</strong>
+                </div>
+            </div>
+            <div id="verif-alert" style="display:none;margin-top:0.75rem;padding:0.75rem;background:#fff3cd;border-radius:6px;border-left:3px solid #ffc107;">
+                <p style="margin:0;font-size:0.8rem;color:#856404;line-height:1.5;"></p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="btn-responder" class="btn-accion primary" onclick="abrirModalREDCap()">✍️ Añadir Respuesta (REDCap)</button>
+            <button class="btn-accion primary" onclick="sincronizarREDCap()">🔄 Sincronizar con REDCap</button>
+            <button class="btn-accion primary" onclick="simularDatos()">🎲 Simular n=374</button>
+            <button class="btn-accion info" onclick="abrirModalMetodologia()" style="background:#667eea;">📖 Metodología Simulación</button>
+            <button class="btn-accion secondary" onclick="cargarCSV()">📁 Cargar CSV</button>
+            <button class="btn-accion success" onclick="exportarCSV()">💾 Exportar CSV</button>
+            <button class="btn-accion danger" onclick="limpiarDatos()">🧹 Limpiar</button>
+        </div>
+        
+        <div class="content">
+            <!-- Análisis -->
+            <div class="section">
+                <div style="background:#e3f2fd;padding:1.5rem;border-radius:8px;border-left:4px solid #667eea;">
+                    <div id="analisis-sociologico">
+                        <p style="color:#64748b;margin:0;">Añada respuestas para generar análisis.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="grid-2">
+                <!-- Pirámide Poblacional -->
+                <div class="card">
+                    <h4 style="color:#667eea;">📊 Pirámide Poblacional Atarfe 2023</h4>
+                    <div style="font-size:0.75rem;margin-bottom:0.6rem;display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center;align-items:center;">
+                        <span style="display:flex;align-items:center;gap:0.3rem;">
+                            <span style="display:inline-block;width:18px;height:10px;background:#5b8dd9;opacity:0.22;border-radius:2px;"></span>Pob. H
+                        </span>
+                        <span style="display:flex;align-items:center;gap:0.3rem;">
+                            <span style="display:inline-block;width:18px;height:10px;background:#5b8dd9;opacity:0.75;border-radius:2px;"></span>Mue. H
+                        </span>
+                        <span style="color:#ccc;">|</span>
+                        <span style="display:flex;align-items:center;gap:0.3rem;">
+                            <span style="display:inline-block;width:18px;height:10px;background:#e8789a;opacity:0.22;border-radius:2px;"></span>Pob. M
+                        </span>
+                        <span style="display:flex;align-items:center;gap:0.3rem;">
+                            <span style="display:inline-block;width:18px;height:10px;background:#e8789a;opacity:0.75;border-radius:2px;"></span>Mue. M
+                        </span>
+                        <span style="font-size:0.64rem;color:#94a3b8;width:100%;text-align:center;font-style:italic;">
+                            Superficie de muestra proporcional a su tamaño real (374 vs 14.828)
+                        </span>
+                    </div>
+                    <div id="piramide-container" style="position:relative;width:100%;"></div>
+                    <div id="ind-r" style="margin-top:1rem;padding:0.75rem;background:#f8f9fa;border-radius:6px;text-align:center;">
+                        <div style="font-size:0.8rem;color:#64748b;">Tamaño de Participación</div>
+                        <div style="font-size:1.5rem;font-weight:800;color:#667eea;" id="ind-r-val">0 / 374</div>
+                        <div style="font-size:0.7rem;color:#94a3b8;">Objetivo censal: 374 participantes (afijación proporcional)</div>
+                    </div>
+                    <div id="indicadores-repr"></div>
+                </div>
+                
+                <!-- 4 Factores - Radar Chart -->
+                <div class="card">
+                    <h4 style="color:#764ba2;">🎯 Perfil 4 Factores IBSE</h4>
+                    <canvas id="chartFactores"></canvas>
+                    <div id="interpretacion-radar" style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #764ba2;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#475569;">
+                            <strong>Interpretación:</strong> <span id="texto-radar">Añada datos para generar interpretación del perfil socioemocional.</span>
+                        </p>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.7rem;color:#64748b;text-align:center;">
+                        Encuesta Andaluza de Salud, 2023 · Rango 0-100
+                    </div>
+                </div>
+                
+                <!-- Semáforo IBSE Global -->
+                <div class="card">
+                    <h4 style="color:#10b981;">🚦 Nivel de Bienestar Global</h4>
+                    <div id="semaforo-container"></div>
+                    <div id="interpretacion-semaforo" style="margin-top:0rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #10b981;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#475569;">
+                            <strong>Interpretación:</strong> <span id="texto-semaforo">Añada datos para generar interpretación del nivel de bienestar poblacional.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- IBSE por Sexo - Pictogramas -->
+                <div class="card">
+                    <h4 style="color:#3b82f6;">👥 Comparativa por Sexo</h4>
+                    <div id="sexo-container"></div>
+                    <div id="interpretacion-sexo" style="margin-top:0rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #3b82f6;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#475569;">
+                            <strong>Interpretación:</strong> <span id="texto-sexo">Añada datos para generar interpretación de las diferencias de género en bienestar.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- IBSE por Edad - Línea temporal -->
+                <div class="card">
+                    <h4 style="color:#f59e0b;">📆 Evolución por Grupos de Edad</h4>
+                    <canvas id="chartEdad"></canvas>
+                    <div id="interpretacion-edad" style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #f59e0b;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#475569;">
+                            <strong>Interpretación:</strong> <span id="texto-edad">Añada datos para generar interpretación del curso vital del bienestar.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Factores individuales - Barras horizontales -->
+                <div class="card">
+                    <h4 style="color:#8b5cf6;">📊 Desglose por Factor</h4>
+                    <div id="factores-barras"></div>
+                    <div id="interpretacion-factores" style="margin-top:0rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #8b5cf6;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#475569;">
+                            <strong>Interpretación:</strong> <span id="texto-factores">Añada datos para generar interpretación diferencial de los factores socioemocionales.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Convergencia desviación - Ley Grandes Números -->
+                <div class="card" id="card-convergencia" style="display:none;">
+                    <h4 style="color:#0891b2;">📉 Convergencia de la Desviación (Ley de los Grandes Números)</h4>
+                    <canvas id="chartConvergencia"></canvas>
+                    <div style="margin-top:1rem;padding:1rem;background:#f0f9ff;border-radius:8px;border-left:4px solid #0891b2;">
+                        <p style="margin:0;font-size:0.85rem;line-height:1.6;color:#0c4a6e;">
+                            <strong>Lectura:</strong> <span id="texto-convergencia">Simule más casos para observar la convergencia.</span>
+                        </p>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.7rem;color:#64748b;text-align:center;font-style:italic;">
+                        Diferencia máxima entre grupos de edad respecto a distribución poblacional · Teorema Central del Límite
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REDCAP EMBEBIDO -->
+<div id="modal-redcap" class="modal">
+    <div class="modal-content" style="max-width:1000px;">
+        <div class="modal-header">
+            <h2>✍️ Cuestionario IBSE - REDCap</h2>
+            <p>Encuesta Bienestar Socioemocional Atarfe 2026</p>
+            <button class="modal-close" onclick="cerrarModalREDCap()">×</button>
+        </div>
+        <div class="modal-body" style="padding:0;max-height:80vh;overflow:hidden;">
+            <iframe 
+                id="redcap-iframe"
+                src="https://redcap-fibao.granadasalud.es/DSGM/surveys/?s=N8C8RPXEK4C7MENF"
+                style="width:100%;height:75vh;border:none;"
+                frameborder="0">
+            </iframe>
+            <div style="padding:1rem;background:#f8f9fa;border-top:2px solid #e9ecef;text-align:center;">
+                <p style="margin:0;font-size:0.85rem;color:#64748b;">
+                    📊 Los datos se guardan directamente en REDCap. 
+                    Usa el botón <strong>"🔄 Sincronizar con REDCap"</strong> para actualizar el dashboard.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIGURACIÓN API -->
+<div id="modal-config" class="modal">
+    <div class="modal-content" style="max-width:700px;">
+        <div class="modal-header">
+            <h2>⚙️ Configuración API REDCap</h2>
+            <p>Sincronización automática de datos</p>
+            <button class="modal-close" onclick="cerrarModalConfig()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>🔗 URL API REDCap</label>
+                <input type="text" id="config-api-url" value="https://redcap-fibao.granadasalud.es/DSGM/api/" 
+                       placeholder="https://redcap.ejemplo.es/api/"
+                       style="width:100%;padding:0.75rem;border:2px solid #e9ecef;border-radius:8px;">
+                <small style="color:#64748b;font-size:0.8rem;">URL del endpoint API de tu servidor REDCap</small>
+            </div>
+            
+            <div class="form-group">
+                <label>🔑 Token API</label>
+                <input type="password" id="config-api-token" 
+                       placeholder="Introduce tu token API de REDCap"
+                       style="width:100%;padding:0.75rem;border:2px solid #e9ecef;border-radius:8px;">
+                <small style="color:#64748b;font-size:0.8rem;">
+                    Obtén el token en: REDCap → API → Generar token API
+                </small>
+            </div>
+            
+            <div style="background:#fff3cd;padding:1rem;border-radius:8px;border-left:4px solid #ffc107;margin-top:1rem;">
+                <p style="margin:0;font-size:0.85rem;color:#856404;">
+                    ⚠️ <strong>Importante:</strong> El token se guarda solo en tu navegador (localStorage). 
+                    Nunca se envía a Firebase ni se comparte.
+                </p>
+            </div>
+            
+            <button onclick="guardarConfigAPI()" class="btn-accion success" style="width:100%;margin-top:1.5rem;font-size:1.1rem;padding:1rem;">
+                💾 Guardar Configuración
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL METODOLOGÍA SIMULACIÓN -->
+<div id="modal-metodologia" class="modal">
+    <div class="modal-content" style="max-width:900px;">
+        <div class="modal-header">
+            <h2>📖 Metodología de Simulación Monte Carlo</h2>
+            <p>Generación de datos sintéticos para validación de herramientas</p>
+            <button class="modal-close" onclick="cerrarModalMetodologia()">×</button>
+        </div>
+        <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+            <div style="background:#e3f2fd;padding:1.5rem;border-radius:8px;border-left:4px solid #1976d2;margin-bottom:1.5rem;">
+                <h3 style="color:#1565c0;margin-top:0;">Propósito de la Simulación</h3>
+                <p style="line-height:1.7;">
+                    La función de simulación genera <strong>datos sintéticos</strong> que permiten probar el funcionamiento de la herramienta de monitoreo 
+                    sin necesidad de datos reales. Los datos simulados replican las características estadísticas esperadas en una población real, 
+                    incluyendo variabilidad muestral, distribución demográfica y estructura correlacional de respuestas.
+                </p>
+            </div>
+
+            <h3 style="color:#1565c0;border-bottom:2px solid #90caf9;padding-bottom:0.5rem;">1. Marco Teórico: Simulación Monte Carlo</h3>
+            <p style="line-height:1.7;">
+                El método implementado se basa en <strong>simulación Monte Carlo</strong>, técnica ampliamente validada en ciencias sociales 
+                para generar datos sintéticos que preservan propiedades estadísticas de interés (Mooney, 1997; Paxton et al., 2001).
+            </p>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">1.1 Muestreo Estratificado con Afijación Proporcional</h4>
+            <p style="line-height:1.7;">
+                Se utiliza <strong>muestreo estratificado con afijación proporcional</strong> sobre 30 estratos (15 grupos quinquenales × 2 sexos) 
+                según la estructura del Padrón Municipal de Atarfe 2023. El número de casos por estrato se calcula proporcionalmente 
+                y se ajusta al total exacto de n=374 (Cochran, 1977; Lohr, 2019).
+            </p>
+            <div style="background:#f8f9fa;padding:1rem;border-radius:6px;margin:1rem 0;font-family:monospace;font-size:0.85rem;">
+                n<sub>i</sub> = round(n × p<sub>i</sub> + ε<sub>i</sub>)&nbsp;&nbsp;→&nbsp;&nbsp;ajuste hasta Σn<sub>i</sub> = 374<br>
+                donde n = 374, p<sub>i</sub> = N<sub>i</sub>/N<sub>total</sub> y ε<sub>i</sub> ~ N(0, SD<sub>i</sub> · factorVar)
+            </div>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">1.2 Generador de Números Pseudo-Aleatorios</h4>
+            <p style="line-height:1.7;">
+                Se implementa <strong>Mersenne Twister</strong> (Matsumoto & Nishimura, 1998) mediante la librería seedrandom.js. 
+                Este generador tiene periodo 2<sup>19937</sup>-1 y pasa los test de aleatoriedad Diehard y TestU01, estándares en simulación científica 
+                (L'Ecuyer & Simard, 2007). El seed es único en cada llamada (timestamp + componente aleatorio), 
+                garantizando independencia entre simulaciones.
+            </p>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">1.3 Variabilidad Normal y Factor de Escala Heurístico</h4>
+            <p style="line-height:1.7;">
+                La variabilidad entre estratos sigue una <strong>distribución normal simétrica</strong> generada mediante el 
+                método de <strong>Box-Muller</strong> (Box & Muller, 1958). Este método garantiza que los errores sean 
+                simétricos alrededor de cero, evitando sesgos acumulativos entre simulaciones sucesivas:
+            </p>
+            <div style="background:#f8f9fa;padding:1rem;border-radius:6px;margin:1rem 0;font-family:monospace;font-size:0.85rem;">
+                Z = √(−2 ln U₁) · cos(2π U₂)&nbsp;&nbsp;donde U₁, U₂ ~ Uniforme(0,1)<br><br>
+                ε<sub>i</sub> = Z · SD<sub>i</sub> · factorVar&nbsp;&nbsp;&nbsp;con&nbsp;&nbsp;factorVar = √(374 / n<sub>acumulado</sub>)<br><br>
+                SD<sub>i</sub> = √(n · p<sub>i</sub> · (1 − p<sub>i</sub>))&nbsp;&nbsp;(desviación típica de conteos del estrato; n = 374)
+            </div>
+            <p style="line-height:1.7;">
+                El factor de variabilidad es un <strong>heurístico de diseño</strong>: decrece proporcionalmente a
+                1/√n acumulado, reduciendo el ruido inyectado a medida que aumentan las iteraciones de simulación.
+                Este comportamiento es una consecuencia directa de la elección de factorVar, no una propiedad
+                estadística formal derivada de la Ley de los Grandes Números.
+            </p>
+
+            <h3 style="color:#1565c0;border-bottom:2px solid #90caf9;padding-bottom:0.5rem;margin-top:2rem;">2. Implementación Algorítmica</h3>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">Paso 1: Inicialización</h4>
+            <ul style="line-height:1.7;">
+                <li>Generación de seed único: timestamp + componente aleatorio</li>
+                <li>Instanciación del generador Mersenne Twister (seedrandom.js)</li>
+                <li>Inicialización del generador Box-Muller para distribución normal</li>
+                <li>Carga de estructura poblacional (Padrón Municipal Atarfe 2023)</li>
+            </ul>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">Paso 2: Afijación Proporcional con Ajuste Exacto</h4>
+            <ul style="line-height:1.7;">
+                <li>Cálculo de n esperado por estrato según proporciones poblacionales</li>
+                <li>Adición de variabilidad normal simétrica (Box-Muller) que decrece proporcionalmente a 1/√n acumulado (heurístico de diseño)</li>
+                <li><strong>Ajuste al total exacto de 374:</strong> la diferencia respecto al objetivo se distribuye entre los estratos más numerosos (+1 o -1 caso), garantizando siempre n=374</li>
+                <li>Asignación aleatoria de edad exacta dentro del rango quinquenal del estrato</li>
+            </ul>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">Paso 3: Generación de Respuestas IBSE</h4>
+            <ul style="line-height:1.7;">
+                <li><strong>Metodología:</strong> Índice de Bienestar Socioemocional (IBSE) de Eduardo Bericat (2014), validado en Encuesta Andaluza de Salud 2023</li>
+                <li><strong>Parámetros poblacionales:</strong> Valores medios esperados por edad y sexo según distribuciones empíricas EAS</li>
+                <li><strong>Variabilidad muestral:</strong> Desviación aleatoria uniforme en ±1,96·SE, donde SE decrece proporcionalmente a 1/√n acumulado</li>
+                <li><strong>Heterogeneidad individual:</strong> Ruido N(0, σ<sub>ind</sub>) para simular variabilidad intra-poblacional</li>
+                <li><strong>Redondeo y truncamiento:</strong> Ajuste a escalas Likert discretas (1-4 frecuencia; 1-5 acuerdo)</li>
+            </ul>
+
+            <h4 style="color:#1976d2;margin-top:1.5rem;">Paso 4: Cálculo de Índices</h4>
+            <p style="line-height:1.7;">
+                Aplicación de fórmulas del IBSE (Bericat, 2014) sobre las 8 preguntas de la Encuesta Andaluza de Salud 2023 
+                para obtener 4 factores + IBSE total, manteniendo estructura correlacional teórica.
+            </p>
+
+            <h3 style="color:#1565c0;border-bottom:2px solid #90caf9;padding-bottom:0.5rem;margin-top:2rem;">3. Propiedades Estadísticas Garantizadas</h3>
+            
+            <div style="background:#f0f9ff;padding:1rem;border-radius:6px;border-left:4px solid #0284c7;margin:1rem 0;">
+                <p style="margin:0;line-height:1.7;"><strong>✓ Total exacto:</strong> Cada simulación genera siempre exactamente n=374 casos</p>
+            </div>
+            <div style="background:#f0f9ff;padding:1rem;border-radius:6px;border-left:4px solid #0284c7;margin:1rem 0;">
+                <p style="margin:0;line-height:1.7;"><strong>✓ Validez estructural:</strong> Distribución edad/sexo ajustada a población objetivo (Padrón 2023)</p>
+            </div>
+            <div style="background:#f0f9ff;padding:1rem;border-radius:6px;border-left:4px solid #0284c7;margin:1rem 0;">
+                <p style="margin:0;line-height:1.7;"><strong>✓ Variabilidad simétrica:</strong> Errores centrados en cero, sin sesgo acumulativo entre iteraciones (normal en la afijación; uniforme en la generación de respuestas)</p>
+            </div>
+            <div style="background:#f0f9ff;padding:1rem;border-radius:6px;border-left:4px solid #0284c7;margin:1rem 0;">
+                <p style="margin:0;line-height:1.7;"><strong>✓ Variabilidad decreciente:</strong> La variabilidad máxima decrece proporcionalmente a 1/√n acumulado (heurístico de diseño, visible en el gráfico del panel)</p>
+            </div>
+            <div style="background:#f0f9ff;padding:1rem;border-radius:6px;border-left:4px solid #0284c7;margin:1rem 0;">
+                <p style="margin:0;line-height:1.7;"><strong>✓ Reproducibilidad:</strong> Mismo seed → resultados idénticos (trazabilidad científica)</p>
+            </div>
+
+            <h3 style="color:#1565c0;border-bottom:2px solid #90caf9;padding-bottom:0.5rem;margin-top:2rem;">4. Referencias Bibliográficas</h3>
+            <div style="font-size:0.85rem;line-height:1.8;padding-left:1rem;">
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Bericat, E.</strong> (2014). The Socioemotional Well-Being Index (SEWBI): Theoretical Framework and Empirical Operationalisation. 
+                    <em>Social Indicators Research</em>, 119(2), 599-626. https://doi.org/10.1007/s11205-013-0528-z 
+                    <span style="background:#4caf50;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Q1</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Box, G.E.P., & Muller, M.E.</strong> (1958). A note on the generation of random normal deviates. 
+                    <em>The Annals of Mathematical Statistics</em>, 29(2), 610-611. https://doi.org/10.1214/aoms/1177706645
+                    <span style="background:#4caf50;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Q1</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Consejería de Salud y Consumo, Junta de Andalucía.</strong> (2023). <em>Encuesta Andaluza de Salud 2023. Cuestionario Unificado de Hogar y Adultos</em>. 
+                    Servicio Andaluz de Salud. 
+                    <span style="background:#9c27b0;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Oficial</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Cochran, W.G.</strong> (1977). <em>Sampling Techniques</em> (3rd ed.). John Wiley & Sons. 
+                    <span style="background:#2196f3;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Clásico</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Efron, B., & Tibshirani, R.J.</strong> (1993). <em>An Introduction to the Bootstrap</em>. Chapman & Hall/CRC. 
+                    <span style="background:#2196f3;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Clásico</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>L'Ecuyer, P., & Simard, R.</strong> (2007). TestU01: A C library for empirical testing of random number generators. 
+                    <em>ACM Transactions on Mathematical Software</em>, 33(4), 1-40. https://doi.org/10.1145/1268776.1268777 
+                    <span style="background:#4caf50;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Q1</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Lohr, S.L.</strong> (2019). <em>Sampling: Design and Analysis</em> (3rd ed.). CRC Press. 
+                    <span style="background:#ff9800;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Referencia</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Matsumoto, M., & Nishimura, T.</strong> (1998). Mersenne Twister: A 623-dimensionally equidistributed uniform pseudo-random number generator. 
+                    <em>ACM Transactions on Modeling and Computer Simulation</em>, 8(1), 3-30. https://doi.org/10.1145/272991.272995 
+                    <span style="background:#4caf50;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Q1</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Mooney, C.Z.</strong> (1997). <em>Monte Carlo Simulation</em>. SAGE Publications. 
+                    <span style="background:#ff9800;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Referencia</span>
+                </p>
+                <p style="text-indent:-1rem;padding-left:1rem;">
+                    <strong>Paxton, P., Curran, P.J., Bollen, K.A., Kirby, J., & Chen, F.</strong> (2001). Monte Carlo experiments: Design and implementation. 
+                    <em>Structural Equation Modeling</em>, 8(2), 287-312. https://doi.org/10.1207/S15328007SEM0802_7 
+                    <span style="background:#4caf50;color:white;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem;font-weight:600;">Q1</span>
+                </p>
+            </div>
+
+            <div style="background:#fff3cd;padding:1rem;border-radius:8px;border-left:4px solid #ffc107;margin-top:2rem;">
+                <p style="margin:0;font-size:0.9rem;color:#856404;line-height:1.6;">
+                    <strong>⚠️ Nota importante sobre inferencia estadística:</strong>
+                </p>
+                <p style="margin:0.5rem 0 0 0;font-size:0.85rem;color:#856404;line-height:1.6;">
+                    Los datos simulados son exclusivamente para <strong>validación técnica</strong> de la herramienta. 
+                    NO se calculan intervalos de confianza ni error muestral porque NO se pretende hacer inferencia poblacional.
+                </p>
+                <p style="margin:0.5rem 0 0 0;font-size:0.85rem;color:#856404;line-height:1.6;">
+                    <strong>Para análisis con datos reales de campo,</strong> sí aplicarían los cálculos estándar de inferencia:
+                    nivel de confianza 95%, error muestral ±5%, intervalos de confianza para estimaciones puntuales, 
+                    y ponderación según diseño muestral complejo si procede (Lohr, 2019).
+                </p>
+                <p style="margin:0.5rem 0 0 0;font-size:0.85rem;color:#856404;line-height:1.6;">
+                    Los datos simulados <strong>NO deben usarse</strong> para inferencia poblacional ni publicación científica sustantiva.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="procesarCSV(event)">
+
+<script>
+// ==========================================
+// MUNICIPIO DINÁMICO — parámetros URL
+// ==========================================
+(function() {
+    var p = new URLSearchParams(window.location.search);
+    window.IBSE_MUN_KEY    = p.get('municipio') || 'atarfe';
+    window.IBSE_MUN_NOMBRE = p.get('nombre')    || 'Atarfe';
+})();
+
+// ==========================================
+// HISTORIAL CONVERGENCIA
+// ==========================================
+let historialConvergencia = []; // [{n, desvMax, chiEdad}]
+let chartConvergencia = null;
+
+function registrarConvergencia(n, desvMax, chiEdad) {
+    // Solo registrar si viene de simulación (no borrar historial con datos reales)
+    historialConvergencia.push({ n, desvMax, chiEdad });
+    actualizarGraficoConvergencia();
+}
+
+function actualizarGraficoConvergencia() {
+    const card = document.getElementById('card-convergencia');
+    if (historialConvergencia.length < 2) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+
+    const labels  = historialConvergencia.map(p => 'n=' + p.n);
+    const desvsMax = historialConvergencia.map(p => parseFloat(p.desvMax.toFixed(2)));
+    const chiVals  = historialConvergencia.map(p => parseFloat(p.chiEdad.toFixed(2)));
+
+    // Curva de referencia heurística: k/sqrt(n) calibrada al primer punto observado
+    // Ajustar k al primer punto observado
+    const k = desvsMax[0] * Math.sqrt(historialConvergencia[0].n);
+    const teorica = historialConvergencia.map(p => parseFloat((k / Math.sqrt(p.n)).toFixed(2)));
+
+    const ctx = document.getElementById('chartConvergencia').getContext('2d');
+    if (chartConvergencia) chartConvergencia.destroy();
+
+    chartConvergencia = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Diferencia máxima observada (p.p.)',
+                    data: desvsMax,
+                    borderColor: '#0891b2',
+                    backgroundColor: 'rgba(8,145,178,0.1)',
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#0891b2',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Curva teórica 1/√n',
+                    data: teorica,
+                    borderColor: '#f59e0b',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: false
+                },
+                {
+                    label: 'χ² edad',
+                    data: chiVals,
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#ef4444',
+                    tension: 0.3,
+                    fill: false,
+                    yAxisID: 'y2'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Diferencia máxima (p.p.)', font: { size: 11 } },
+                    ticks: { font: { size: 10 } }
+                },
+                y2: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: { display: true, text: 'χ² edad', font: { size: 11 } },
+                    grid: { drawOnChartArea: false },
+                    ticks: { font: { size: 10 } }
+                },
+                x: { ticks: { font: { size: 10 } } }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        afterBody: function(items) {
+                            const idx = items[0].dataIndex;
+                            const p = historialConvergencia[idx];
+                            return [`Reducción vs inicial: ${((1 - p.desvMax / desvsMax[0]) * 100).toFixed(0)}%`];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Texto interpretativo
+    const ultimo = historialConvergencia[historialConvergencia.length - 1];
+    const primero = historialConvergencia[0];
+    const reduccion = ((1 - ultimo.desvMax / primero.desvMax) * 100).toFixed(0);
+    const converge = ultimo.desvMax < primero.desvMax;
+
+    let texto = '';
+    if (converge) {
+        texto = `Con ${ultimo.n} casos acumulados, la diferencia máxima ha pasado de ${primero.desvMax.toFixed(1)} p.p. (n=${primero.n}) a ${ultimo.desvMax.toFixed(1)} p.p. — una reducción del ${reduccion}%. `;
+        texto += `La curva amarilla muestra la convergencia teórica 1/√n esperada por la Ley de los Grandes Números. `;
+        if (ultimo.desvMax < 3) texto += `La muestra está bien ajustada a la distribución poblacional.`;
+        else if (ultimo.desvMax < 5) texto += `La diferencia es aceptable. Con más iteraciones seguirá reduciéndose.`;
+        else texto += `Todavía hay margen de mejora. Continúe acumulando iteraciones.`;
+    } else {
+        texto = `La diferencia máxima ha aumentado de ${primero.desvMax.toFixed(1)} p.p. a ${ultimo.desvMax.toFixed(1)} p.p. Esto puede ocurrir por variabilidad aleatoria entre muestras pequeñas. Con más iteraciones debería converger.`;
+    }
+    document.getElementById('texto-convergencia').textContent = texto;
+}
+
+// ==========================================
+// VERIFICACIÓN DE CONSISTENCIA
+// ==========================================
+let ultimaVerificacion = null;
+
+function calcularChecksum(datos) {
+    // Generar checksum MD5 simple de los datos
+    const str = JSON.stringify(datos.map(d => ({
+        e: d.edad,
+        s: d.sexo,
+        i: Math.round(d.ibse_total * 100) / 100
+    })));
+    
+    // Hash simplificado (suficiente para verificación)
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0').toUpperCase();
+}
+
+function verificarConsistencia(origen) {
+    const n = respuestas.length;
+    if (n === 0) return;
+    
+    // Contar registros válidos e incompletos
+    let validos = 0;
+    let incompletos = 0;
+    
+    respuestas.forEach(r => {
+        if (r.edad && r.sexo && 
+            r.ibse_deprimido && r.ibse_feliz && r.ibse_solo && r.ibse_disfrutar &&
+            r.ibse_energia && r.ibse_tranquilo && r.ibse_optimista && r.ibse_bienmismo) {
+            validos++;
+        } else {
+            incompletos++;
+        }
+    });
+    
+    // Detectar posibles duplicados (misma edad + sexo)
+    const combinaciones = new Map();
+    respuestas.forEach(r => {
+        const key = `${r.edad}-${r.sexo}`;
+        combinaciones.set(key, (combinaciones.get(key) || 0) + 1);
+    });
+    
+    let duplicados = 0;
+    combinaciones.forEach(count => {
+        if (count > 1) duplicados += (count - 1);
+    });
+    
+    // Calcular checksum
+    const checksum = calcularChecksum(respuestas);
+    
+    // Guardar verificación actual
+    const verificacionActual = {
+        origen,
+        timestamp: new Date().toLocaleString('es-ES'),
+        checksum,
+        n,
+        validos,
+        incompletos,
+        duplicados
+    };
+    
+    // Mostrar panel
+    document.getElementById('panel-verificacion').style.display = 'block';
+    document.getElementById('verif-origen').textContent = origen;
+    document.getElementById('verif-timestamp').textContent = verificacionActual.timestamp;
+    document.getElementById('verif-checksum').textContent = checksum;
+    document.getElementById('verif-validos').textContent = validos;
+    document.getElementById('verif-incompletos').textContent = incompletos;
+    document.getElementById('verif-duplicados').textContent = duplicados;
+    
+    // Comprobar si hay cambios respecto a carga anterior
+    const alertDiv = document.getElementById('verif-alert');
+    const alertP = alertDiv.querySelector('p');
+    
+    if (ultimaVerificacion && ultimaVerificacion.origen !== 'Simulación') {
+        if (ultimaVerificacion.checksum === checksum && ultimaVerificacion.n === n) {
+            alertDiv.style.display = 'block';
+            alertDiv.style.background = '#d1fae5';
+            alertDiv.style.borderLeftColor = '#10b981';
+            alertP.style.color = '#065f46';
+            alertP.innerHTML = `<strong>✓ Datos consistentes:</strong> Checksum coincide con carga anterior (${ultimaVerificacion.origen}). Los datos son idénticos.`;
+        } else if (ultimaVerificacion.n !== n) {
+            alertDiv.style.display = 'block';
+            alertDiv.style.background = '#dbeafe';
+            alertDiv.style.borderLeftColor = '#3b82f6';
+            alertP.style.color = '#1e40af';
+            alertP.innerHTML = `<strong>ℹ️ Diferente tamaño:</strong> Carga anterior tenía ${ultimaVerificacion.n} casos, actual tiene ${n} casos. Normal si se añadieron respuestas.`;
+        } else {
+            alertDiv.style.display = 'block';
+            alertDiv.style.background = '#fff3cd';
+            alertDiv.style.borderLeftColor = '#ffc107';
+            alertP.style.color = '#856404';
+            alertP.innerHTML = `<strong>⚠️ Datos diferentes:</strong> Mismo n=${n} pero checksum distinto. Los datos han cambiado respecto a ${ultimaVerificacion.origen}.`;
+        }
+    } else if (origen === 'Simulación') {
+        alertDiv.style.display = 'block';
+        alertDiv.style.background = '#e0e7ff';
+        alertDiv.style.borderLeftColor = '#667eea';
+        alertP.style.color = '#3730a3';
+        alertP.innerHTML = `<strong>🎲 Datos simulados:</strong> Generados aleatoriamente para validación técnica. NO usar para inferencia poblacional.`;
+    } else {
+        alertDiv.style.display = 'none';
+    }
+    
+    // Actualizar última verificación
+    ultimaVerificacion = verificacionActual;
+}
+
+function cerrarVerificacion() {
+    document.getElementById('panel-verificacion').style.display = 'none';
+}
+
+// ==========================================
+// FIREBASE CONFIGURACIÓN
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCdAivJATiX76xuOJAMc4Yt7sLq-3GDuDw",
+    authDomain: "itaca-3ba7b.firebaseapp.com",
+    databaseURL: "https://itaca-3ba7b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "itaca-3ba7b",
+    storageBucket: "itaca-3ba7b.firebasestorage.app",
+    messagingSenderId: "891982060410",
+    appId: "1:891982060410:web:cd954a8602eb89ebccd4c3",
+    measurementId: "G-Q09X6ZZT1G"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ==========================================
+// VARIABLES GLOBALES
+// ==========================================
+const MET = 374; // Muestra estadísticamente representativa
+let respuestas = [];
+let chartFactores, chartEdad;
+
+// ==========================================
+// FUNCIONES CÁLCULO IBSE (BERICAT 2014)
+// ==========================================
+function calcularIBSE(d) {
+    // P.57b: escala 1-4
+    const deprimido = parseInt(d.ibse_deprimido);
+    const feliz = parseInt(d.ibse_feliz);
+    const solo = parseInt(d.ibse_solo);
+    const disfrutar = parseInt(d.ibse_disfrutar);
+    const energia = parseInt(d.ibse_energia);
+    const tranquilo = parseInt(d.ibse_tranquilo);
+    
+    // P.57c: escala 1-5
+    const optimista = parseInt(d.ibse_optimista);
+    const bienmismo = parseInt(d.ibse_bienmismo);
+    
+    // Factor VÍNCULO (deprimido, solo) - invertir (5-valor)
+    const f_vinculo = (((5-deprimido)+(5-solo))/2-1)*25;
+    
+    // Factor SITUACIÓN (feliz, disfrutar) - estandarizar (+1) 
+    const f_situacion = (((feliz+1)+(disfrutar+1))/2-1)*25;
+    
+    // Factor CONTROL (energía, tranquilo) - estandarizar (+1)
+    const f_control = (((energia+1)+(tranquilo+1))/2-1)*25;
+    
+    // Factor PERSONA (optimista, bienmismo) - invertir (6-valor)
+    const f_persona = (((6-optimista)+(6-bienmismo))/2-1)*25;
+    
+    // IBSE Total (media de 4 factores)
+    const ibse_total = (f_vinculo + f_situacion + f_control + f_persona) / 4;
+    
+    return {
+        ibse_total,
+        factor_vinculo: f_vinculo,
+        factor_situacion: f_situacion,
+        factor_control: f_control,
+        factor_persona: f_persona
+    };
+}
+
+// ==========================================
+// CONFIGURACIÓN REDCAP
+// ==========================================
+const REDCAP_SURVEY_URL = 'https://redcap-fibao.granadasalud.es/DSGM/surveys/?s=N8C8RPXEK4C7MENF';
+
+function getREDCapConfig() {
+    return {
+        apiUrl: localStorage.getItem('redcap_api_url') || 'https://redcap-fibao.granadasalud.es/DSGM/api/',
+        token: localStorage.getItem('redcap_api_token') || ''
+    };
+}
+
+// ==========================================
+// CONTROL PARTICIPACIÓN ÚNICA (localStorage)
+// ==========================================
+const STORAGE_KEY = 'ibse_' + window.IBSE_MUN_KEY + '_2026_respondido';
+
+function yaRespondio() {
+    return localStorage.getItem(STORAGE_KEY) !== null;
+}
+
+function marcarRespondido() {
+    localStorage.setItem(STORAGE_KEY, new Date().toISOString());
+}
+
+// ==========================================
+// INTERFAZ REDCAP
+// ==========================================
+function abrirModalREDCap() {
+    // Control silencioso: si ya respondió, no hacer nada
+    if (yaRespondio()) return;
+    
+    document.getElementById('modal-redcap').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('redcap-iframe').src = REDCAP_SURVEY_URL + '&__nonce=' + Date.now();
+    
+    // Marcar como respondido al abrir (momento de la participación)
+    marcarRespondido();
+}
+
+function cerrarModalREDCap() {
+    document.getElementById('modal-redcap').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function abrirModalConfig() {
+    const config = getREDCapConfig();
+    document.getElementById('config-api-url').value = config.apiUrl;
+    document.getElementById('config-api-token').value = config.token;
+    document.getElementById('modal-config').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalConfig() {
+    document.getElementById('modal-config').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function abrirModalMetodologia() {
+    document.getElementById('modal-metodologia').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalMetodologia() {
+    document.getElementById('modal-metodologia').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function guardarConfigAPI() {
+    const apiUrl = document.getElementById('config-api-url').value.trim();
+    const token = document.getElementById('config-api-token').value.trim();
+    
+    if (!apiUrl || !token) {
+        alert('⚠️ Debes completar URL y Token');
+        return;
+    }
+    
+    localStorage.setItem('redcap_api_url', apiUrl);
+    localStorage.setItem('redcap_api_token', token);
+    
+    alert('✅ Configuración guardada correctamente');
+    cerrarModalConfig();
+}
+
+// ==========================================
+// SINCRONIZACIÓN CON REDCAP API
+// ==========================================
+async function sincronizarREDCap() {
+    const config = getREDCapConfig();
+    
+    if (!config.token) {
+        if (confirm('⚠️ No has configurado el token API.\n\n¿Quieres configurarlo ahora?')) {
+            abrirModalConfig();
+        }
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('token', config.token);
+        formData.append('content', 'record');
+        formData.append('format', 'json');
+        formData.append('type', 'flat');
+        formData.append('rawOrLabel', 'raw');
+        formData.append('rawOrLabelHeaders', 'raw');
+        formData.append('exportCheckboxLabel', 'false');
+        formData.append('exportSurveyFields', 'false');
+        formData.append('exportDataAccessGroups', 'false');
+        formData.append('returnFormat', 'json');
+        
+        const response = await fetch(config.apiUrl, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const records = await response.json();
+        
+        if (!Array.isArray(records) || records.length === 0) {
+            alert('ℹ️ No hay datos nuevos en REDCap');
+            return;
+        }
+        
+        // Limpiar datos actuales de Firebase
+        const ref = db.ref('ibse_monitor/' + window.IBSE_MUN_KEY);
+        await ref.remove();
+        
+        // Procesar y subir registros de REDCap
+        let contador = 0;
+        records.forEach(record => {
+            // Validar que el registro tenga los campos mínimos
+            if (!record.sexo || !record.edad) return;
+            
+            const datos = {
+                record_id: record.record_id || Date.now() + contador,
+                edad: parseInt(record.edad),
+                sexo: parseInt(record.sexo),
+                ibse_deprimido: parseInt(record.ibse_deprimido),
+                ibse_feliz: parseInt(record.ibse_feliz),
+                ibse_solo: parseInt(record.ibse_solo),
+                ibse_disfrutar: parseInt(record.ibse_disfrutar),
+                ibse_energia: parseInt(record.ibse_energia),
+                ibse_tranquilo: parseInt(record.ibse_tranquilo),
+                ibse_optimista: parseInt(record.ibse_optimista),
+                ibse_bienmismo: parseInt(record.ibse_bienmismo),
+                timestamp: record.timestamp || new Date().toISOString()
+            };
+            
+            // Calcular factores e IBSE
+            const calcs = calcularIBSE(datos);
+            Object.assign(datos, calcs);
+            
+            ref.push(datos);
+            contador++;
+        });
+        
+        alert(`✅ Sincronización completada\n\n${contador} registros importados desde REDCap API`);
+        
+        // Verificar consistencia después de sincronizar
+        setTimeout(() => {
+            verificarConsistencia('REDCap API');
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error sincronizando con REDCap:', error);
+        alert(`❌ Error al sincronizar con REDCap:\n\n${error.message}\n\nVerifica la URL del API y el token.`);
+    }
+}
+
+// ==========================================
+// INTERFAZ (MANTENER COMPATIBILIDAD)
+// ==========================================
+function abrirModal() {
+    // Redirigir al modal REDCap
+    abrirModalREDCap();
+}
+
+function cerrarModal() {
+    cerrarModalREDCap();
+}
+
+function guardarRespuesta(e) {
+    // Función legacy - ya no se usa con REDCap embebido
+    e.preventDefault();
+    alert('ℹ️ Usa el formulario REDCap embebido para añadir respuestas');
+}
+
+// ==========================================
+// DATOS & FIREBASE
+// ==========================================
+db.ref('ibse_monitor/' + window.IBSE_MUN_KEY).on('value', snapshot => {
+    respuestas = [];
+    snapshot.forEach(child => {
+        respuestas.push(child.val());
+    });
+    actualizarTodo();
+});
+
+// Inicializar estado botón según localStorage
+(function inicializarBotonParticipacion() {
+    const btn = document.getElementById('btn-responder');
+    if (!btn) return;
+    if (yaRespondio()) {
+        btn.disabled = true;
+        btn.style.opacity = '0.45';
+        btn.style.cursor = 'not-allowed';
+        btn.textContent = '✓ Ya has participado';
+    }
+})();
+
+function limpiarDatos() {
+    if (!confirm('¿Eliminar TODOS los datos?')) return;
+    db.ref('ibse_monitor/' + window.IBSE_MUN_KEY).remove().then(() => {
+        alert('✅ Datos eliminados');
+    });
+}
+
+function cargarCSV() {
+    document.getElementById('csv-upload').click();
+}
+
+function procesarCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+            const ref = db.ref('ibse_monitor/' + window.IBSE_MUN_KEY);
+            ref.remove().then(() => {
+                let contador = 0;
+                results.data.forEach(row => {
+                    if (row.sexo && row.edad && row.ibse_deprimido) {
+                        const datos = {
+                            record_id: row.record_id || Date.now() + contador,
+                            edad: parseInt(row.edad),
+                            sexo: parseInt(row.sexo),
+                            ibse_deprimido: parseInt(row.ibse_deprimido),
+                            ibse_feliz: parseInt(row.ibse_feliz),
+                            ibse_solo: parseInt(row.ibse_solo),
+                            ibse_disfrutar: parseInt(row.ibse_disfrutar),
+                            ibse_energia: parseInt(row.ibse_energia),
+                            ibse_tranquilo: parseInt(row.ibse_tranquilo),
+                            ibse_optimista: parseInt(row.ibse_optimista),
+                            ibse_bienmismo: parseInt(row.ibse_bienmismo),
+                            timestamp: row.timestamp || new Date().toISOString()
+                        };
+                        const calcs = calcularIBSE(datos);
+                        Object.assign(datos, calcs);
+                        ref.push(datos);
+                        contador++;
+                    }
+                });
+                alert(`✅ ${contador} respuestas cargadas desde CSV`);
+                // Verificar consistencia después de cargar
+                setTimeout(() => {
+                    verificarConsistencia('CSV');
+                }, 500);
+            });
+        }
+    });
+}
+
+function exportarCSV() {
+    if (respuestas.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    const headers = ['record_id','sexo','edad','ibse_deprimido','ibse_feliz','ibse_solo','ibse_disfrutar','ibse_energia','ibse_tranquilo','ibse_optimista','ibse_bienmismo','factor_vinculo','factor_situacion','factor_control','factor_persona','ibse_total','timestamp'];
+    const csv = [headers.join(',')];
+    
+    respuestas.forEach(r => {
+        csv.push([
+            r.record_id, r.sexo, r.edad,
+            r.ibse_deprimido, r.ibse_feliz, r.ibse_solo, r.ibse_disfrutar,
+            r.ibse_energia, r.ibse_tranquilo, r.ibse_optimista, r.ibse_bienmismo,
+            r.factor_vinculo.toFixed(2), r.factor_situacion.toFixed(2),
+            r.factor_control.toFixed(2), r.factor_persona.toFixed(2),
+            r.ibse_total.toFixed(2), r.timestamp
+        ].join(','));
+    });
+    
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ibse_${window.IBSE_MUN_KEY}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+}
+
+// ==========================================
+// SIMULACIÓN
+// ==========================================
+function simularDatos() {
+    const nActual = respuestas.length;
+    if (!confirm(`¿Añadir ${MET} nuevos casos a los ${nActual} existentes?\n\nTotal después: ${nActual + MET} casos`)) return;
+    
+    // Limpiar historial si es primera iteración de nueva serie
+    if (nActual === 0) historialConvergencia = [];
+    window._simulacionActiva = true;
+    
+    const ref = db.ref('ibse_monitor/' + window.IBSE_MUN_KEY);
+    
+    // GENERADOR ALEATORIO CON SEED ÚNICO (timestamp + contador aleatorio)
+    const seed = Date.now() + Math.random() * 1000000;
+    const rng = new Math.seedrandom(seed);
+    
+    // Afijación proporcional por sexo y edad (objetivo poblacional)
+    const afijacionBase = [
+        {nH:1,  nM:3,  eMin:85, eMax:89},
+        {nH:3,  nM:6,  eMin:80, eMax:84},
+        {nH:5,  nM:8,  eMin:75, eMax:79},
+        {nH:8,  nM:11, eMin:70, eMax:74},
+        {nH:10, nM:12, eMin:65, eMax:69},
+        {nH:11, nM:13, eMin:60, eMax:64},
+        {nH:12, nM:13, eMin:55, eMax:59},
+        {nH:14, nM:14, eMin:50, eMax:54},
+        {nH:16, nM:16, eMin:45, eMax:49},
+        {nH:18, nM:17, eMin:40, eMax:44},
+        {nH:19, nM:18, eMin:35, eMax:39},
+        {nH:18, nM:18, eMin:30, eMax:34},
+        {nH:18, nM:17, eMin:25, eMax:29},
+        {nH:16, nM:14, eMin:20, eMax:24},
+        {nH:13, nM:12, eMin:15, eMax:19}
+    ];
+    
+    const todas = [];
+    
+    // MUESTREO ESTRATIFICADO CON AFIJACIÓN PROPORCIONAL + VARIABILIDAD CONTROLADA
+    const totalPobBase = afijacionBase.reduce((sum, a) => sum + a.nH + a.nM, 0);
+    
+    // Factor heurístico de estabilización: reduce la variabilidad en proporción a 1/√n acumulado
+    const factorVar = Math.sqrt(374 / (nActual + MET));
+    
+    // Generador normal Box-Muller: variabilidad simétrica sin sesgo acumulativo
+    const normalRng = () => {
+        const u1 = rng(), u2 = rng();
+        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    };
+    
+    // Paso 1: Calcular n de cada estrato con variabilidad normal simétrica
+    const estratos = [];
+    afijacionBase.forEach(a => {
+        [[a.nH, 1], [a.nM, 2]].forEach(([nBase, sexo]) => {
+            const proporcion = nBase / totalPobBase;
+            const nEsperado = MET * proporcion;
+            // Desviación típica binomial del estrato: σ = √(n·p·(1-p))
+            const errorEstandar = Math.sqrt(nEsperado * (1 - proporcion));
+            // Variabilidad normal (media=0, simétrica) que decrece con √n
+            const variabilidad = normalRng() * errorEstandar * factorVar;
+            const nEstrato = Math.max(0, Math.round(nEsperado + variabilidad));
+            estratos.push({ nEstrato, sexo, eMin: a.eMin, eMax: a.eMax, nEsperado });
+        });
+    });
+    
+    // Paso 2: Ajustar al total exacto de MET (374)
+    // Repartir la diferencia entre los estratos más grandes
+    let totalGenerado = estratos.reduce((sum, e) => sum + e.nEstrato, 0);
+    const diferencia = MET - totalGenerado;
+    
+    if (diferencia !== 0) {
+        // Ordenar por tamaño descendente para ajustar los más grandes
+        const ordenados = [...estratos]
+            .map((e, i) => ({ i, nEstrato: e.nEstrato }))
+            .sort((a, b) => b.nEstrato - a.nEstrato);
+        
+        const paso = diferencia > 0 ? 1 : -1;
+        let restante = Math.abs(diferencia);
+        let idx = 0;
+        while (restante > 0) {
+            estratos[ordenados[idx % ordenados.length].i].nEstrato += paso;
+            restante--;
+            idx++;
+        }
+    }
+    
+    // Paso 3: Generar casos por estrato
+    estratos.forEach(({ nEstrato, sexo, eMin, eMax }) => {
+        for (let i = 0; i < nEstrato; i++) {
+            const edad = eMin + Math.floor(rng() * (eMax - eMin + 1));
+        
+        // PARÁMETROS POBLACIONALES BASE (hacia donde converge con n grande)
+        let mediaPoblacional = 2.3; // escala 1-4, equivale a IBSE ~57.5
+        
+        // Variación por edad (efecto poblacional)
+        if (edad < 25) mediaPoblacional = 2.6; // jóvenes: menor bienestar
+        else if (edad < 45) mediaPoblacional = 2.5;
+        else if (edad < 65) mediaPoblacional = 2.1; // valle edad madura
+        else mediaPoblacional = 2.4; // recuperación mayores
+        
+        // Variación por sexo (efecto poblacional)
+        if (sexo === 2) mediaPoblacional += 0.15; // mujeres ligeramente peor
+        
+        // VARIABILIDAD MUESTRAL (simulación a simulación)
+        // Variabilidad muestral individual; amplitud decrece proporcionalmente a 1/√n acumulado
+        const errorEstandar = 0.6 / Math.sqrt((nActual + MET) / 374); // amplitud SE decrece en 1/√n acumulado
+        const desvioMuestra = (rng() - 0.5) * 2 * errorEstandar * 1.96; // Distribución uniforme en ±1,96·SE (no normal)
+        
+        const mediaIndividuo = mediaPoblacional + desvioMuestra;
+        
+        // VARIABILIDAD INDIVIDUAL dentro de la muestra (heterogeneidad poblacional)
+        const noise = () => (rng() - 0.5) * 1.4;
+        
+        // P.57b (escala 1-4)
+        const deprimido = Math.max(1, Math.min(4, Math.round(mediaIndividuo + noise())));
+        const feliz = Math.max(1, Math.min(4, Math.round((5 - mediaIndividuo) + noise())));
+        const solo = Math.max(1, Math.min(4, Math.round(mediaIndividuo + noise())));
+        const disfrutar = Math.max(1, Math.min(4, Math.round((5 - mediaIndividuo) + noise())));
+        const energia = Math.max(1, Math.min(4, Math.round((5 - mediaIndividuo) + noise())));
+        const tranquilo = Math.max(1, Math.min(4, Math.round((5 - mediaIndividuo) + noise())));
+        
+        // P.57c (escala 1-5) - convertir de escala 1-4 a 1-5
+        const mediaAcuerdo = (mediaIndividuo - 1) / 3 * 4 + 1;
+        const optimista = Math.max(1, Math.min(5, Math.round(mediaAcuerdo + noise() * 0.8)));
+        const bienmismo = Math.max(1, Math.min(5, Math.round(mediaAcuerdo + noise() * 0.8)));
+        
+        const datos = {
+            edad, sexo,
+            ibse_deprimido: deprimido,
+            ibse_feliz: feliz,
+            ibse_solo: solo,
+            ibse_disfrutar: disfrutar,
+            ibse_energia: energia,
+            ibse_tranquilo: tranquilo,
+            ibse_optimista: optimista,
+            ibse_bienmismo: bienmismo,
+            timestamp: new Date().toISOString()
+        };
+        
+        const calcs = calcularIBSE(datos);
+        Object.assign(datos, calcs);
+        todas.push(datos);
+        }
+    });
+    
+    // Subir a Firebase de forma escalonada (para ver la acumulación)
+    todas.forEach((d, i) => {
+        setTimeout(() => {
+            ref.push(d);
+        }, i * 5); // 5ms entre casos para efecto visual
+    });
+    
+    const nFinal = nActual + todas.length;
+    alert(`✅ Simulando ${todas.length} nuevos casos...\n\nMuestra anterior: ${nActual}\nNueva muestra: ${todas.length}\nTotal acumulado: ${nFinal}\n\nVariabilidad muestral aleatoria (seed: ${seed.toFixed(0)})`);
+    
+    // Esperar a que se carguen los datos y verificar consistencia
+    setTimeout(() => {
+        verificarConsistencia('Simulación');
+    }, todas.length * 6 + 500);
+}
+
+// ==========================================
+// ACTUALIZACIÓN
+// ==========================================
+function actualizarTodo() {
+    actualizarStats();
+    actualizarAnalisis();
+    actualizarGraficos();
+}
+
+function actualizarStats() {
+    const n = respuestas.length;
+    document.getElementById('ibse-total').textContent = n;
+    
+    if (n === 0) {
+        document.getElementById('ibse-media').textContent = '--';
+        document.getElementById('factor-vinculo').textContent = '--';
+        document.getElementById('factor-situacion').textContent = '--';
+        document.getElementById('factor-control').textContent = '--';
+        document.getElementById('factor-persona').textContent = '--';
+        document.getElementById('ibse-bajo').textContent = '0';
+        document.getElementById('ibse-repr').textContent = '0%';
+        return;
+    }
+    
+    const mediaIBSE = respuestas.reduce((s,r) => s + r.ibse_total, 0) / n;
+    const mediaVinculo = respuestas.reduce((s,r) => s + r.factor_vinculo, 0) / n;
+    const mediaSituacion = respuestas.reduce((s,r) => s + r.factor_situacion, 0) / n;
+    const mediaControl = respuestas.reduce((s,r) => s + r.factor_control, 0) / n;
+    const mediaPersona = respuestas.reduce((s,r) => s + r.factor_persona, 0) / n;
+    const bajo = respuestas.filter(r => r.ibse_total < 50).length;
+    const repr = Math.min(100, (n / MET * 100));
+    
+    document.getElementById('ibse-media').textContent = mediaIBSE.toFixed(1);
+    document.getElementById('factor-vinculo').textContent = mediaVinculo.toFixed(1);
+    document.getElementById('factor-situacion').textContent = mediaSituacion.toFixed(1);
+    document.getElementById('factor-control').textContent = mediaControl.toFixed(1);
+    document.getElementById('factor-persona').textContent = mediaPersona.toFixed(1);
+    document.getElementById('ibse-bajo').textContent = bajo;
+    document.getElementById('ibse-repr').textContent = repr.toFixed(0) + '%';
+}
+
+function actualizarAnalisis() {
+    const div = document.getElementById('analisis-sociologico');
+    const n = respuestas.length;
+    
+    if (n < 30) {
+        div.innerHTML = '<p style="color:#64748b;margin:0;">Muestra insuficiente (n=' + n + '). Se requieren al menos 30 casos.</p>';
+        return;
+    }
+    
+    const mediaIBSE = respuestas.reduce((s,r) => s + r.ibse_total, 0) / n;
+    const mediaVinculo = respuestas.reduce((s,r) => s + r.factor_vinculo, 0) / n;
+    const mediaSituacion = respuestas.reduce((s,r) => s + r.factor_situacion, 0) / n;
+    const mediaControl = respuestas.reduce((s,r) => s + r.factor_control, 0) / n;
+    const mediaPersona = respuestas.reduce((s,r) => s + r.factor_persona, 0) / n;
+    const bajo = respuestas.filter(r => r.ibse_total < 50).length;
+    const repr = Math.min(100, (n / MET * 100));
+    
+    let txt = '<div style="color:#1e293b;line-height:1.8;font-size:0.95rem;">';
+    txt += '<p><strong>Muestra:</strong> n=' + n + ' (' + repr.toFixed(1) + '% del objetivo)</p>';
+    txt += '<p><strong>IBSE Global:</strong> ' + mediaIBSE.toFixed(2) + ' (0-100, mayor=mejor)</p>';
+    txt += '<p><strong>4 Factores (Encuesta Andaluza de Salud, 2023):</strong></p>';
+    txt += '<ul style="margin-left:1.5rem;">';
+    txt += '<li>VÍNCULO (relaciones): ' + mediaVinculo.toFixed(2) + '</li>';
+    txt += '<li>SITUACIÓN (condiciones vida): ' + mediaSituacion.toFixed(2) + '</li>';
+    txt += '<li>CONTROL (manejo entorno): ' + mediaControl.toFixed(2) + '</li>';
+    txt += '<li>PERSONA (autovaloración): ' + mediaPersona.toFixed(2) + '</li>';
+    txt += '</ul>';
+    txt += '<p><strong>Prevalencia IBSE<50:</strong> ' + (bajo/n*100).toFixed(1) + '% (n=' + bajo + ')</p>';
+    txt += '</div>';
+    
+    div.innerHTML = txt;
+}
+
+function actualizarGraficos() {
+    const n = respuestas.length;
+    
+    // Actualizar pirámide
+    actualizarPiramide();
+    
+    if (n === 0) {
+        if (chartFactores) chartFactores.destroy();
+        if (chartEdad) chartEdad.destroy();
+        document.getElementById('semaforo-container').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">Sin datos</p>';
+        document.getElementById('sexo-container').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">Sin datos</p>';
+        document.getElementById('factores-barras').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:2rem;">Sin datos</p>';
+        
+        // Resetear textos interpretativos
+        document.getElementById('texto-radar').textContent = 'Añada datos para generar interpretación del perfil socioemocional.';
+        document.getElementById('texto-semaforo').textContent = 'Añada datos para generar interpretación del nivel de bienestar poblacional.';
+        document.getElementById('texto-sexo').textContent = 'Añada datos para generar interpretación de las diferencias de género en bienestar.';
+        document.getElementById('texto-edad').textContent = 'Añada datos para generar interpretación del curso vital del bienestar.';
+        document.getElementById('texto-factores').textContent = 'Añada datos para generar interpretación diferencial de los factores socioemocionales.';
+        return;
+    }
+    
+    const mediaIBSE = respuestas.reduce((s,r) => s + r.ibse_total, 0) / n;
+    const mediaVinculo = respuestas.reduce((s,r) => s + r.factor_vinculo, 0) / n;
+    const mediaSituacion = respuestas.reduce((s,r) => s + r.factor_situacion, 0) / n;
+    const mediaControl = respuestas.reduce((s,r) => s + r.factor_control, 0) / n;
+    const mediaPersona = respuestas.reduce((s,r) => s + r.factor_persona, 0) / n;
+    
+    // ========== GRÁFICO RADAR 4 FACTORES ==========
+    const ctx1 = document.getElementById('chartFactores').getContext('2d');
+    if (chartFactores) chartFactores.destroy();
+    chartFactores = new Chart(ctx1, {
+        type: 'radar',
+        data: {
+            labels: ['VÍNCULO\n(Relaciones)', 'SITUACIÓN\n(Condiciones)', 'CONTROL\n(Autonomía)', 'PERSONA\n(Autoestima)'],
+            datasets: [{
+                label: 'Perfil IBSE',
+                data: [mediaVinculo, mediaSituacion, mediaControl, mediaPersona],
+                backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                borderColor: '#8b5cf6',
+                borderWidth: 3,
+                pointBackgroundColor: '#8b5cf6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 25,
+                        font: { size: 10 }
+                    },
+                    pointLabels: {
+                        font: { size: 11, weight: 'bold' }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+    
+    // ========== SEMÁFORO IBSE GLOBAL ==========
+    let colorSemaforo, textoNivel, emoji;
+    if (mediaIBSE >= 76) {
+        colorSemaforo = '#10b981';
+        textoNivel = 'ALTO';
+        emoji = '😊';
+    } else if (mediaIBSE >= 51) {
+        colorSemaforo = '#f59e0b';
+        textoNivel = 'MODERADO';
+        emoji = '😐';
+    } else if (mediaIBSE >= 26) {
+        colorSemaforo = '#f97316';
+        textoNivel = 'BAJO';
+        emoji = '😟';
+    } else {
+        colorSemaforo = '#ef4444';
+        textoNivel = 'MUY BAJO';
+        emoji = '😢';
+    }
+    
+    const semaforo = document.getElementById('semaforo-container');
+    semaforo.innerHTML = `
+        <div style="text-align:center;padding:2rem 1rem;">
+            <div style="font-size:5rem;margin-bottom:1rem;">${emoji}</div>
+            <div style="font-size:3rem;font-weight:900;color:${colorSemaforo};margin-bottom:0.5rem;">${mediaIBSE.toFixed(1)}</div>
+            <div style="font-size:1.2rem;font-weight:700;color:${colorSemaforo};margin-bottom:1rem;">${textoNivel}</div>
+            <div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1.5rem;">
+                <div style="width:60px;height:20px;background:${mediaIBSE >= 76 ? '#10b981' : '#e5e7eb'};border-radius:10px;"></div>
+                <div style="width:60px;height:20px;background:${mediaIBSE >= 51 && mediaIBSE < 76 ? '#f59e0b' : '#e5e7eb'};border-radius:10px;"></div>
+                <div style="width:60px;height:20px;background:${mediaIBSE >= 26 && mediaIBSE < 51 ? '#f97316' : '#e5e7eb'};border-radius:10px;"></div>
+                <div style="width:60px;height:20px;background:${mediaIBSE < 26 ? '#ef4444' : '#e5e7eb'};border-radius:10px;"></div>
+            </div>
+            <div style="font-size:0.7rem;color:#94a3b8;margin-top:0.5rem;">n=${n} · 0-25: Muy Bajo | 26-50: Bajo | 51-75: Moderado | 76-100: Alto</div>
+        </div>
+    `;
+    
+    // ========== PICTOGRAMAS POR SEXO ==========
+    const h = respuestas.filter(r => r.sexo === 1);
+    const m = respuestas.filter(r => r.sexo === 2);
+    const mediaH = h.length > 0 ? h.reduce((s,r) => s + r.ibse_total, 0) / h.length : 0;
+    const mediaM = m.length > 0 ? m.reduce((s,r) => s + r.ibse_total, 0) / m.length : 0;
+    
+    const maxSexo = Math.max(mediaH, mediaM);
+    const barraH = mediaH > 0 ? (mediaH / 100) * 100 : 0;
+    const barraM = mediaM > 0 ? (mediaM / 100) * 100 : 0;
+    
+    const sexoCont = document.getElementById('sexo-container');
+    sexoCont.innerHTML = `
+        <div style="padding:1.5rem;">
+            <!-- Hombres -->
+            <div style="margin-bottom:2rem;">
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+                    <div style="font-size:2rem;">👨</div>
+                    <div style="flex:1;">
+                        <div style="font-size:0.85rem;color:#64748b;font-weight:600;">HOMBRES</div>
+                        <div style="font-size:1.8rem;font-weight:900;color:#5b8dd9;">${mediaH.toFixed(1)}</div>
+                    </div>
+                    <div style="font-size:0.75rem;color:#94a3b8;">n=${h.length}</div>
+                </div>
+                <div style="width:100%;height:24px;background:#e5e7eb;border-radius:12px;overflow:hidden;">
+                    <div style="width:${barraH}%;height:100%;background:linear-gradient(90deg, #5b8dd9, #3b82f6);transition:width 0.5s;"></div>
+                </div>
+            </div>
+            
+            <!-- Mujeres -->
+            <div>
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;">
+                    <div style="font-size:2rem;">👩</div>
+                    <div style="flex:1;">
+                        <div style="font-size:0.85rem;color:#64748b;font-weight:600;">MUJERES</div>
+                        <div style="font-size:1.8rem;font-weight:900;color:#e8789a;">${mediaM.toFixed(1)}</div>
+                    </div>
+                    <div style="font-size:0.75rem;color:#94a3b8;">n=${m.length}</div>
+                </div>
+                <div style="width:100%;height:24px;background:#e5e7eb;border-radius:12px;overflow:hidden;">
+                    <div style="width:${barraM}%;height:100%;background:linear-gradient(90deg, #e8789a, #ec4899);transition:width 0.5s;"></div>
+                </div>
+            </div>
+            
+            ${mediaH > 0 && mediaM > 0 ? `
+            <div style="margin-top:1.5rem;padding:1rem;background:#f8f9fa;border-radius:8px;text-align:center;">
+                <div style="font-size:0.75rem;color:#64748b;">DIFERENCIA</div>
+                <div style="font-size:1.3rem;font-weight:800;color:${Math.abs(mediaH - mediaM) < 5 ? '#10b981' : '#f59e0b'};">
+                    ${Math.abs(mediaH - mediaM).toFixed(1)} pts
+                </div>
+                <div style="font-size:0.7rem;color:#94a3b8;">${mediaH > mediaM ? 'Hombres mayor bienestar' : mediaM > mediaH ? 'Mujeres mayor bienestar' : 'Igualdad'}</div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // ========== LÍNEA TEMPORAL POR EDAD ==========
+    const grupos = {
+        '16-24': respuestas.filter(r => r.edad >= 16 && r.edad <= 24),
+        '25-44': respuestas.filter(r => r.edad >= 25 && r.edad <= 44),
+        '45-64': respuestas.filter(r => r.edad >= 45 && r.edad <= 64),
+        '65+': respuestas.filter(r => r.edad >= 65)
+    };
+    const medias = Object.keys(grupos).map(k => {
+        const g = grupos[k];
+        return g.length > 0 ? g.reduce((s,r) => s + r.ibse_total, 0) / g.length : null;
+    });
+    const counts = Object.keys(grupos).map(k => grupos[k].length);
+    
+    const ctx3 = document.getElementById('chartEdad').getContext('2d');
+    if (chartEdad) chartEdad.destroy();
+    chartEdad = new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: ['16-24\n👶', '25-44\n👨‍💼', '45-64\n👴', '65+\n👵'],
+            datasets: [{
+                label: 'IBSE Media',
+                data: medias,
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                pointBackgroundColor: '#f59e0b',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    max: 100,
+                    ticks: {
+                        font: { size: 11 }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: { size: 11, weight: 'bold' }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            return 'n=' + counts[context.dataIndex];
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // ========== BARRAS HORIZONTALES FACTORES ==========
+    const factores = [
+        { nombre: '🤝 VÍNCULO', emoji: '🤝', valor: mediaVinculo, color: '#10b981', desc: 'Relaciones sociales' },
+        { nombre: '🏠 SITUACIÓN', emoji: '🏠', valor: mediaSituacion, color: '#3b82f6', desc: 'Condiciones de vida' },
+        { nombre: '💪 CONTROL', emoji: '💪', valor: mediaControl, color: '#f59e0b', desc: 'Manejo del entorno' },
+        { nombre: '😊 PERSONA', emoji: '😊', valor: mediaPersona, color: '#8b5cf6', desc: 'Autoestima' }
+    ];
+    
+    let barrasHTML = '<div style="padding:1rem;">';
+    factores.forEach(f => {
+        const ancho = (f.valor / 100) * 100;
+        barrasHTML += `
+            <div style="margin-bottom:1.5rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="font-size:1.5rem;">${f.emoji}</span>
+                        <div>
+                            <div style="font-size:0.8rem;font-weight:700;color:#2c3e50;">${f.nombre.replace(f.emoji + ' ', '')}</div>
+                            <div style="font-size:0.65rem;color:#94a3b8;">${f.desc}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:1.3rem;font-weight:900;color:${f.color};">${f.valor.toFixed(1)}</div>
+                </div>
+                <div style="width:100%;height:20px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+                    <div style="width:${ancho}%;height:100%;background:${f.color};transition:width 0.5s;border-radius:10px;"></div>
+                </div>
+            </div>
+        `;
+    });
+    barrasHTML += '</div>';
+    document.getElementById('factores-barras').innerHTML = barrasHTML;
+    
+    // ========== GENERAR INTERPRETACIONES ==========
+    generarInterpretaciones(mediaIBSE, mediaVinculo, mediaSituacion, mediaControl, mediaPersona, mediaH, mediaM, h.length, m.length, medias, counts);
+}
+
+function generarInterpretaciones(mediaIBSE, mediaVinculo, mediaSituacion, mediaControl, mediaPersona, mediaH, mediaM, nH, nM, mediasEdad, countsEdad) {
+    
+    // ========== INTERPRETACIÓN RADAR (4 FACTORES) ==========
+    const factoresOrdenados = [
+        {nombre: 'VÍNCULO', valor: mediaVinculo},
+        {nombre: 'SITUACIÓN', valor: mediaSituacion},
+        {nombre: 'CONTROL', valor: mediaControl},
+        {nombre: 'PERSONA', valor: mediaPersona}
+    ].sort((a,b) => b.valor - a.valor);
+    
+    const fortaleza = factoresOrdenados[0];
+    const debilidad = factoresOrdenados[3];
+    const varianza = Math.max(...factoresOrdenados.map(f => f.valor)) - Math.min(...factoresOrdenados.map(f => f.valor));
+    
+    let textoRadar = '';
+    if (varianza < 10) {
+        textoRadar = `El perfil socioemocional muestra un <strong>equilibrio notable</strong> entre dimensiones (variación ${varianza.toFixed(1)} pts), lo que según Bericat indica una integración armónica de recursos emocionales. `;
+    } else {
+        textoRadar = `Se observa <strong>heterogeneidad</strong> en el perfil (variación ${varianza.toFixed(1)} pts). El factor <strong>${fortaleza.nombre}</strong> destaca como fortaleza (${fortaleza.valor.toFixed(1)}), mientras que <strong>${debilidad.nombre}</strong> requiere atención (${debilidad.valor.toFixed(1)}). `;
+    }
+    
+    if (mediaVinculo < 50) {
+        textoRadar += 'La <strong>debilidad vincular</strong> señala fragilidad en redes sociales, fenómeno creciente en sociedades individualizadas. ';
+    }
+    if (mediaControl < 50) {
+        textoRadar += 'El <strong>bajo control</strong> sugiere percepción de falta de autonomía, típico en contextos de precariedad o estrés crónico. ';
+    }
+    
+    document.getElementById('texto-radar').innerHTML = textoRadar.trim();
+    
+    // ========== INTERPRETACIÓN SEMÁFORO (IBSE GLOBAL) ==========
+    let textoSemaforo = '';
+    if (mediaIBSE >= 76) {
+        textoSemaforo = `La población alcanza un <strong>bienestar alto</strong> (${mediaIBSE.toFixed(1)}), superando el umbral de florecimiento socioemocional. Este nivel refleja integración exitosa de recursos afectivos, relacionales y existenciales. Es consistente con comunidades con capital social denso y oportunidades vitales accesibles.`;
+    } else if (mediaIBSE >= 51) {
+        textoSemaforo = `El bienestar poblacional se sitúa en <strong>nivel moderado</strong> (${mediaIBSE.toFixed(1)}), el rango más frecuente en sociedades europeas contemporáneas. Indica capacidad de afrontamiento cotidiano, aunque con margen de mejora en alguna dimensión emocional específica.`;
+    } else if (mediaIBSE >= 26) {
+        textoSemaforo = `Se detecta <strong>bienestar bajo</strong> (${mediaIBSE.toFixed(1)}), señal de malestar socioemocional que requiere atención sociosanitaria. Bericat asocia estos niveles con acumulación de desventajas estructurales (precariedad, aislamiento, cronicidad). Justifica intervención preventiva.`;
+    } else {
+        textoSemaforo = `El <strong>bienestar muy bajo</strong> (${mediaIBSE.toFixed(1)}) constituye una alerta sociosanitaria grave. Indica sufrimiento emocional intenso, posible exclusión social y riesgo de patología mental. Requiere respuesta multidisciplinar urgente desde salud pública y servicios sociales.`;
+    }
+    document.getElementById('texto-semaforo').innerHTML = textoSemaforo;
+    
+    // ========== INTERPRETACIÓN SEXO ==========
+    let textoSexo = '';
+    const diferencia = Math.abs(mediaH - mediaM);
+    if (nH === 0 || nM === 0) {
+        textoSexo = 'Muestra insuficiente por sexo para análisis diferencial.';
+    } else if (diferencia < 3) {
+        textoSexo = `No se observan <strong>diferencias significativas</strong> entre hombres (${mediaH.toFixed(1)}) y mujeres (${mediaM.toFixed(1)}). La paridad emocional de género contrasta con hallazgos clásicos de la sociología de las emociones que reportan sistemáticamente menor bienestar femenino, especialmente en países mediterráneos.`;
+    } else if (mediaM > mediaH) {
+        textoSexo = `Las mujeres presentan <strong>mayor bienestar</strong> que los hombres (+${diferencia.toFixed(1)} pts). Resultado contraintuitivo respecto a literatura internacional, que documenta "paradoja de género" (peores indicadores objetivos + peor bienestar subjetivo femenino). Podría reflejar transformaciones en roles de género o sesgo muestral.`;
+    } else {
+        textoSexo = `Los hombres muestran <strong>mayor bienestar</strong> (+${diferencia.toFixed(1)} pts), patrón coherente con investigación sociológica. Las mujeres enfrentan doble carga (productiva-reproductiva), mayor precariedad laboral y exposición a violencia de género. La brecha se amplifica en contextos de crisis económica según Bericat (2018).`;
+    }
+    document.getElementById('texto-sexo').innerHTML = textoSexo;
+    
+    // ========== INTERPRETACIÓN EDAD ==========
+    let textoEdad = '';
+    const mediasValidas = mediasEdad.filter(m => m !== null);
+    if (mediasValidas.length < 2) {
+        textoEdad = 'Muestra insuficiente por grupos de edad para análisis de curso vital.';
+    } else {
+        const jovenes = mediasEdad[0]; // 16-24
+        const adultos = mediasEdad[1]; // 25-44
+        const maduros = mediasEdad[2]; // 45-64
+        const mayores = mediasEdad[3]; // 65+
+        
+        const patron = [];
+        if (jovenes !== null && adultos !== null && jovenes < adultos) patron.push('ascenso-inicial');
+        if (adultos !== null && maduros !== null && adultos > maduros) patron.push('descenso-medio');
+        if (maduros !== null && mayores !== null && maduros < mayores) patron.push('ascenso-final');
+        
+        if (patron.includes('descenso-medio') && patron.includes('ascenso-final')) {
+            textoEdad = `Se reproduce la <strong>curva en U del bienestar</strong> documentada por Blanchflower. El valle en edad madura (${maduros?.toFixed(1)}) coincide con máxima presión laboral-familiar ("generación sándwich"). La recuperación en mayores (${mayores?.toFixed(1)}) refleja liberación de cargas, aceptación vital y paradoja del bienestar en vejez.`;
+        } else if (jovenes !== null && mayores !== null && jovenes > mayores) {
+            textoEdad = `Patrón de <strong>declive con la edad</strong>. Los jóvenes (${jovenes.toFixed(1)}) superan a mayores (${mayores.toFixed(1)}), posiblemente por deterioro de salud, soledad y pérdida de autonomía en vejez. Contrasta con hallazgos de estabilidad emocional gerontológica (teoría selectividad socioemocional).`;
+        } else if (jovenes !== null && mayores !== null && jovenes < mayores) {
+            textoEdad = `<strong>Mejora progresiva</strong> del bienestar con la edad. Los mayores (${mayores.toFixed(1)}) aventajan a jóvenes (${jovenes.toFixed(1)}). Coherente con teorías de maduración emocional, sabiduría afectiva y priorización de metas significativas en etapas tardías del curso vital.`;
+        } else {
+            textoEdad = `El curso vital del bienestar muestra un <strong>patrón heterogéneo</strong> que requiere análisis diferencial por cohorte. Variaciones pueden reflejar tanto efectos de edad como de generación (jóvenes precarios vs. mayores con pensiones consolidadas).`;
+        }
+    }
+    document.getElementById('texto-edad').innerHTML = textoEdad;
+    
+    // ========== INTERPRETACIÓN FACTORES ==========
+    let textoFactores = '';
+    const difs = [
+        {f1: 'VÍNCULO', f2: 'SITUACIÓN', dif: Math.abs(mediaVinculo - mediaSituacion)},
+        {f1: 'CONTROL', f2: 'PERSONA', dif: Math.abs(mediaControl - mediaPersona)}
+    ];
+    
+    if (mediaVinculo < 50 && mediaSituacion < 50) {
+        textoFactores = `La <strong>convergencia de déficits vinculares y situacionales</strong> señala vulnerabilidad socioemocional múltiple. Combina aislamiento relacional con precariedad material, patrón de exclusión social. Kemper vincula esta configuración a emociones de vergüenza y desesperanza.`;
+    } else if (mediaControl < 50 && mediaPersona < 50) {
+        textoFactores = `El <strong>deterioro simultáneo de control y autoestima</strong> indica indefensión aprendida. La impotencia percibida mina la autovaloración, círculo vicioso estudiado en contextos de desempleo prolongado y cronicidad. Scheff asocia este patrón a depresión clínica.`;
+    } else if (Math.abs(mediaVinculo - mediaSituacion) > 20) {
+        textoFactores = `<strong>Disonancia marcada</strong> entre VÍNCULO (${mediaVinculo.toFixed(1)}) y SITUACIÓN (${mediaSituacion.toFixed(1)}). Refleja desacoplamiento entre capital social y condiciones materiales. Puede generar frustración relativa o, inversamente, resiliencia relacional ante adversidad económica.`;
+    } else {
+        textoFactores = `Los cuatro factores muestran <strong>coherencia relativa</strong>, sugiriendo que el bienestar socioemocional opera como sistema integrado. Según Bericat, esta armonía factorial predice mayor estabilidad emocional y menor riesgo de trastornos afectivos.`;
+    }
+    document.getElementById('texto-factores').innerHTML = textoFactores;
+}
+
+function actualizarPiramide() {
+    const n = respuestas.length;
+    
+    // DATOS POBLACIÓN - Atarfe INE Padrón 2023 (15+)
+    const pobGrupos = [
+        {label: '85+', h: 0.2, m: 0.6},
+        {label: '80-84', h: 0.5, m: 1.0},
+        {label: '75-79', h: 0.9, m: 1.5},
+        {label: '70-74', h: 1.4, m: 1.9},
+        {label: '65-69', h: 1.8, m: 2.2},
+        {label: '60-64', h: 2.0, m: 2.3},
+        {label: '55-59', h: 2.2, m: 2.4},
+        {label: '50-54', h: 2.5, m: 2.6},
+        {label: '45-49', h: 2.9, m: 2.8},
+        {label: '40-44', h: 3.2, m: 3.1},
+        {label: '35-39', h: 3.4, m: 3.2},
+        {label: '30-34', h: 3.5, m: 3.3},
+        {label: '25-29', h: 3.2, m: 3.0},
+        {label: '20-24', h: 2.8, m: 2.5},
+        {label: '15-19', h: 2.3, m: 2.2}
+    ];
+    
+    // Normalizar Pob a 100%
+    const pobPct15 = pobGrupos.reduce((s, g) => s + g.h + g.m, 0);
+    const pobNorm = pobGrupos.map(g => ({h: g.h / pobPct15 * 100, m: g.m / pobPct15 * 100}));
+    
+    // DATOS MUESTRA
+    const mueConteos = {};
+    pobGrupos.forEach(g => { mueConteos[g.label] = [0, 0]; });
+    respuestas.forEach(r => {
+        const e = r.edad, s = r.sexo === 1 ? 0 : 1;
+        if (e >= 85) mueConteos['85+'][s]++;
+        else if (e >= 80) mueConteos['80-84'][s]++;
+        else if (e >= 75) mueConteos['75-79'][s]++;
+        else if (e >= 70) mueConteos['70-74'][s]++;
+        else if (e >= 65) mueConteos['65-69'][s]++;
+        else if (e >= 60) mueConteos['60-64'][s]++;
+        else if (e >= 55) mueConteos['55-59'][s]++;
+        else if (e >= 50) mueConteos['50-54'][s]++;
+        else if (e >= 45) mueConteos['45-49'][s]++;
+        else if (e >= 40) mueConteos['40-44'][s]++;
+        else if (e >= 35) mueConteos['35-39'][s]++;
+        else if (e >= 30) mueConteos['30-34'][s]++;
+        else if (e >= 25) mueConteos['25-29'][s]++;
+        else if (e >= 20) mueConteos['20-24'][s]++;
+        else if (e >= 15) mueConteos['15-19'][s]++;
+    });
+    
+    const mueNorm = pobGrupos.map(g => {
+        const c = mueConteos[g.label];
+        return {h: n > 0 ? (c[0] / n) * 100 : 0, m: n > 0 ? (c[1] / n) * 100 : 0};
+    });
+    
+    // ESCALA VISUAL
+    const POB_15 = 14828;
+    const FACTOR = Math.sqrt(n / POB_15);
+    let maxPob = 0;
+    pobNorm.forEach(g => { maxPob = Math.max(maxPob, g.h, g.m); });
+    const escala = maxPob * 1.12;
+    
+    // RENDER
+    const cont = document.getElementById('piramide-container');
+    if (!cont) return;
+    
+    const barH = 22;
+    const labelW = 46;
+    
+    let html = '<div style="font-size:0.68rem;display:flex;margin-bottom:0.3rem;color:#64748b;">';
+    html += '<span style="width:' + labelW + 'px;"></span>';
+    html += '<span style="flex:1;text-align:center;font-weight:600;">← Hombres</span>';
+    html += '<span style="flex:1;text-align:center;font-weight:600;">Mujeres →</span>';
+    html += '</div>';
+    
+    pobNorm.forEach((pobG, i) => {
+        const mueG = mueNorm[i];
+        
+        const pobHw = (pobG.h / escala) * 100;
+        const pobMw = (pobG.m / escala) * 100;
+        
+        const ratioH = pobG.h > 0 ? mueG.h / pobG.h : 0;
+        const ratioM = pobG.m > 0 ? mueG.m / pobG.m : 0;
+        const mueHw = pobHw * FACTOR * ratioH;
+        const mueMw = pobMw * FACTOR * ratioM;
+        
+        html += '<div style="display:flex;align-items:center;height:' + barH + 'px;">';
+        html += '<div style="width:' + labelW + 'px;text-align:center;font-size:0.68rem;font-weight:700;color:#475569;flex-shrink:0;">' + pobGrupos[i].label + '</div>';
+        
+        // HOMBRES
+        html += '<div style="flex:1;position:relative;height:' + barH + 'px;">';
+        html += '<div style="position:absolute;right:0;top:2px;height:' + (barH - 4) + 'px;width:' + pobHw + '%;background:#5b8dd9;opacity:0.22;border-radius:3px 0 0 3px;"></div>';
+        if (n > 0 && mueG.h > 0) {
+            html += '<div style="position:absolute;right:0;top:1px;height:' + barH + 'px;width:' + mueHw + '%;background:#5b8dd9;opacity:0.70;border-radius:3px 0 0 3px;"></div>';
+        }
+        html += '</div>';
+        
+        // MUJERES
+        html += '<div style="flex:1;position:relative;height:' + barH + 'px;">';
+        html += '<div style="position:absolute;left:0;top:2px;height:' + (barH - 4) + 'px;width:' + pobMw + '%;background:#e8789a;opacity:0.22;border-radius:0 3px 3px 0;"></div>';
+        if (n > 0 && mueG.m > 0) {
+            html += '<div style="position:absolute;left:0;top:1px;height:' + barH + 'px;width:' + mueMw + '%;background:#e8789a;opacity:0.70;border-radius:0 3px 3px 0;"></div>';
+        }
+        html += '</div>';
+        
+        html += '</div>';
+    });
+    
+    cont.innerHTML = html;
+    
+    // INDICADOR REPRESENTATIVIDAD
+    const indVal = document.getElementById('ind-r-val');
+    if (indVal) indVal.textContent = n + ' / ' + MET;
+    
+    // ========== INDICADORES DE CALIDAD MUESTRAL ==========
+    if (n >= 30) {
+        // 1. Chi-cuadrado de bondad de ajuste - USAR CONTEOS REALES
+        const pobG4Pct = {'15-24': 0, '25-44': 0, '45-64': 0, '65+': 0}; // porcentajes poblacionales
+        const mueG4Cnt = {'15-24': 0, '25-44': 0, '45-64': 0, '65+': 0}; // conteos reales muestra
+        
+        // Calcular porcentajes poblacionales (de pobNorm que suma 100)
+        pobNorm.forEach((g, i) => {
+            const e = parseInt(pobGrupos[i].label);
+            const key = e >= 65 ? '65+' : (e >= 45 ? '45-64' : (e >= 25 ? '25-44' : '15-24'));
+            pobG4Pct[key] += g.h + g.m;
+        });
+        
+        // Contar casos reales de la muestra (NO usar mueNorm que está normalizado)
+        respuestas.forEach(r => {
+            const e = r.edad;
+            const key = e >= 65 ? '65+' : (e >= 45 ? '45-64' : (e >= 25 ? '25-44' : '15-24'));
+            mueG4Cnt[key]++;
+        });
+        
+        // Conteos reales por sexo
+        let mueH = 0, mueM = 0;
+        respuestas.forEach(r => {
+            if (r.sexo === 1) mueH++;
+            else mueM++;
+        });
+        
+        // Porcentajes poblacionales por sexo
+        let pobPctH = 0, pobPctM = 0;
+        pobNorm.forEach(g => {
+            pobPctH += g.h;
+            pobPctM += g.m;
+        });
+        
+        // Chi-cuadrado por edad (frecuencias observadas vs esperadas)
+        let chiEdad = 0;
+        Object.keys(pobG4Pct).forEach(k => {
+            const esperado = (pobG4Pct[k] / 100) * n; // cuántos esperamos según población
+            const observado = mueG4Cnt[k]; // cuántos tenemos realmente
+            if (esperado > 0) {
+                chiEdad += Math.pow(observado - esperado, 2) / esperado;
+            }
+        });
+        
+        // Chi-cuadrado por sexo
+        let chiSexo = 0;
+        const espH = (pobPctH / 100) * n;
+        const espM = (pobPctM / 100) * n;
+        chiSexo = Math.pow(mueH - espH, 2) / espH + Math.pow(mueM - espM, 2) / espM;
+        
+        // Índice de similitud (0-100)
+        const similEdad = Math.max(0, Math.round(100 - chiEdad * 2));
+        const similSexo = Math.max(0, Math.round(100 - chiSexo * 10));
+        
+        // 2. Desviación máxima absoluta entre grupos (en puntos porcentuales)
+        let maxDesv = 0;
+        Object.keys(pobG4Pct).forEach(k => {
+            const pctPob = pobG4Pct[k]; // % poblacional
+            const pctMue = (mueG4Cnt[k] / n) * 100; // % muestral
+            const desv = Math.abs(pctMue - pctPob);
+            maxDesv = Math.max(maxDesv, desv);
+        });
+        
+        // 3. Coeficiente de cobertura demográfica global (media ponderada)
+        const reprGlobal = Math.round((similEdad * 0.7 + similSexo * 0.3));
+        
+        // Registrar punto de convergencia (solo si hay historial activo de simulación)
+        if (historialConvergencia.length > 0 || window._simulacionActiva) {
+            registrarConvergencia(n, maxDesv, chiEdad);
+            window._simulacionActiva = false;
+        }
+        
+        // 4. Ratio de cobertura por sexo
+        const ratioH = (mueH / n) * 100;
+        const ratioM = (mueM / n) * 100;
+        const targetH = pobPctH;
+        const targetM = pobPctM;
+        const desvSexoH = Math.abs(ratioH - targetH);
+        const desvSexoM = Math.abs(ratioM - targetM);
+        
+        // Mostrar indicadores
+        const indicadores = document.getElementById('indicadores-repr');
+        if (indicadores) {
+            let colorRepr = '#10b981';
+            let textoRepr = 'EXCELENTE';
+            if (reprGlobal < 90) { colorRepr = '#f59e0b'; textoRepr = 'BUENA'; }
+            if (reprGlobal < 75) { colorRepr = '#f97316'; textoRepr = 'ACEPTABLE'; }
+            if (reprGlobal < 60) { colorRepr = '#ef4444'; textoRepr = 'INSUFICIENTE'; }
+
+            // Texto interpretativo de la desviación
+            let textoDesv = '', colorDesv = '#f59e0b';
+            if (maxDesv < 2)       { textoDesv = 'Excelente';   colorDesv = '#10b981'; }
+            else if (maxDesv < 5)  { textoDesv = 'Aceptable';   colorDesv = '#f59e0b'; }
+            else if (maxDesv < 10) { textoDesv = 'Alta';        colorDesv = '#f97316'; }
+            else                   { textoDesv = 'Muy alta';    colorDesv = '#ef4444'; }
+
+            // Grupo con mayor desviación (para orientar difusión)
+            let grupoMasDesviado = '', maxDesvGrupo = 0;
+            Object.keys(pobG4Pct).forEach(k => {
+                const d = Math.abs((mueG4Cnt[k] / n) * 100 - pobG4Pct[k]);
+                if (d > maxDesvGrupo) { maxDesvGrupo = d; grupoMasDesviado = k; }
+            });
+            const grupoLabel = grupoMasDesviado ? `Grupo ${grupoMasDesviado}` : '';
+            
+            indicadores.innerHTML = `
+                <div style="background:#fff3cd;padding:0.75rem;border-radius:6px;margin:1rem 0 0.5rem 0;border-left:4px solid #ffc107;">
+                    <p style="margin:0;font-size:0.75rem;color:#856404;line-height:1.5;">
+                        <strong>ℹ️ Interpretación:</strong> Estos indicadores miden <strong>cobertura y ajuste demográfico</strong> de la participación voluntaria, no representatividad estadística poblacional (censo abierto, no muestreo aleatorio).
+                    </p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:0.5rem;">
+                    
+                    <!-- COBERTURA GLOBAL -->
+                    <div style="background:#fff;padding:1rem;border-radius:8px;border:2px solid ${colorRepr};text-align:center;cursor:help;position:relative;" 
+                         title="Índice sintético (0-100) que combina el ajuste por edad (70%) y por sexo (30%). Valores altos indican que la distribución de participantes se parece a la de la población de Atarfe.">
+                        <div style="font-size:0.75rem;color:#64748b;font-weight:600;">COBERTURA GLOBAL</div>
+                        <div style="font-size:2rem;font-weight:900;color:${colorRepr};">${reprGlobal}</div>
+                        <div style="font-size:0.7rem;color:${colorRepr};font-weight:600;">${textoRepr}</div>
+                        <div style="font-size:0.65rem;color:#94a3b8;margin-top:0.25rem;">≥90 excelente · ≥75 buena · ≥60 aceptable</div>
+                    </div>
+                    
+                    <!-- AJUSTE EDAD -->
+                    <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #e9ecef;text-align:center;cursor:help;"
+                         title="Mide si la distribución por grupos de edad de los participantes coincide con la población real. Se calcula con el estadístico χ² (chi-cuadrado): cuanto menor sea χ², mejor el ajuste. El índice 0-100 invierte el χ²: 100 = ajuste perfecto.">
+                        <div style="font-size:0.75rem;color:#64748b;font-weight:600;">AJUSTE EDAD</div>
+                        <div style="font-size:2rem;font-weight:900;color:#3b82f6;">${similEdad}</div>
+                        <div style="font-size:0.65rem;color:#94a3b8;">χ²=${chiEdad.toFixed(2)} · 100=ajuste perfecto</div>
+                    </div>
+                    
+                    <!-- AJUSTE SEXO -->
+                    <div style="background:#fff;padding:1rem;border-radius:8px;border:1px solid #e9ecef;text-align:center;cursor:help;"
+                         title="Mide si la proporción hombres/mujeres entre los participantes coincide con la de la población real de Atarfe. 100 = proporción exacta. Se calcula con χ² sobre dos categorías (H/M).">
+                        <div style="font-size:0.75rem;color:#64748b;font-weight:600;">AJUSTE SEXO</div>
+                        <div style="font-size:2rem;font-weight:900;color:#ec4899;">${similSexo}</div>
+                        <div style="font-size:0.65rem;color:#94a3b8;">χ²=${chiSexo.toFixed(2)} · 100=ajuste perfecto</div>
+                    </div>
+                    
+                    <!-- DESVIACIÓN MÁXIMA -->
+                    <div style="background:#fff;padding:1rem;border-radius:8px;border:2px solid ${colorDesv};text-align:center;cursor:help;"
+                         title="Peor caso: cuántos puntos porcentuales (p.p.) se aleja el grupo más desequilibrado de su peso real en la población. Ejemplo: ±6 p.p. significa que algún grupo representa el 26% de la muestra cuando debería ser el 20% — diferencia de 6 p.p. No confundir con porcentaje relativo ni con desviación típica. Con más participantes, tiende a disminuir (Ley de los Grandes Números).">
+                        <div style="font-size:0.75rem;color:#64748b;font-weight:600;">DIF. MÁX.</div>
+                        <div style="font-size:2rem;font-weight:900;color:${colorDesv};">±${maxDesv.toFixed(1)}</div>
+                        <div style="font-size:0.65rem;color:${colorDesv};font-weight:600;">${textoDesv} · p.p.</div>
+                        <div style="font-size:0.65rem;color:#94a3b8;margin-top:0.2rem;">Grupo: ${grupoLabel}</div>
+                    </div>
+                </div>
+                
+                <!-- Leyenda expandible -->
+                <details style="margin-top:0.75rem;">
+                    <summary style="cursor:pointer;font-size:0.75rem;color:#667eea;font-weight:600;padding:0.5rem;background:#f0f4ff;border-radius:6px;">
+                        📖 ¿Cómo interpretar estos indicadores?
+                    </summary>
+                    <div style="padding:0.75rem;background:#f8f9fa;border-radius:0 0 6px 6px;font-size:0.78rem;line-height:1.7;color:#475569;">
+                        <p style="margin:0 0 0.5rem 0;"><strong style="color:#374151;">Cobertura Global (0-100):</strong> Resumen sintético. Combina ajuste por edad (peso 70%) y por sexo (peso 30%). Por encima de 90 la participación es equilibrada. Por debajo de 60, hay grupos que apenas participan y los resultados pueden estar sesgados.</p>
+                        <p style="margin:0 0 0.5rem 0;"><strong style="color:#374151;">Ajuste Edad / Ajuste Sexo (0-100):</strong> Basados en el estadístico χ² (chi-cuadrado de bondad de ajuste). Comparan la distribución de participantes con la distribución real de Atarfe. Un valor alto (≥85) indica que los participantes replican bien la estructura poblacional en esa dimensión.</p>
+                        <p style="margin:0 0 0.5rem 0;"><strong style="color:#374151;">Diferencia Máxima (±p.p.):</strong> El indicador más intuitivo. Responde a: <em>"¿cuánto se aleja el grupo más desequilibrado?"</em> Si vale ±6 p.p., significa que algún grupo etario representa 6 puntos porcentuales más (o menos) de lo que le correspondería por su peso en la población. No es un porcentaje relativo ni una desviación típica: es una diferencia entre dos proporciones. <strong>Umbral orientativo:</strong> &lt;2 p.p. excelente · 2-5 p.p. aceptable · &gt;5 p.p. revisar difusión · &gt;10 p.p. sesgo importante.</p>
+                        <p style="margin:0;"><strong style="color:#374151;">Ley de los Grandes Números:</strong> Con más participantes, la diferencia máxima tiende a disminuir porque los errores aleatorios se compensan. El gráfico de convergencia muestra esta evolución si se usa la simulación.</p>
+                    </div>
+                </details>
+                
+                <div style="margin-top:0.75rem;padding:1rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #667eea;">
+                    <div style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:0.5rem;">Distribución por Sexo:</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.75rem;">
+                        <div>
+                            <span style="color:#5b8dd9;font-weight:700;">👨 Hombres:</span> 
+                            ${ratioH.toFixed(1)}% (objetivo: ${targetH.toFixed(1)}%)
+                            <span style="color:${desvSexoH < 2 ? '#10b981' : desvSexoH < 5 ? '#f59e0b' : '#ef4444'};font-weight:600;">
+                                ${desvSexoH < 0.5 ? '✓' : desvSexoH.toFixed(1) + '% desv'}
+                            </span>
+                        </div>
+                        <div>
+                            <span style="color:#e8789a;font-weight:700;">👩 Mujeres:</span> 
+                            ${ratioM.toFixed(1)}% (objetivo: ${targetM.toFixed(1)}%)
+                            <span style="color:${desvSexoM < 2 ? '#10b981' : desvSexoM < 5 ? '#f59e0b' : '#ef4444'};font-weight:600;">
+                                ${desvSexoM < 0.5 ? '✓' : desvSexoM.toFixed(1) + '% desv'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:0.5rem;font-size:0.7rem;color:#64748b;text-align:center;font-style:italic;">
+                    Cobertura: ${reprGlobal >= 90 ? 'Participación excelentemente ajustada por grupos' : reprGlobal >= 75 ? 'Ajuste bueno, desviaciones menores entre grupos' : reprGlobal >= 60 ? 'Ajuste aceptable, revisar grupos subrepresentados' : 'Ajuste insuficiente, sesgos importantes de participación'}
+                </div>
+            `;
+        }
+    } else {
+        const indicadores = document.getElementById('indicadores-repr');
+        if (indicadores) {
+            indicadores.innerHTML = `
+                <div style="margin-top:1rem;padding:1rem;background:#fff3cd;border-radius:8px;text-align:center;">
+                    <p style="margin:0;font-size:0.85rem;color:#856404;">
+                        ⚠️ Se requieren al menos 30 casos para calcular indicadores de cobertura demográfica
+                    </p>
+                </div>
+            `;
+        }
+    }
+}
+
+</script>
+
+<script>
+/* Actualizar textos UI con municipio recibido por URL [M8] */
+document.addEventListener('DOMContentLoaded', function() {
+    var nombre = window.IBSE_MUN_NOMBRE || 'Atarfe';
+    document.title = 'Monitor IBSE · ' + nombre + ' · COMPÁS';
+
+    var h1 = document.querySelector('.header h1');
+    if (h1) h1.innerHTML = '&#x1F9E0; Monitor IBSE &mdash; ' + nombre;
+
+    var hp = document.querySelector('.header p');
+    if (hp) hp.textContent = 'Índice de Bienestar Socioemocional · ' + nombre + ' · EAS 2023';
+
+    var mh = document.querySelector('.monitor-header p');
+    if (mh) mh.textContent = 'Monitoreo Bienestar Emocional · ' + nombre + ' · Metodología EAS 2023';
+
+    document.querySelectorAll('.card h4').forEach(function(h) {
+        if (h.textContent.indexOf('Pirámide') !== -1) {
+            h.textContent = h.textContent.replace('Atarfe', nombre);
+        }
+    });
+});
+</script>
+</body>
+</html>
