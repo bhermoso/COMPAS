@@ -10617,6 +10617,11 @@ function actualizarEstadosCarga() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio).once('value', snap => {
 
+        if (getMunicipioActual() !== municipio) {
+            console.warn('[COMPÁS AM] actualizarEstadosCarga: callback tardío para "' + municipio + '". Descartado.');
+            return;
+        }
+
         const datos = snap.val() || {};
 
         
@@ -10785,6 +10790,8 @@ function actualizarEstadosCarga() {
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] actualizarEstadosCarga: error Firebase para "' + municipio + '":', err);
     });
 
     
@@ -10809,7 +10816,9 @@ function actualizarEstadosCarga() {
 
             }
 
-        });
+        }).catch(function(err) {
+                console.error('[COMPÁS] actualizarEstadosCarga: error Firebase referencias:', err);
+            });
 
     }
 
