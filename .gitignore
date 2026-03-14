@@ -1,0 +1,7 @@
+
+# Backups y datos locales
+COMPAS--BLOQUEADA--*
+COMPAS_vNext_*
+*.csv
+*.pdf
+*.md
