@@ -14,6 +14,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
+    <script src="config.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -7848,23 +7850,7 @@ var db;
 
 try {
 
-    firebase.initializeApp({
-
-        apiKey: "AIzaSyCdAivJATiX76xuOJAMc4Yt7sLq-3GDuDw",
-
-        authDomain: "itaca-3ba7b.firebaseapp.com",
-
-        databaseURL: "https://itaca-3ba7b-default-rtdb.europe-west1.firebasedatabase.app",
-
-        projectId: "itaca-3ba7b",
-
-        storageBucket: "itaca-3ba7b.firebasestorage.app",
-
-        messagingSenderId: "891982060410",
-
-        appId: "1:891982060410:web:cd954a8602eb89ebccd4c3"
-
-    });
+    firebase.initializeApp(window.COMPAS_CONFIG.firebase);
 
     db = firebase.database();
 
@@ -45350,17 +45336,7 @@ function vrelas_generarPaginaVoto(municipio, sessionId) {
 
     const dSes   = JSON.stringify(sessionId);
 
-    const fbConf = JSON.stringify({
-
-        apiKey: "AIzaSyCdAivJATiX76xuOJAMc4Yt7sLq-3GDuDw",
-
-        authDomain: "itaca-3ba7b.firebaseapp.com",
-
-        databaseURL: "https://itaca-3ba7b-default-rtdb.europe-west1.firebasedatabase.app",
-
-        projectId: "itaca-3ba7b"
-
-    });
+    const fbConf = JSON.stringify(window.COMPAS_CONFIG.firebase);
 
     const S = '<scr' + 'ipt';
 
