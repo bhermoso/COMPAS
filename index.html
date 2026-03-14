@@ -55583,6 +55583,8 @@ function _cargarIBSEFirebase(municipio) {
 
           if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
 
+      }).catch(function(err) {
+          console.error('[COMPÁS] _cargarIBSEFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
