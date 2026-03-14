@@ -10394,6 +10394,11 @@ function cargarDeterminantes() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/determinantes').once('value', snap => {
 
+        if (getMunicipioActual() !== municipio) {
+            console.warn('[COMPÁS AM] cargarDeterminantes: callback tardío para "' + municipio + '". Descartado.');
+            return;
+        }
+
         const valores = snap.val() || {};
 
         // Limpiar todos los inputs primero
@@ -10432,6 +10437,8 @@ function cargarDeterminantes() {
 
         actualizarColoresDeterminantes();
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] cargarDeterminantes: error Firebase para "' + municipio + '":', err);
     });
 
 }
