@@ -35526,10 +35526,14 @@ function cargarParticipacionCiudadana(municipio) {
 
                 }
 
+            }).catch(function(err) {
+                console.error('[COMPÁS] cargarParticipacionCiudadana: error EPVSA para "' + municipio + '":', err);
             });
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] cargarParticipacionCiudadana: error VRELAS para "' + municipio + '":', err);
     });
 
 }
@@ -36570,6 +36574,8 @@ function cargarDecisionPriorizacion(municipio) {
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] cargarDecisionPriorizacion: error Firebase para "' + municipio + '":', err);
     });
 
 }
