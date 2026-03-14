@@ -46546,6 +46546,8 @@ function _cargarEstudiosFirebase(municipio) {
 
           }
 
+      }).catch(function(err) {
+          console.error('[COMPÁS] _cargarEstudiosFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
@@ -46758,12 +46760,19 @@ function _cargarEscalasFirebase(municipio){
 
       .once('value', function(snap){
 
+          if (getMunicipioActual() !== municipio) {
+              console.warn('[COMPÁS AM] _cargarEscalasFirebase: callback tardío para "' + municipio + '". Descartado.');
+              return;
+          }
+
           var datos = snap.val();
 
           _compasEscalasSet(Array.isArray(datos) ? datos : []);
 
           if (typeof renderizarSeccionEstudios === 'function') renderizarSeccionEstudios();
 
+      }).catch(function(err) {
+          console.error('[COMPÁS] _cargarEscalasFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
