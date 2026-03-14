@@ -55557,6 +55557,12 @@ function _cargarIBSEFirebase(municipio) {
 
               window.datosIBSE = null;
 
+              // ibseDatos vacío: intentar reconstruir desde ibse_respuestas individuales
+
+              ibse_recalcularAgregado(municipio);
+
+              return;   // ibse_recalcularAgregado llama renderizarPanelIBSE al terminar
+
           }
 
           renderizarPanelIBSE();
@@ -55635,7 +55641,7 @@ function ibse_recalcularAgregado(municipio) {
 
             suma.fP  += r.factorPersona   || 0;
 
-            suma.tot += r.total           || 0;
+            suma.tot += (r.ibse_total !== undefined ? r.ibse_total : r.total) || 0;
 
         });
 
