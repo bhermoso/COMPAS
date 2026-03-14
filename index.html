@@ -10394,11 +10394,6 @@ function cargarDeterminantes() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/determinantes').once('value', snap => {
 
-        if (getMunicipioActual() !== municipio) {
-            console.warn('[COMPÁS AM] cargarDeterminantes: callback tardío para "' + municipio + '". Descartado.');
-            return;
-        }
-
         const valores = snap.val() || {};
 
         // Limpiar todos los inputs primero
@@ -10437,8 +10432,6 @@ function cargarDeterminantes() {
 
         actualizarColoresDeterminantes();
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] cargarDeterminantes: error Firebase para "' + municipio + '":', err);
     });
 
 }
@@ -10617,11 +10610,6 @@ function actualizarEstadosCarga() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio).once('value', snap => {
 
-        if (getMunicipioActual() !== municipio) {
-            console.warn('[COMPÁS AM] actualizarEstadosCarga: callback tardío para "' + municipio + '". Descartado.');
-            return;
-        }
-
         const datos = snap.val() || {};
 
         
@@ -10790,8 +10778,6 @@ function actualizarEstadosCarga() {
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] actualizarEstadosCarga: error Firebase para "' + municipio + '":', err);
     });
 
     
@@ -10816,9 +10802,7 @@ function actualizarEstadosCarga() {
 
             }
 
-        }).catch(function(err) {
-                console.error('[COMPÁS] actualizarEstadosCarga: error Firebase referencias:', err);
-            });
+        });
 
     }
 
@@ -10843,11 +10827,6 @@ function actualizarBadgesFase4() {
     
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio).once('value', snap => {
-
-        if (getMunicipioActual() !== municipio) {
-            console.warn('[COMPÁS AM] actualizarBadgesFase4: callback tardío para "' + municipio + '". Descartado.');
-            return;
-        }
 
         const datos = snap.val() || {};
 
@@ -10969,8 +10948,6 @@ function actualizarBadgesFase4() {
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] actualizarBadgesFase4: error Firebase para "' + municipio + '":', err);
     });
 
 }
@@ -14729,8 +14706,6 @@ function cargarMunicipiosDisponibles() {
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] cargarMunicipiosDisponibles: error Firebase:', err);
     });
 
 }
@@ -16629,11 +16604,6 @@ function inicializarHojaRuta() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + m + '/hojaRuta').once('value', snap => {
 
-        if (getMunicipioActual() !== m) {
-            console.warn('[COMPÁS AM] inicializarHojaRuta: callback tardío para "' + m + '". Descartado.');
-            return;
-        }
-
         console.log('  Firebase hojaRuta respondió:', snap.exists() ? 'tiene datos' : 'vacío');
 
         if (!snap.exists()) {
@@ -16650,8 +16620,6 @@ function inicializarHojaRuta() {
 
         cargarHojaRuta();
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] inicializarHojaRuta: error Firebase para "' + m + '":', err);
     });
 
 }
@@ -24142,11 +24110,6 @@ function initAgendas() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/agendas').once('value', snap => {
 
-        if (getMunicipioActual() !== municipio) {
-            console.warn('[COMPÁS AM] initAgendas: callback tardío para "' + municipio + '". Descartado.');
-            return;
-        }
-
         console.log('  Firebase respondió, datos:', snap.exists() ? 'SÍ' : 'NO');
 
         const data = snap.val();
@@ -24181,8 +24144,6 @@ function initAgendas() {
 
         guardarAgendaParaCompilador(accionesAgenda);
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] initAgendas: error Firebase para "' + municipio + '":', err);
     });
 
 }
@@ -33273,8 +33234,6 @@ function reanudarSesionVotacion() {
 
             setupVotacionListener(municipio);
 
-        }).catch(function(err) {
-            console.error('[COMPÁS] vrelas_reanudarSesion: error Firebase para "' + municipio + '":', err);
         });
 
 }
@@ -35567,14 +35526,10 @@ function cargarParticipacionCiudadana(municipio) {
 
                 }
 
-            }).catch(function(err) {
-                console.error('[COMPÁS] cargarParticipacionCiudadana: error EPVSA para "' + municipio + '":', err);
             });
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] cargarParticipacionCiudadana: error VRELAS para "' + municipio + '":', err);
     });
 
 }
@@ -36615,8 +36570,6 @@ function cargarDecisionPriorizacion(municipio) {
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] cargarDecisionPriorizacion: error Firebase para "' + municipio + '":', err);
     });
 
 }
@@ -37835,7 +37788,7 @@ function actualizarHistorialUI() {
 
         `).join('');
 
-    } catch(e) { console.error('[COMPÁS] actualizarHistorialUI: error en template:', e); }
+    } catch(e) {}
 
 }
 
@@ -40933,11 +40886,6 @@ function relas_cargarDesdeFirebase(municipio) {
 
   db.ref(path).once('value', snap => {
 
-    if (getMunicipioActual() !== municipio) {
-      console.warn('[COMPÁS AM] relas_cargarDesdeFirebase: callback tardío para "' + municipio + '". Descartado.');
-      return;
-    }
-
     const data = snap.val();
 
     if (data && Array.isArray(data)) {
@@ -40952,8 +40900,6 @@ function relas_cargarDesdeFirebase(municipio) {
 
     }
 
-  }).catch(function(err) {
-    console.error('[COMPÁS] relas_cargarDesdeFirebase: error Firebase para "' + municipio + '":', err);
   });
 
 }
@@ -46600,8 +46546,6 @@ function _cargarEstudiosFirebase(municipio) {
 
           }
 
-      }).catch(function(err) {
-          console.error('[COMPÁS] _cargarEstudiosFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
@@ -46814,19 +46758,12 @@ function _cargarEscalasFirebase(municipio){
 
       .once('value', function(snap){
 
-          if (getMunicipioActual() !== municipio) {
-              console.warn('[COMPÁS AM] _cargarEscalasFirebase: callback tardío para "' + municipio + '". Descartado.');
-              return;
-          }
-
           var datos = snap.val();
 
           _compasEscalasSet(Array.isArray(datos) ? datos : []);
 
           if (typeof renderizarSeccionEstudios === 'function') renderizarSeccionEstudios();
 
-      }).catch(function(err) {
-          console.error('[COMPÁS] _cargarEscalasFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
@@ -55228,14 +55165,10 @@ function ibseMonitor_abrir() {
 
                 }
 
-            }).catch(function(err) {
-                console.error('[COMPÁS] ibseMonitor_abrir: error Firebase legacy para "' + mun + '":', err);
             });
 
         }
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] ibseMonitor_abrir: error Firebase para "' + mun + '":', err);
     });
 
 }
@@ -55628,8 +55561,6 @@ function _cargarIBSEFirebase(municipio) {
 
           if (typeof actualizarChecklistIA === 'function') actualizarChecklistIA();
 
-      }).catch(function(err) {
-          console.error('[COMPÁS] _cargarIBSEFirebase: error Firebase para "' + municipio + '":', err);
       });
 
 }
@@ -58378,8 +58309,6 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
     db.ref(base + '/participacionCiudadana').once('value').then(function(snap) {
 
-        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
-
         var d = snap.val();
 
         if (!d || !window.COMPAS || !window.COMPAS.prioridades) return;
@@ -58424,15 +58353,13 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl1 && _rfEl1.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
+    }).catch(function(){});
 
 
 
     // votacionRelas → tematicas
 
     db.ref(base + '/votacionRelas').once('value').then(function(snap) {
-
-        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
 
         var d = snap.val();
 
@@ -58456,15 +58383,13 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl2 && _rfEl2.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
+    }).catch(function(){});
 
 
 
     // decisionPriorizacion → fusion
 
     db.ref(base + '/decisionPriorizacion').once('value').then(function(snap) {
-
-        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
 
         var d = snap.val();
 
@@ -58482,15 +58407,13 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         };
 
-    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
+    }).catch(function(){});
 
 
 
     // relas_datos → relas (Priorización Mixta / HPC)
 
     db.ref(base + '/relas_datos').once('value').then(function(snap) {
-
-        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
 
         var d = snap.val();
 
@@ -58526,7 +58449,7 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl4 && _rfEl4.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
+    }).catch(function(){});
 
 }
 
@@ -58768,19 +58691,12 @@ function seguimiento_cargarPanel() {
 
     db.ref(_seguimiento_path(municipio, anio)).once('value').then(function(snap) {
 
-        if (getMunicipioActual() !== municipio) {
-            console.warn('[COMPÁS AM] seguimiento_cargarPanel: callback tardío para "' + municipio + '". Descartado.');
-            return;
-        }
-
         var datos = snap.val() || {};
 
         _seguimiento_solicitudes = Object.values(datos);
 
         seguimiento_renderLista(_seguimiento_solicitudes);
 
-    }).catch(function(err) {
-        console.error('[COMPÁS] seguimiento_cargarPanel: error Firebase para "' + municipio + '":', err);
     });
 
 }
