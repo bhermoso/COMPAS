@@ -15088,6 +15088,8 @@ function actualizarMunicipio() {
 
         window.datosIBSE = null;                // I1: evita datos IBSE de municipio anterior
 
+        window.analisisActual = null;           // AM: evita análisis de municipio anterior como fallback
+
         // Cargar prioridades guardadas para el nuevo municipio (asíncrono, silencioso)
 
         if (typeof COMPAS_cargarPrioridadesFirebase === 'function') {
