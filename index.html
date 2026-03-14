@@ -58333,6 +58333,8 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
     db.ref(base + '/participacionCiudadana').once('value').then(function(snap) {
 
+        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
+
         var d = snap.val();
 
         if (!d || !window.COMPAS || !window.COMPAS.prioridades) return;
@@ -58385,6 +58387,8 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
     db.ref(base + '/votacionRelas').once('value').then(function(snap) {
 
+        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
+
         var d = snap.val();
 
         if (!d || !d.temasFreq || !window.COMPAS || !window.COMPAS.prioridades) return;
@@ -58415,6 +58419,8 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
     db.ref(base + '/decisionPriorizacion').once('value').then(function(snap) {
 
+        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
+
         var d = snap.val();
 
         if (!d || !window.COMPAS || !window.COMPAS.prioridades) return;
@@ -58438,6 +58444,8 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
     // relas_datos → relas (Priorización Mixta / HPC)
 
     db.ref(base + '/relas_datos').once('value').then(function(snap) {
+
+        if (getMunicipioActual() !== municipio) { console.warn('[COMPÁS AM] COMPAS_cargarPrioridadesFirebase: descartado para "' + municipio + '"'); return; }
 
         var d = snap.val();
 
