@@ -26973,7 +26973,7 @@ function generarDocumentoCompletoPDF(nombre) {
 
     // Generar contenido del Plan Local (sin portada porque ya está en el header institucional)
 
-    const contenidoPlan = generarHTMLPlanLocal(false);
+    const contenidoPlan = (window.__COMPAS_generarHTMLPlanLocal || generarHTMLPlanLocal)(false);
 
     
 
@@ -28425,7 +28425,7 @@ function generarDocumentoCompleto() {
 
     const nombre = getNombreMunicipio(municipio);
 
-    const contenido = generarHTMLPlanLocal(true);
+    const contenido = (window.__COMPAS_generarHTMLPlanLocal || generarHTMLPlanLocal)(true, null, { municipio, planLocalSalud, datosMunicipioActual, accionesAgenda, generarDeterminantes: generarDeterminantesCompletosPDF, generarParticipacion: generarSeccionParticipacionCiudadanaPDF });
 
     
 
@@ -28863,13 +28863,15 @@ ${contenido}
 
 
 
-function generarHTMLPlanLocal(completo) {
+function generarHTMLPlanLocal(completo, estudiosHtmlExterno = null, ctx = null) {
 
-    const municipio = getMunicipioActual();
+    const municipio = ctx?.municipio || getMunicipioActual();
 
     const nombre = getNombreMunicipio(municipio);
 
-    
+    const planLocalSalud       = ctx?.planLocalSalud       || window.planLocalSalud;
+    const datosMunicipioActual = ctx?.datosMunicipioActual || window.datosMunicipioActual;
+    const accionesAgenda       = ctx?.accionesAgenda       || window.accionesAgenda;
 
     // Usar datos del compilador si están disponibles
 
@@ -28979,7 +28981,7 @@ function generarHTMLPlanLocal(completo) {
 
     html += '<div class="dest" style="background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.05));border-color:#0074c8;"><strong>📊 Valores estimados mediante reponderación Bettersurveys</strong><br>Estimaciones territoriales a partir de la Encuesta Andaluza de Salud 2023 para el municipio de <strong>' + nombre + '</strong>. Los valores se comparan con las referencias provinciales (Granada) y autonómicas (Andalucía).</div>';
 
-    html += generarDeterminantesCompletosPDF();
+    html += (ctx?.generarDeterminantes || generarDeterminantesCompletosPDF)();
 
     html += '</div>';
 
@@ -28987,9 +28989,7 @@ function generarHTMLPlanLocal(completo) {
 
     // 1.4 Estudios complementarios (si existen)
 
-    var _estudiosElPDF = document.getElementById('seccion-estudios-complementarios');
-
-    var _estudiosHTMLPDF = _estudiosElPDF && _estudiosElPDF.innerHTML.trim();
+    var _estudiosHTMLPDF = estudiosHtmlExterno ?? (document.getElementById('seccion-estudios-complementarios')?.innerHTML.trim() || '');
 
     var _estudiosContenido = (_estudiosHTMLPDF && _estudiosHTMLPDF.length > 30 && !_estudiosHTMLPDF.includes('Carga el') && !_estudiosHTMLPDF.includes('Sin estudios')) ? _estudiosHTMLPDF : null;
 
@@ -29005,9 +29005,9 @@ function generarHTMLPlanLocal(completo) {
 
     html += '<div class="sub"><div class="sub-header"><div class="sub-icon orange">🗳️</div><h3 class="sub-titulo">Prioridades ciudadanas</h3></div>';
 
-    if (window.datosParticipacionCiudadana && typeof generarSeccionParticipacionCiudadanaPDF === 'function') {
+    if (window.datosParticipacionCiudadana && typeof (ctx?.generarParticipacion || generarSeccionParticipacionCiudadanaPDF) === 'function') {
 
-        html += generarSeccionParticipacionCiudadanaPDF();
+        html += (ctx?.generarParticipacion || generarSeccionParticipacionCiudadanaPDF)();
 
     } else {
 
@@ -59766,6 +59766,9 @@ function planMapa_obtener() {
      ═══════════════════════════════════════════════════════════════════════ -->
 
 <script type="module">
+
+import { generarHTMLPlanLocal as _generarHTMLPlanLocalModular } from './core/documentos/generarHTMLPlanLocal.js';
+window.__COMPAS_generarHTMLPlanLocal = _generarHTMLPlanLocalModular;
 
 // ── Fallback: motor heredado directo (si el módulo no carga o falla) ─────────
 
