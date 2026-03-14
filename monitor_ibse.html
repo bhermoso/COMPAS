@@ -1450,7 +1450,12 @@ db.ref('ibse_monitor/' + window.IBSE_MUN_KEY).on('value', snapshot => {
 
 function limpiarDatos() {
     if (!confirm('¿Eliminar TODOS los datos?')) return;
-    db.ref('ibse_monitor/' + window.IBSE_MUN_KEY).remove().then(() => {
+    var key = window.IBSE_MUN_KEY;
+    Promise.all([
+        db.ref('ibse_monitor/'    + key).remove(),
+        db.ref('ibse_respuestas/' + key).remove()
+    ]).then(function() {
+        window._ibseArr = null;
         alert('✅ Datos eliminados');
     });
 }
@@ -1502,7 +1507,8 @@ function procesarCSV(event) {
 }
 
 function exportarCSV() {
-    if (respuestas.length === 0) {
+    var datosExport = (window._ibseArr && window._ibseArr.length > 0) ? window._ibseArr : respuestas;
+    if (datosExport.length === 0) {
         alert('No hay datos para exportar');
         return;
     }
@@ -1510,7 +1516,7 @@ function exportarCSV() {
     const headers = ['record_id','sexo','edad','ibse_deprimido','ibse_feliz','ibse_solo','ibse_disfrutar','ibse_energia','ibse_tranquilo','ibse_optimista','ibse_bienmismo','factor_vinculo','factor_situacion','factor_control','factor_persona','ibse_total','timestamp'];
     const csv = [headers.join(',')];
     
-    respuestas.forEach(r => {
+    datosExport.forEach(r => {
         csv.push([
             r.record_id, r.sexo, r.edad,
             r.ibse_deprimido, r.ibse_feliz, r.ibse_solo, r.ibse_disfrutar,
@@ -2824,6 +2830,7 @@ function cargar() {
                 var calc = _calcular(d);
                 return calc ? Object.assign({}, d, calc) : null;
             }).filter(Boolean);
+            window._ibseArr = arr;
             renderizar(arr);
         } else {
             // Fallback: ibse_monitor/{mun} puede ser agregado o colección
@@ -2846,11 +2853,13 @@ function cargar() {
                         });
                     }
                     document.getElementById('firebase-path').textContent = 'Firebase: ibse_monitor/' + municipio + ' (agregado)';
+                    window._ibseArr = arr;
                     renderizar(arr);
                 } else {
                     var arrL = vals.filter(function(d){ return d.ibse_total !== undefined || d.total !== undefined; });
                     if (!arrL.length) { sinDatos(); return; }
                     document.getElementById('firebase-path').textContent = 'Firebase: ibse_monitor/' + municipio;
+                    window._ibseArr = arrL;
                     renderizar(arrL);
                 }
             });
