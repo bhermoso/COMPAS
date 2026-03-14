@@ -24117,6 +24117,11 @@ function initAgendas() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/agendas').once('value', snap => {
 
+        if (getMunicipioActual() !== municipio) {
+            console.warn('[COMPÁS AM] initAgendas: callback tardío para "' + municipio + '". Descartado.');
+            return;
+        }
+
         console.log('  Firebase respondió, datos:', snap.exists() ? 'SÍ' : 'NO');
 
         const data = snap.val();
@@ -24151,6 +24156,8 @@ function initAgendas() {
 
         guardarAgendaParaCompilador(accionesAgenda);
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] initAgendas: error Firebase para "' + municipio + '":', err);
     });
 
 }
