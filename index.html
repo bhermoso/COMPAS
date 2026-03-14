@@ -2853,21 +2853,11 @@
 
                             <div id="panel-ibse" style="font-size:0.82rem; color:#64748b; margin-bottom:0.5rem;">⏳ Sin datos IBSE para este municipio</div>
 
-                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-
-                                <label style="background:#fff; border:1px solid #7dd3fc; border-radius:6px; padding:0.4rem 0.75rem; cursor:pointer; font-size:0.78rem; font-weight:600; color:#0369a1;">
-
-                                    <input type="file" accept=".csv" onchange="ibse_cargarCSV(this)" hidden>
-
-                                    📁 Cargar CSV REDCap
-
-                                </label>
-
-                                <button onclick="ibse_sincronizarREDCap()" style="background:#fff; border:1px solid #7dd3fc; border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; color:#0369a1; cursor:pointer;" title="Próximamente">🔗 REDCap API</button>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
 
                                 <button onclick="ibse_abrirMonitor()" style="background:#0074c8; color:white; border:none; border-radius:6px; padding:0.4rem 0.75rem; font-size:0.78rem; font-weight:600; cursor:pointer;" title="Abrir monitor completo IBSE">📊 Monitor</button>
 
-                                <button onclick="ibse_borrarDatos()" style="background:#fff; border:1px solid #fca5a5; border-radius:6px; padding:0.4rem 0.5rem; font-size:0.75rem; color:#dc2626; cursor:pointer;" title="Borrar datos IBSE">🗑️</button>
+                                <span style="font-size:0.72rem; color:#94a3b8;">Carga y gestión en sección 03 ↓</span>
 
                             </div>
 
@@ -11580,6 +11570,9 @@ function parsearCSV(contenido, tipo) {
 
     
 
+    // MC1: strip BOM (Excel UTF-8 con BOM añade \uFEFF — rompe detección de formato)
+    contenido = contenido.replace(/^\uFEFF/, '');
+
     const lineas = contenido.split('\n');
 
     if (lineas.length < 2) {
@@ -11590,7 +11583,7 @@ function parsearCSV(contenido, tipo) {
 
     }
 
-    
+
 
     // Detectar si tiene cabecera válida (primera línea)
 
@@ -35671,9 +35664,12 @@ function actualizarIndicadorParticipacion(existe, participantes = 0) {
 // Mostrar modal de priorización dual
 
 function mostrarPriorizacionDual() {
+    // REDIRIGIDO → mostrarPriorizacionICP() (v2, sin LE5, sin fusión textual legacy)
+    mostrarPriorizacionICP();
+    return;
 
     // [M1-INVENTARIO] Este modal consume window.datosParticipacionCiudadana normalizado para comparar prioridades epi vs ciudadanas
-
+    // eslint-disable-next-line no-unreachable
     const municipio = (typeof getMunicipioActual === 'function') ? getMunicipioActual() : null;
 
     if (window.datosParticipacionCiudadanaMunicipio && municipio && window.datosParticipacionCiudadanaMunicipio !== municipio) {
@@ -36539,6 +36535,268 @@ function confirmarPriorizacion() {
 }
 
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODAL DE PRIORIZACIÓN ICP v2
+// Sustituye a mostrarPriorizacionDual() + fusionarPriorizaciones().
+// Fuente epidemiológica: _calcularICP() → LE1-LE4 (sin LE5, sin priorizacion legacy).
+// Fuente ciudadana: normalizarParticipacion() → rankingObjetivos / colectivoPrioritario.
+// Estructura de decisionPriorizacion: compatible con downstream (metodo, areasResultantes, etc.)
+// ═══════════════════════════════════════════════════════════════════════
+
+function mostrarPriorizacionICP() {
+    const municipio = (typeof getMunicipioActual === 'function') ? getMunicipioActual() : null;
+
+    // Guard: datos vinculados a otro municipio
+    if (window.datosParticipacionCiudadanaMunicipio && municipio &&
+        window.datosParticipacionCiudadanaMunicipio !== municipio) {
+        mostrarNotificacion('Sin datos de participación ciudadana para este municipio (datos vinculados a otro territorio).', 'warning');
+        return;
+    }
+
+    // Fuentes de datos
+    const analisis = window.analisisActual || null;
+    const icp      = _calcularICP(analisis);
+    const part     = normalizarParticipacion(window.datosParticipacionCiudadana);
+
+    // ICP lineas ordenadas (LE1-LE4 por score)
+    const BARCOL = { 'Muy alta':'#166534','Alta':'#1d4ed8','Media':'#854d0e','Baja':'#64748b' };
+    const BARBG  = { 'Muy alta':'#dcfce7','Alta':'#dbeafe','Media':'#fef9c3','Baja':'#f8fafc'  };
+    const BARBORDER = { 'Muy alta':'#86efac','Alta':'#93c5fd','Media':'#fde68a','Baja':'#e2e8f0' };
+
+    function _minibar(v, col) {
+        var pct = Math.max(2, Math.round(v * 100));
+        return '<div style="height:4px;background:#e2e8f0;border-radius:2px;margin-top:2px">' +
+               '<div style="height:100%;width:' + pct + '%;background:' + col + ';border-radius:2px"></div></div>';
+    }
+
+    // ── Panel ICP ──
+    var icpLineasHTML = icp.lineas.map(function(le, i) {
+        var nc = BARCOL[le.nivel] || '#64748b';
+        var nb = BARBG[le.nivel]  || '#f8fafc';
+        var pct = Math.round(le.icp * 100);
+        return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.7rem;background:' + nb +
+               ';border-radius:7px;border:1px solid ' + (BARBORDER[le.nivel] || '#e2e8f0') + ';margin-bottom:0.4rem">' +
+               '<span style="font-size:0.95rem;flex-shrink:0;">' + (i+1) + '</span>' +
+               '<span style="font-size:1rem;flex-shrink:0;">' + le.icono + '</span>' +
+               '<div style="flex:1;min-width:0">' +
+                 '<div style="font-size:0.78rem;font-weight:700;color:' + nc + '">' + le.cod + ' — ' + le.nombre + '</div>' +
+                 _minibar(le.icp, nc) +
+               '</div>' +
+               '<div style="text-align:right;flex-shrink:0">' +
+                 '<div style="font-size:0.9rem;font-weight:900;color:' + nc + '">' + pct + '</div>' +
+                 '<div style="font-size:0.58rem;color:' + nc + ';font-weight:600">' + le.nivel.toUpperCase() + '</div>' +
+               '</div></div>';
+    }).join('');
+
+    var icpFuentesHTML = '<div style="font-size:0.72rem;color:#64748b;margin-top:0.4rem">' +
+        (icp.tienePT ? '✅ Ciudadanía wT=' + icp.wT + '%&nbsp;' : '⬜ Sin participación&nbsp;') +
+        (icp.tienePE ? '✅ EPVSA wE=' + icp.wE + '%&nbsp;' : '⬜ Sin motor EPVSA&nbsp;') +
+        (icp.tienePR ? '✅ RELAS wR=' + icp.wR + '%' : '⬜ Sin RELAS') +
+        '</div>';
+
+    // ── Panel ciudadano ──
+    var ciudadanoHTML = '';
+    if (part) {
+        var objP = part.objetivoPrioritario;
+        var colP = part.colectivoPrioritario;
+        var top5 = part.top5Temas || [];
+        ciudadanoHTML += '<div style="margin-bottom:0.5rem;font-size:0.8rem;color:#1e40af;font-weight:600">' +
+            (part.esVrelas ? '🗳️ Votación VRELAS' : '🗳️ Consulta ciudadana') +
+            ' <span style="font-weight:400;color:#64748b">(' + part.n + ' participantes)</span></div>';
+        if (objP) ciudadanoHTML += '<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:0.45rem 0.7rem;margin-bottom:0.3rem">' +
+            '<span style="font-size:0.72rem;font-weight:700;color:#1e40af;text-transform:uppercase">Tema / objetivo principal</span>' +
+            '<div style="font-size:0.85rem;color:#1e293b;font-weight:600">' + (objP.icono||'') + ' ' + objP.texto +
+            ' <span style="color:#0074c8;font-weight:400">(' + objP.porcentaje + '%)</span></div></div>';
+        if (colP) ciudadanoHTML += '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:0.45rem 0.7rem;margin-bottom:0.3rem">' +
+            '<span style="font-size:0.72rem;font-weight:700;color:#166534;text-transform:uppercase">Colectivo prioritario</span>' +
+            '<div style="font-size:0.85rem;color:#1e293b;font-weight:600">' + (colP.icono||'') + ' ' + colP.texto +
+            (colP.porcentaje ? ' <span style="color:#166534;font-weight:400">(' + colP.porcentaje + '%)</span>' : '') + '</div></div>';
+        if (top5.length > 1) ciudadanoHTML += '<div style="font-size:0.75rem;color:#475569;margin-top:0.4rem">' +
+            top5.map(function(t,i){ return '<span style="margin-right:0.6rem">' + (i+1) + '. ' + (t.icono||'') + ' ' + t.texto + ' (' + t.porcentaje + '%)</span>'; }).join('') +
+            '</div>';
+    } else {
+        ciudadanoHTML = '<div style="color:#94a3b8;font-size:0.82rem;font-style:italic">Sin datos de participación ciudadana registrados para este municipio.</div>';
+    }
+
+    var modalHTML = '<div id="modal-priorizacion-dual" onclick="if(event.target.id===\'modal-priorizacion-dual\')cerrarModalPriorizacion()" ' +
+        'style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem">' +
+
+        '<div style="background:white;border-radius:14px;max-width:680px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative">' +
+
+            // Cabecera
+            '<div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:flex-start">' +
+                '<div><h2 style="margin:0;color:#1e293b;font-size:1.25rem;font-weight:700">📊 Priorización EPVSA</h2>' +
+                '<p style="margin:0.25rem 0 0;color:#64748b;font-size:0.82rem">' + (municipio ? municipio : 'Municipio') +
+                ' — Basada en Índice Combinado de Priorización (ICP)</p></div>' +
+                '<button onclick="cerrarModalPriorizacion()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#94a3b8;padding:0.25rem;border-radius:50%;line-height:1" ' +
+                'onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'none\'">×</button>' +
+            '</div>' +
+
+            // Cuerpo
+            '<div style="padding:1.25rem 1.5rem;">' +
+
+                // Panel ICP
+                '<div style="margin-bottom:1.25rem">' +
+                    '<div style="font-size:0.78rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.5rem">⚖️ Propuesta ICP — Líneas EPVSA ordenadas por prioridad</div>' +
+                    icpLineasHTML +
+                    icpFuentesHTML +
+                '</div>' +
+
+                // Panel ciudadano
+                '<div style="margin-bottom:1.25rem;padding:0.85rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px">' +
+                    '<div style="font-size:0.78rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.5rem">🗳️ Perspectiva ciudadana</div>' +
+                    ciudadanoHTML +
+                '</div>' +
+
+                // Decisión
+                '<div style="margin-bottom:1rem">' +
+                    '<div style="font-size:0.78rem;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.6rem">Decisión metodológica</div>' +
+                    '<div style="display:flex;flex-direction:column;gap:0.5rem">' +
+
+                        '<label style="display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0.9rem;background:white;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer" ' +
+                        'onmouseover="this.style.borderColor=\'#7c3aed\'" onmouseout="this.style.borderColor=this.querySelector(\'input\').checked?\'#7c3aed\':\'#e2e8f0\'">' +
+                            '<input type="radio" name="metodo-priorizacion" value="integracion" checked style="margin-top:0.2rem">' +
+                            '<div><strong style="color:#7c3aed">⚖️ Confirmar propuesta ICP</strong> <span style="font-size:0.72rem;background:#ede9fe;color:#7c3aed;padding:.1rem .4rem;border-radius:8px;margin-left:.3rem">Recomendado</span>' +
+                            '<p style="margin:0.15rem 0 0;color:#64748b;font-size:0.78rem">Acepta el orden ICP (integra motor EPVSA + ciudadanía + RELAS con los pesos disponibles)</p></div>' +
+                        '</label>' +
+
+                        '<label style="display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0.9rem;background:white;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer" ' +
+                        'onmouseover="this.style.borderColor=\'#1d4ed8\'" onmouseout="this.style.borderColor=this.querySelector(\'input\').checked?\'#1d4ed8\':\'#e2e8f0\'">' +
+                            '<input type="radio" name="metodo-priorizacion" value="ciudadana" style="margin-top:0.2rem">' +
+                            '<div><strong style="color:#1e40af">🗳️ Priorizar según ciudadanía</strong>' +
+                            '<p style="margin:0.15rem 0 0;color:#64748b;font-size:0.78rem">Basa la decisión en el resultado de la votación/consulta popular' +
+                            (part ? ' (' + part.n + ' participantes)' : ' — sin datos disponibles') + '</p></div>' +
+                        '</label>' +
+
+                        '<label style="display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0.9rem;background:white;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer" ' +
+                        'onmouseover="this.style.borderColor=\'#166534\'" onmouseout="this.style.borderColor=this.querySelector(\'input\').checked?\'#166534\':\'#e2e8f0\'">' +
+                            '<input type="radio" name="metodo-priorizacion" value="epidemiologica" style="margin-top:0.2rem">' +
+                            '<div><strong style="color:#166534">🔬 Prioridad técnica EPVSA</strong>' +
+                            '<p style="margin:0.15rem 0 0;color:#64748b;font-size:0.78rem">Usa exclusivamente el motor salutogénico EPVSA (peso PE), sin ponderar participación</p></div>' +
+                        '</label>' +
+
+                    '</div>' +
+                '</div>' +
+
+                // Justificación
+                '<div>' +
+                    '<label style="display:block;margin-bottom:0.4rem;color:#374151;font-size:0.82rem;font-weight:600">Justificación (opcional):</label>' +
+                    '<textarea id="justificacion-priorizacion" placeholder="Razone brevemente la decisión adoptada..." ' +
+                    'style="width:100%;padding:0.65rem;border:1px solid #d1d5db;border-radius:7px;resize:vertical;min-height:56px;font-family:inherit;font-size:0.82rem;box-sizing:border-box"></textarea>' +
+                '</div>' +
+
+            '</div>' +
+
+            // Footer
+            '<div style="padding:1rem 1.5rem;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:0.75rem;background:#f9fafb;border-radius:0 0 14px 14px">' +
+                '<button onclick="cerrarModalPriorizacion()" style="padding:0.55rem 1.25rem;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:7px;cursor:pointer;font-weight:500;font-size:0.85rem">Cancelar</button>' +
+                '<button onclick="confirmarPriorizacionICP()" style="padding:0.55rem 1.25rem;background:linear-gradient(135deg,#0074c8,#00acd9);color:white;border:none;border-radius:7px;cursor:pointer;font-weight:600;font-size:0.85rem">Confirmar decisión</button>' +
+            '</div>' +
+
+        '</div></div>';
+
+    const cont = document.createElement('div');
+    cont.innerHTML = modalHTML;
+    document.body.appendChild(cont.firstElementChild);
+}
+
+function confirmarPriorizacionICP() {
+    const metodo = document.querySelector('input[name="metodo-priorizacion"]:checked')?.value;
+    const justificacion = (document.getElementById('justificacion-priorizacion')?.value || '').trim();
+    const municipio = getMunicipioActual();
+
+    if (!metodo) { alert('Seleccione un método de priorización'); return; }
+
+    const analisis = window.analisisActual || null;
+    const icp      = _calcularICP(analisis);
+    const part     = normalizarParticipacion(window.datosParticipacionCiudadana);
+    const objP     = part ? part.objetivoPrioritario : null;
+    const colP     = part ? part.colectivoPrioritario : null;
+
+    let areasResultantes = [];
+    let colectivoResultante = colP ? colP.texto : null;
+    let fuenteEpi = [];
+    let metodologiaFusion = null;
+
+    if (metodo === 'integracion') {
+        // Orden ICP completo (LE1-LE4 por icp score)
+        areasResultantes = icp.lineas.map(function(l){ return l.cod + ' — ' + l.nombre; });
+        fuenteEpi = icp.lineas.map(function(l){ return { area: l.cod + ' — ' + l.nombre, justificacion: 'ICP: ' + Math.round(l.icp*100) + '/100 — ' + l.nivel }; });
+        metodologiaFusion = {
+            pesoEpidemiologico: icp.wE / 100,
+            pesoCiudadano:      icp.wT / 100,
+            salvaguardasAplicadas: [],
+            conflictosDetectados: [],
+            rankingFusionado: icp.lineas.map(function(l){ return { area: l.cod + ' — ' + l.nombre, scoreFusionado: +(l.icp*10).toFixed(2), posicionEpi: 0, posicionCiudadana: 0 }; })
+        };
+    } else if (metodo === 'ciudadana') {
+        areasResultantes = part && part.rankingObjetivos ? part.rankingObjetivos.slice(0,3).map(function(o){ return o.texto; }) : (objP ? [objP.texto] : []);
+        fuenteEpi = icp.lineas.slice(0,3).map(function(l){ return { area: l.cod + ' — ' + l.nombre, justificacion: 'ICP: ' + Math.round(l.icp*100) + '/100' }; });
+    } else if (metodo === 'epidemiologica') {
+        // Orden por score PE exclusivamente
+        var lineasPE = icp.lineas.slice().sort(function(a,b){ return b.pe - a.pe; });
+        areasResultantes = lineasPE.map(function(l){ return l.cod + ' — ' + l.nombre; });
+        fuenteEpi = lineasPE.map(function(l){ return { area: l.cod + ' — ' + l.nombre, justificacion: 'Motor EPVSA PE: ' + Math.round(l.pe*100) + '/100' }; });
+    }
+
+    const decisionPriorizacion = {
+        metodo: metodo,
+        fechaDecision: new Date().toISOString(),
+        justificacion: justificacion,
+        areasResultantes: areasResultantes,
+        colectivoResultante: colectivoResultante,
+        fuenteEpidemiologica: fuenteEpi,
+        fuenteCiudadana: {
+            objetivo: objP,
+            colectivo: colP,
+            participantes: part ? part.n : 0
+        },
+        ...(metodo === 'integracion' && metodologiaFusion ? { metodologiaFusion: metodologiaFusion } : {})
+    };
+
+    const modoManualVisible = document.getElementById('plan-modo-manual')?.style.display === 'block';
+
+    db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio + '/decisionPriorizacion')
+        .set(decisionPriorizacion)
+        .then(function() {
+            window.decisionPriorizacionActual = decisionPriorizacion;
+
+            if (window.COMPAS && window.COMPAS.prioridades) {
+                window.COMPAS.prioridades.fusion = {
+                    tipo: decisionPriorizacion.metodo || 'icp',
+                    fecha: decisionPriorizacion.fechaDecision || null,
+                    prioridadesFinales: decisionPriorizacion.areasResultantes || [],
+                    algoritmo: metodo === 'integracion' ? 'ICP (' + icp.wE + '% EPVSA + ' + icp.wT + '% ciudadanía + ' + icp.wR + '% RELAS)' : metodo
+                };
+            }
+
+            cerrarModalPriorizacion();
+
+            if (modoManualVisible) {
+                cambiarTabManual('seleccion');
+                mostrarNotificacion({ title: 'Priorización completada', message: 'La decisión se ha registrado. Ya puede generar el plan de acción.', type: 'success', duration: 5000 });
+                setTimeout(function() {
+                    var btn = document.querySelector('#contenido-tab-seleccion .plan-accion-footer');
+                    if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            } else {
+                mostrarNotificacion({ title: 'Priorización completada', message: 'Ahora pulse «Aceptar propuesta» y luego «Generar documento» para completar el plan de acción.', type: 'success', duration: 6000 });
+                cambiarModoPlan('auto');
+                if (typeof generarPropuestaAutomatica === 'function') {
+                    setTimeout(function() {
+                        generarPropuestaAutomatica();
+                        var el = document.getElementById('propuesta-automatica-container');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                }
+            }
+        })
+        .catch(function(err) {
+            console.error('[COMPÁS] Error guardando decisión priorización ICP:', err);
+            mostrarNotificacion({ title: 'Error', message: 'Error al guardar decisión: ' + err.message, type: 'error' });
+        });
+}
 
 // Cargar decisión de priorización al cargar municipio
 
@@ -46974,13 +47232,7 @@ function renderizarSeccionEstudios() {
                 '</div>' +
                 '<div style="flex:1;">' + factBars + '</div>' +
             '</div>';
-        var accionesIBSE =
-            '<label style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
-            'padding:0.36rem 0.7rem;cursor:pointer;font-size:0.74rem;font-weight:600;color:#475569;">' +
-            '<input type="file" accept=".csv" onchange="ibse_cargarCSV(this)" hidden>\ud83d\udcc1 Recargar CSV</label>' +
-            '<button onclick="ibse_borrarDatos()" style="background:white;border:1px solid #fca5a5;' +
-            'border-radius:7px;padding:0.36rem 0.55rem;font-size:0.72rem;color:#dc2626;cursor:pointer;" ' +
-            'title="Borrar datos IBSE">\ud83d\uddd1\ufe0f</button>';
+        var accionesIBSE = '';  // Carga y borrado centralizados en la sección operativa principal (panel inline)
         html += _renderTarjetaEstudio({
             icon:'\ud83d\udcca', iconBg:'#ecfdf5',
             nombre:'IBSE \u2014 \u00cdndice de Bienestar Socioemocional',
@@ -54380,7 +54632,7 @@ window.COMPAS_analizarV3 = function(){
 
     if(av3.inequidades.length)av3.recomendaciones_v3.push({id:'rec_equidad',area:'transversal',problema:'Equidad en salud',prioridad:0,urgencia:'alta',
 
-        tipoActuacion:'orientada_equidad',lineasEPVSA:'LE2,LE5',fuentes:['EAS'],contribucionEquidad:true,
+        tipoActuacion:'orientada_equidad',lineasEPVSA:'LE2',fuentes:['EAS'],contribucionEquidad:true,
 
         horizonteTemporal:'corto plazo (0-12 meses)',
 
@@ -54390,7 +54642,7 @@ window.COMPAS_analizarV3 = function(){
 
     av3.recomendaciones_v3.push({id:'rec_relas',area:'gobernanza',problema:'Gobernanza participativa',prioridad:av3.recomendaciones_v3.length+1,
 
-        urgencia:'media',tipoActuacion:'participativa',lineasEPVSA:'LE5',fuentes:['EPVSA 2024-2030'],contribucionEquidad:false,
+        urgencia:'media',tipoActuacion:'participativa',lineasEPVSA:'',fuentes:['EPVSA 2024-2030'],contribucionEquidad:false,
 
         horizonteTemporal:'corto plazo',
 
@@ -55690,6 +55942,9 @@ function ibse_cargarCSV(input) {
 
         skipEmptyLines: true,
 
+        // MC2: normalizar cabeceras — REDCap puede exportar en mayúsculas o con espacios
+        transformHeader: function(h) { return h.toLowerCase().trim(); },
+
         complete: function(results) {
 
             var campos = ['ibse_deprimido','ibse_feliz','ibse_solo','ibse_disfrutar','ibse_energia','ibse_tranquilo','ibse_optimista','ibse_bienmismo'];
@@ -55737,6 +55992,7 @@ function ibse_cargarCSV(input) {
                     factorPersona:   calc.factorPersona,
 
                     total:           calc.total,
+                    ibse_total:      calc.total,  // MC3: alias para compatibilidad con monitor
 
                     fuente:    'csv_redcap',
 
