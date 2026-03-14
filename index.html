@@ -58760,12 +58760,19 @@ function seguimiento_cargarPanel() {
 
     db.ref(_seguimiento_path(municipio, anio)).once('value').then(function(snap) {
 
+        if (getMunicipioActual() !== municipio) {
+            console.warn('[COMPÁS AM] seguimiento_cargarPanel: callback tardío para "' + municipio + '". Descartado.');
+            return;
+        }
+
         var datos = snap.val() || {};
 
         _seguimiento_solicitudes = Object.values(datos);
 
         seguimiento_renderLista(_seguimiento_solicitudes);
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] seguimiento_cargarPanel: error Firebase para "' + municipio + '":', err);
     });
 
 }
