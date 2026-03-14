@@ -50653,7 +50653,7 @@ function _calcularICP(analisis) {
 
     // PE por línea EPVSA (motor salutogénico — relevancia 0-100 → 0-1)
 
-    var peMap = {1:0,2:0,3:0,4:0,5:0};
+    var peMap = {1:0,2:0,3:0,4:0};
 
     if (tienePE) {
 
@@ -50667,7 +50667,7 @@ function _calcularICP(analisis) {
 
     // PT por línea EPVSA (priorización temática VRELAS → mapeo aproximado)
 
-    var ptMap = {1:0,2:0,3:0,4:0,5:0};
+    var ptMap = {1:0,2:0,3:0,4:0};
 
     var pNorm = null;
 
@@ -50679,7 +50679,7 @@ function _calcularICP(analisis) {
 
         var V2LE = {1:[1],2:[1],3:[1,2],4:[1],5:[3],6:[1],7:[1],8:[2],9:[1],10:[1]};
 
-        var ptRaw = {1:0,2:0,3:0,4:0,5:0};
+        var ptRaw = {1:0,2:0,3:0,4:0};
 
         (pNorm.rankingObjetivos || []).forEach(function(item) {
 
@@ -50699,7 +50699,7 @@ function _calcularICP(analisis) {
 
     // PR por línea EPVSA (diagnóstico RELAS hábitos + problemas → mapeo aproximado)
 
-    var prMap = {1:0,2:0,3:0,4:0,5:0};
+    var prMap = {1:0,2:0,3:0,4:0};
 
     if (tienePR) {
 
@@ -50707,7 +50707,7 @@ function _calcularICP(analisis) {
 
         var P2LE = {1:[1],2:[1],3:[2],4:[1],5:[2],6:[1],7:[2],8:[1]};
 
-        var prRaw = {1:0,2:0,3:0,4:0,5:0};
+        var prRaw = {1:0,2:0,3:0,4:0};
 
         Object.entries(relas_globalData._habFreq||{}).forEach(function(e){ var ls=H2LE[e[0]]||[1]; ls.forEach(function(l){ prRaw[l]+=(+e[1]||0)/ls.length; }); });
 
@@ -50721,17 +50721,17 @@ function _calcularICP(analisis) {
 
 
 
-    var NOMS = {1:'Estilos de vida saludable',2:'Entornos promotores de salud',3:'Información y comunicación',4:'Formación e investigación',5:'Coordinación y gobernanza'};
+    var NOMS = {1:'Estilos de vida saludable',2:'Entornos promotores de salud',3:'Información y comunicación',4:'Formación e investigación'};
 
-    var ICOS = {1:'🌿',2:'🏘️',3:'📡',4:'🎓',5:'🤝'};
+    var ICOS = {1:'🌿',2:'🏘️',3:'📡',4:'🎓'};
 
-    var CODS = {1:'LE1',2:'LE2',3:'LE3',4:'LE4',5:'LE5'};
+    var CODS = {1:'LE1',2:'LE2',3:'LE3',4:'LE4'};
 
-    var ACTS = {1:'Programas de promoción de hábitos saludables',2:'Intervenciones en entornos y movilidad',3:'Campañas de comunicación y educación para la salud',4:'Formación de profesionales y comunidad',5:'Gobernanza local y coordinación intersectorial'};
+    var ACTS = {1:'Programas de promoción de hábitos saludables',2:'Intervenciones en entornos y movilidad',3:'Campañas de comunicación y educación para la salud',4:'Formación de profesionales y comunidad'};
 
 
 
-    var lineas = [1,2,3,4,5].map(function(lid) {
+    var lineas = [1,2,3,4].map(function(lid) {
 
         var pe=peMap[lid]||0, pt=ptMap[lid]||0, pr=prMap[lid]||0;
 
@@ -51009,13 +51009,10 @@ function renderizarResultadoIA(r) {
     });
     priHTML += '</div></div></details>';
 
-        // ── BLOQUE 2: MATRIZ DE CONVERGENCIA ──────────────────────────────
-
-    priHTML += '<div style="margin-bottom:1.5rem;">' +
-
-        '<h4 style="margin:0 0 0.75rem;color:#1e293b;font-size:0.9rem;font-weight:700;">📋 Matriz de convergencia entre fuentes</h4>' +
-
-        '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.76rem;">' +
+        // ── BLOQUE 2: MATRIZ DE CONVERGENCIA (colapsada por defecto) ──────
+    priHTML += '<details style="margin-bottom:1.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.7rem 1rem;">' +
+        '<summary style="cursor:pointer;font-size:0.82rem;font-weight:700;color:#64748b;user-select:none;list-style:none;">📋 Ver matriz de convergencia entre fuentes</summary>' +
+        '<div style="margin-top:0.85rem;"><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.76rem;">' +
 
         '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">' +
 
@@ -51049,7 +51046,7 @@ function renderizarResultadoIA(r) {
 
     });
 
-    priHTML += '</tbody></table></div></div>';
+    priHTML += '</tbody></table></div></div></details>';
 
 
 
@@ -51105,7 +51102,7 @@ function renderizarResultadoIA(r) {
 
         '</tr></thead><tbody>';
 
-    icp.lineas.slice(0,5).forEach(function(le, i) {
+    icp.lineas.slice(0,4).forEach(function(le, i) {
 
         var rowBg = i%2===0 ? '#f8fafc' : 'white';
 
