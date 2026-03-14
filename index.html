@@ -10844,6 +10844,11 @@ function actualizarBadgesFase4() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + municipio).once('value', snap => {
 
+        if (getMunicipioActual() !== municipio) {
+            console.warn('[COMPÁS AM] actualizarBadgesFase4: callback tardío para "' + municipio + '". Descartado.');
+            return;
+        }
+
         const datos = snap.val() || {};
 
         
@@ -10964,6 +10969,8 @@ function actualizarBadgesFase4() {
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] actualizarBadgesFase4: error Firebase para "' + municipio + '":', err);
     });
 
 }
