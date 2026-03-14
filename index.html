@@ -40892,6 +40892,11 @@ function relas_cargarDesdeFirebase(municipio) {
 
   db.ref(path).once('value', snap => {
 
+    if (getMunicipioActual() !== municipio) {
+      console.warn('[COMPÁS AM] relas_cargarDesdeFirebase: callback tardío para "' + municipio + '". Descartado.');
+      return;
+    }
+
     const data = snap.val();
 
     if (data && Array.isArray(data)) {
@@ -40906,6 +40911,8 @@ function relas_cargarDesdeFirebase(municipio) {
 
     }
 
+  }).catch(function(err) {
+    console.error('[COMPÁS] relas_cargarDesdeFirebase: error Firebase para "' + municipio + '":', err);
   });
 
 }
