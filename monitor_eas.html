@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor EAS — COMPÁS</title>
+<style>
+  :root {
+    --azul:#0074c8; --azul2:#00acd9; --verde:#059669; --rojo:#dc143c;
+    --ambar:#d97706; --gris:#64748b; --gris-claro:#f1f5f9;
+    --texto:#1e293b; --borde:#e2e8f0;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f8fafc; color:var(--texto); font-size:0.875rem; }
+
+  /* HEADER */
+  .header { background:linear-gradient(135deg,#0074c8 0%,#00acd9 60%,#0091d4 100%); color:white; padding:1.25rem 1.5rem; }
+  .header-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; }
+  .header h1 { font-size:1.2rem; font-weight:700; }
+  .header .sub { font-size:0.8rem; opacity:0.85; margin-top:0.2rem; }
+  .header-meta { font-size:0.75rem; opacity:0.75; text-align:right; }
+  .badge-header { display:inline-block; background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.3); border-radius:12px; padding:0.2rem 0.6rem; font-size:0.7rem; font-weight:600; margin-top:0.3rem; }
+
+  /* LAYOUT */
+  .container { max-width:1100px; margin:0 auto; padding:1.25rem 1rem 2rem; }
+
+  /* RESUMEN */
+  .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; margin-bottom:1.5rem; }
+  .summary-card { background:white; border:1px solid var(--borde); border-radius:10px; padding:0.9rem 1rem; }
+  .summary-card .label { font-size:0.7rem; color:var(--gris); text-transform:uppercase; letter-spacing:0.03em; font-weight:600; }
+  .summary-card .value { font-size:1.5rem; font-weight:700; color:var(--azul); margin-top:0.2rem; }
+  .summary-card .value.verde { color:var(--verde); }
+  .summary-card .value.rojo { color:var(--rojo); }
+  .summary-card .value.ambar { color:var(--ambar); }
+  .summary-card .desc { font-size:0.72rem; color:var(--gris); margin-top:0.2rem; }
+
+  /* SEÑALES */
+  .signals-card { background:white; border:1px solid var(--borde); border-radius:10px; padding:1rem 1.25rem; margin-bottom:1.5rem; }
+  .signals-card h3 { font-size:0.85rem; font-weight:700; margin-bottom:0.75rem; color:var(--texto); }
+  .signal-row { display:flex; align-items:center; gap:0.75rem; padding:0.45rem 0; border-bottom:1px solid var(--gris-claro); }
+  .signal-row:last-child { border-bottom:none; }
+  .signal-badge { min-width:44px; text-align:center; font-size:0.68rem; font-weight:700; border-radius:8px; padding:0.15rem 0.4rem; }
+  .signal-badge.peor { background:#fee2e2; color:var(--rojo); }
+  .signal-badge.mejor { background:#dcfce7; color:var(--verde); }
+  .signal-text { flex:1; font-size:0.78rem; color:var(--texto); }
+  .signal-vals { font-size:0.72rem; color:var(--gris); white-space:nowrap; }
+
+  /* ÁREAS */
+  .area-block { background:white; border:1px solid var(--borde); border-radius:10px; margin-bottom:1rem; overflow:hidden; }
+  .area-header { padding:0.9rem 1.25rem; background:var(--gris-claro); border-bottom:1px solid var(--borde); display:flex; align-items:center; gap:0.6rem; cursor:pointer; user-select:none; }
+  .area-header h2 { font-size:0.9rem; font-weight:700; flex:1; }
+  .area-header .area-badge { font-size:0.68rem; color:var(--gris); }
+  .area-toggle { font-size:0.7rem; color:var(--gris); }
+  .area-content { padding:0; }
+
+  /* GRUPOS */
+  .grupo-header { padding:0.55rem 1.25rem; background:#fcfcfd; border-bottom:1px solid #f0f4f8; font-size:0.73rem; font-weight:600; color:var(--gris); text-transform:uppercase; letter-spacing:0.03em; }
+  .grupo-nota { padding:0.35rem 1.25rem; background:#fffbeb; border-bottom:1px solid #fef3c7; font-size:0.71rem; color:#92400e; }
+
+  /* FILAS INDICADOR */
+  .ind-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:0.5rem; padding:0.55rem 1.25rem; border-bottom:1px solid #f8fafc; transition:background 0.1s; }
+  .ind-row:hover { background:#f8fafc; }
+  .ind-row:last-child { border-bottom:none; }
+  .ind-left {}
+  .ind-code { font-size:0.67rem; font-weight:700; color:var(--gris); text-transform:uppercase; letter-spacing:0.04em; }
+  .ind-pregunta { font-size:0.79rem; color:var(--texto); margin-top:0.1rem; line-height:1.3; }
+  .ind-tipo { font-size:0.64rem; color:var(--gris); margin-top:0.15rem; font-style:italic; }
+  .ind-right { min-width:210px; }
+  .ind-valores { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem; justify-content:flex-end; }
+  .ind-val-mun { font-size:0.88rem; font-weight:700; }
+  .ind-val-mun.verde { color:var(--verde); }
+  .ind-val-mun.rojo { color:var(--rojo); }
+  .ind-val-mun.ambar { color:var(--ambar); }
+  .ind-val-mun.neutro { color:var(--texto); }
+  .ind-val-ref { font-size:0.7rem; color:var(--gris); }
+  .ind-val-sin { font-size:0.75rem; color:#94a3b8; font-style:italic; }
+  .bar-container { position:relative; height:7px; background:#e2e8f0; border-radius:4px; overflow:visible; }
+  .bar-and { position:absolute; top:0; left:0; height:100%; border-radius:4px; background:#cbd5e1; transition:width 0.4s; }
+  .bar-mun { position:absolute; top:-2px; height:11px; width:3px; border-radius:2px; transition:left 0.4s; }
+  .bar-mun.verde { background:var(--verde); }
+  .bar-mun.rojo { background:var(--rojo); }
+  .bar-mun.neutro { background:var(--azul); }
+  .bar-mun.ambar { background:var(--ambar); }
+
+  /* NO DATA */
+  .no-data { text-align:center; padding:3rem 2rem; color:var(--gris); }
+  .no-data h2 { font-size:1.1rem; margin-bottom:0.5rem; }
+  .no-data p { font-size:0.85rem; margin-bottom:1.5rem; }
+  .btn-volver { background:var(--azul); color:white; border:none; border-radius:8px; padding:0.6rem 1.2rem; font-size:0.85rem; cursor:pointer; }
+
+  /* NOTE */
+  .nota-card { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.77rem; color:#1e40af; }
+
+  @media(max-width:640px) {
+    .ind-row { grid-template-columns:1fr; }
+    .ind-right { min-width:auto; }
+    .summary-grid { grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ─── Textos reales de las preguntas EAS ──────────────────────────────────────
+const EAS_PREGUNTAS = {
+  // Área 1: Salud percibida y CVRS
+  P7:             { q:'¿En general, diría que su salud es buena o muy buena?',          tipo:'autorreporte_percepcion' },
+  P7b:            { q:'¿En general, diría que su salud mental es buena o muy buena?',   tipo:'autorreporte_percepcion' },
+  P8a:            { q:'¿Su salud actual le limita para hacer esfuerzos moderados (mover una mesa, pasar el aspirador, caminar más de una hora)?', tipo:'autorreporte_percepcion' },
+  P8b:            { q:'¿Su salud actual le limita para subir varios pisos por la escalera?', tipo:'autorreporte_percepcion' },
+  P9a:            { q:'Por causa de su salud física, ¿hizo menos de lo que hubiera querido hacer?', tipo:'autorreporte_percepcion' },
+  P9b:            { q:'Por causa de su salud física, ¿tuvo que dejar de hacer algunas tareas en su trabajo o actividades cotidianas?', tipo:'autorreporte_percepcion' },
+  P10a:           { q:'Por algún problema emocional, ¿hizo menos de lo que hubiera querido hacer?', tipo:'autorreporte_percepcion' },
+  P10b:           { q:'Por algún problema emocional, ¿no hizo su trabajo o sus actividades cotidianas tan cuidadosamente como de costumbre?', tipo:'autorreporte_percepcion' },
+  P11:            { q:'¿El dolor le ha dificultado bastante o mucho su trabajo habitual (incluido el trabajo fuera de casa y las tareas domésticas)?', tipo:'autorreporte_percepcion' },
+  P12a:           { q:'Durante las últimas cuatro semanas, ¿con qué frecuencia se sintió calmado y tranquilo?', tipo:'autorreporte_percepcion' },
+  P12b:           { q:'Durante las últimas cuatro semanas, ¿con qué frecuencia tuvo mucha energía?', tipo:'autorreporte_percepcion' },
+  P12c:           { q:'Durante las últimas cuatro semanas, ¿con qué frecuencia se sintió desanimado y triste?', tipo:'autorreporte_percepcion' },
+  P13:            { q:'¿Su salud física o los problemas emocionales le han dificultado bastante o mucho sus actividades sociales (como visitar a amigos o familiares)?', tipo:'autorreporte_percepcion' },
+  // Área 2: Tabaco
+  P23:            { q:'¿Podría decirme si fuma actualmente? (% fumador diario)',         tipo:'autorreporte_conducta' },
+  P23_ex:         { q:'¿Podría decirme si fuma? (% exfumador)',                          tipo:'autorreporte_conducta' },
+  P25d:           { q:'¿Usa cigarrillos electrónicos, vapeadores o similares?',          tipo:'autorreporte_conducta' },
+  // Área 2: Alcohol
+  P29:            { q:'¿Presenta consumo de riesgo de alcohol según criterios EAS?',     tipo:'autorreporte_conducta' },
+  P32_CAGE:       { q:'CAGE positivo (≥ 2 respuestas afirmativas): escala de cribado de problemas relacionados con el alcohol', tipo:'escala_validada' },
+  // Área 2: Sueño
+  P33:            { q:'¿Cuántas horas al día duerme habitualmente entre semana? (media)', tipo:'autorreporte_conducta' },
+  P33_fin:        { q:'¿Cuántas horas al día duerme habitualmente en fin de semana? (media)', tipo:'autorreporte_conducta' },
+  P33a:           { q:'Las horas que duerme, ¿le permiten descansar lo suficiente?',     tipo:'autorreporte_percepcion' },
+  P33b_insomnio:  { q:'¿Tiene problemas frecuentes para dormir (dificultad para dormirse, despertarse de noche o muy temprano, cansancio al despertar)?', tipo:'autorreporte_percepcion' },
+  // Área 2: Actividad física
+  P34:            { q:'¿Qué tipo de actividad física implica su trabajo o actividad habitual? (% sedentario — sentado la mayor parte del tiempo)', tipo:'autorreporte_conducta' },
+  P34a_intenso:   { q:'En su tiempo libre, ¿practica ejercicio físico intenso (entrenamiento varias veces a la semana)?', tipo:'autorreporte_conducta' },
+  P34a_moderado:  { q:'En su tiempo libre, ¿practica actividad física moderada de forma regular?', tipo:'autorreporte_conducta' },
+  P34a_nada:      { q:'En su tiempo libre, ¿no realiza ningún tipo de ejercicio físico?',tipo:'autorreporte_conducta' },
+  // Área 2: PREDIMED
+  P36b1:          { q:'¿Usa aceite de oliva como principal grasa para cocinar?',         tipo:'autorreporte_conducta' },
+  P36b_aceite:    { q:'¿Cuántas cucharadas de aceite de oliva usa al día? (media)',      tipo:'autorreporte_conducta' },
+  P36b_verdura:   { q:'¿Cuántas raciones de verdura o ensalada come al día? (media)',    tipo:'autorreporte_conducta' },
+  P36b_fruta:     { q:'¿Cuántas piezas de fruta toma al día? (media)',                   tipo:'autorreporte_conducta' },
+  P36b_carne:     { q:'¿Cuántas raciones de carnes rojas o embutidos consume al día? (media)', tipo:'autorreporte_conducta' },
+  P36b_azucar:    { q:'¿Cuántas bebidas azucaradas, refrescos o zumos industriales toma al día? (media)', tipo:'autorreporte_conducta' },
+  P36b_legumbres: { q:'¿Cuántas raciones de legumbres consume a la semana? (media)',     tipo:'autorreporte_conducta' },
+  P36b_pescado:   { q:'¿Cuántas raciones de pescado o marisco consume a la semana? (media)', tipo:'autorreporte_conducta' },
+  PREDIMED:       { q:'Alta adherencia a dieta mediterránea — escala PREDIMED (14 ítems, punto de corte ≥ 9)', tipo:'escala_validada' },
+  // Área 3: Vivienda
+  P4d_frio:       { q:'En invierno, ¿puede mantener su vivienda suficientemente caliente? (% que no puede)', tipo:'autorreporte_situacion' },
+  P4d_calor:      { q:'En verano, ¿puede mantener su vivienda suficientemente fresca? (% que no puede)', tipo:'autorreporte_situacion' },
+  // Área 3: Entorno barrio
+  P5_ruido:       { q:'En su barrio, ¿tiene ruido exterior molesto?',                   tipo:'autorreporte_percepcion' },
+  P5_olores:      { q:'En su barrio, ¿tiene malos olores del exterior?',                tipo:'autorreporte_percepcion' },
+  P5_contaminacion:{ q:'En su barrio, ¿hay contaminación del aire elevada?',            tipo:'autorreporte_percepcion' },
+  P5_industria:   { q:'¿Hay industria contaminante cerca de su vivienda?',              tipo:'autorreporte_percepcion' },
+  P5_zonas_verdes:{ q:'En su barrio, ¿escasean las zonas verdes?',                      tipo:'autorreporte_percepcion' },
+  P5_delincuencia:{ q:'En su barrio, ¿hay delincuencia o inseguridad?',                 tipo:'autorreporte_percepcion' },
+  P5_trafico:     { q:'En su barrio, ¿hay tráfico intenso o muy frecuente?',            tipo:'autorreporte_percepcion' },
+  P5b:            { q:'¿Valora la calidad del medio ambiente de su barrio como buena o muy buena?', tipo:'autorreporte_percepcion' },
+  // Área 3: Duke-UNC
+  DUKE_bajo:      { q:'Apoyo social bajo según escala Duke-UNC (puntuación < 32 sobre 55) — 11 ítems de apoyo funcional percibido', tipo:'escala_validada' },
+  DUKE_media:     { q:'Puntuación media en la escala Duke-UNC de apoyo social funcional (rango 11–55)', tipo:'escala_validada' },
+  // Área 3: Bienestar emocional
+  P57b1:          { q:'Durante las últimas semanas, ¿se ha sentido deprimido/a (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  P57b2:          { q:'Durante las últimas semanas, ¿se ha sentido feliz (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  P57b3:          { q:'Durante las últimas semanas, ¿se ha sentido solo/a (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  P57b4:          { q:'Durante las últimas semanas, ¿ha tenido la sensación de disfrutar de la vida (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  P57b5:          { q:'Durante las últimas semanas, ¿se ha sentido rebosante de energía (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  P57b6:          { q:'Durante las últimas semanas, ¿se ha sentido tranquilo/a y relajado/a (con frecuencia o siempre)?', tipo:'autorreporte_percepcion' },
+  // Área 3: Situación económica
+  P71_dificultad: { q:'¿Llega a fin de mes con dificultad (dificultad + mucha dificultad)?', tipo:'autorreporte_situacion' },
+  P71_mucha_dif:  { q:'¿Llega a fin de mes con mucha dificultad?',                      tipo:'autorreporte_situacion' }
+};
+
+const TIPO_LABELS = {
+  autorreporte_percepcion: 'Percepción subjetiva (autorreporte)',
+  autorreporte_conducta:   'Conducta autodeclarada',
+  autorreporte_situacion:  'Situación declarada',
+  escala_validada:         'Escala validada'
+};
+
+// ─── Estructura de áreas (igual que ESTRUCTURA_DETERMINANTES en index.html) ──
+const AREAS = [
+  {
+    id: 'area1', icono: '🩺',
+    nombre: 'Salud percibida y calidad de vida relacionada con la salud',
+    nota: 'Indicadores de autorreporte de salud percibida. Todos los valores son porcentajes de respuesta favorable/desfavorable según el ítem.',
+    grupos: [{
+      nombre: null,
+      indicadores: [
+        { codigo:'P7',   texto:'¿Salud general buena/muy buena?', unidad:'%', polaridad:1 },
+        { codigo:'P7b',  texto:'¿Salud mental buena/muy buena?',  unidad:'%', polaridad:1 },
+        { codigo:'P8a',  texto:'Limitación para esfuerzos moderados', unidad:'%', polaridad:-1 },
+        { codigo:'P8b',  texto:'Limitación para subir escaleras',      unidad:'%', polaridad:-1 },
+        { codigo:'P9a',  texto:'Hizo menos de lo deseado por salud física', unidad:'%', polaridad:-1 },
+        { codigo:'P9b',  texto:'Dejó tareas por salud física',           unidad:'%', polaridad:-1 },
+        { codigo:'P10a', texto:'Hizo menos por problema emocional',      unidad:'%', polaridad:-1 },
+        { codigo:'P10b', texto:'Menor cuidado en tareas por problema emocional', unidad:'%', polaridad:-1 },
+        { codigo:'P11',  texto:'Dolor dificulta bastante/mucho trabajo habitual', unidad:'%', polaridad:-1 },
+        { codigo:'P12a', texto:'Se siente calmado y tranquilo frecuentemente', unidad:'%', polaridad:1 },
+        { codigo:'P12b', texto:'Tiene mucha energía frecuentemente',     unidad:'%', polaridad:1 },
+        { codigo:'P12c', texto:'Se siente desanimado y triste frecuentemente', unidad:'%', polaridad:-1 },
+        { codigo:'P13',  texto:'Problemas de salud dificultaron vida social', unidad:'%', polaridad:-1 }
+      ]
+    }]
+  },
+  {
+    id: 'area2', icono: '🏃',
+    nombre: 'Estilos de vida y conductas de salud (autodeclaradas)',
+    nota: 'Conductas declaradas sujetas a sesgo de deseabilidad social. Las conductas censuradas (tabaco, alcohol) tienden a infraestimarse; las deseables (ejercicio, dieta) a sobreestimarse.',
+    grupos: [
+      {
+        nombre: 'Consumo de tabaco (autodeclarado)',
+        nota: 'Posible infraestimación por deseabilidad social.',
+        indicadores: [
+          { codigo:'P23',    texto:'Fumador diario',           unidad:'%', polaridad:-1 },
+          { codigo:'P23_ex', texto:'Exfumador',                unidad:'%', polaridad:1 },
+          { codigo:'P25d',   texto:'Usa cigarrillo electrónico', unidad:'%', polaridad:-1 }
+        ]
+      },
+      {
+        nombre: 'Consumo de alcohol (autodeclarado)',
+        nota: 'CAGE es escala de cribado, no diagnóstica. Posible infraestimación.',
+        indicadores: [
+          { codigo:'P29',      texto:'Consumo de riesgo de alcohol', unidad:'%', polaridad:-1 },
+          { codigo:'P32_CAGE', texto:'CAGE positivo (≥2 respuestas)', unidad:'%', polaridad:-1 }
+        ]
+      },
+      {
+        nombre: 'Sueño y descanso (autodeclarado)',
+        nota: null,
+        indicadores: [
+          { codigo:'P33',          texto:'Horas de sueño entre semana', unidad:'h', polaridad:0 },
+          { codigo:'P33_fin',      texto:'Horas de sueño fin de semana', unidad:'h', polaridad:0 },
+          { codigo:'P33a',         texto:'Descansa lo suficiente',       unidad:'%', polaridad:1 },
+          { codigo:'P33b_insomnio',texto:'Problemas de sueño frecuentes', unidad:'%', polaridad:-1 }
+        ]
+      },
+      {
+        nombre: 'Actividad física (autodeclarada)',
+        nota: 'Posible sobreestimación de ejercicio por deseabilidad social.',
+        indicadores: [
+          { codigo:'P34',          texto:'Trabajo sedentario (sentado)',      unidad:'%', polaridad:-1 },
+          { codigo:'P34a_intenso', texto:'Ejercicio intenso en tiempo libre', unidad:'%', polaridad:1 },
+          { codigo:'P34a_moderado',texto:'Ejercicio moderado en tiempo libre', unidad:'%', polaridad:1 },
+          { codigo:'P34a_nada',    texto:'Sin ejercicio en tiempo libre',      unidad:'%', polaridad:-1 }
+        ]
+      },
+      {
+        nombre: 'Alimentación — Cuestionario PREDIMED (autodeclarada)',
+        nota: 'Escala validada de adherencia a dieta mediterránea. 14 ítems, punto de corte ≥9.',
+        indicadores: [
+          { codigo:'P36b1',        texto:'Aceite de oliva como grasa principal', unidad:'%', polaridad:1 },
+          { codigo:'P36b_aceite',  texto:'Cucharadas aceite de oliva/día',       unidad:'ud', polaridad:1 },
+          { codigo:'P36b_verdura', texto:'Raciones verdura o ensalada/día',      unidad:'ud', polaridad:1 },
+          { codigo:'P36b_fruta',   texto:'Piezas de fruta/día',                  unidad:'ud', polaridad:1 },
+          { codigo:'P36b_carne',   texto:'Raciones carnes rojas/día',            unidad:'ud', polaridad:-1 },
+          { codigo:'P36b_azucar',  texto:'Bebidas azucaradas/día',               unidad:'ud', polaridad:-1 },
+          { codigo:'P36b_legumbres',texto:'Raciones legumbres/semana',           unidad:'ud', polaridad:1 },
+          { codigo:'P36b_pescado', texto:'Raciones pescado o marisco/semana',    unidad:'ud', polaridad:1 },
+          { codigo:'PREDIMED',     texto:'Alta adherencia dieta mediterránea',   unidad:'%', polaridad:1 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'area3', icono: '🏠',
+    nombre: 'Entorno, determinantes sociales y apoyo (declarados)',
+    nota: 'Combina indicadores de privación material (vivienda, economía), percepciones del entorno (barrio) y escala validada de apoyo social (Duke-UNC). Los indicadores de percepción ambiental NO sustituyen mediciones objetivas.',
+    grupos: [
+      {
+        nombre: 'Condiciones de vivienda (situación declarada)',
+        nota: 'Indicadores de privación energética del hogar.',
+        indicadores: [
+          { codigo:'P4d_frio',  texto:'No puede mantener vivienda cálida en invierno', unidad:'%', polaridad:-1 },
+          { codigo:'P4d_calor', texto:'No puede mantener vivienda fresca en verano',   unidad:'%', polaridad:-1 }
+        ]
+      },
+      {
+        nombre: 'Percepción del entorno del barrio',
+        nota: '⚠️ Datos de percepción subjetiva. No sustituyen mediciones objetivas de calidad ambiental.',
+        indicadores: [
+          { codigo:'P5_ruido',        texto:'Percibe ruido molesto en su barrio',          unidad:'%', polaridad:-1 },
+          { codigo:'P5_olores',       texto:'Percibe malos olores en su barrio',            unidad:'%', polaridad:-1 },
+          { codigo:'P5_contaminacion',texto:'Percibe contaminación del aire elevada',       unidad:'%', polaridad:-1 },
+          { codigo:'P5_industria',    texto:'Percibe industria contaminante cerca',         unidad:'%', polaridad:-1 },
+          { codigo:'P5_zonas_verdes', texto:'Percibe escasez de zonas verdes',              unidad:'%', polaridad:-1 },
+          { codigo:'P5_delincuencia', texto:'Percibe delincuencia o inseguridad',           unidad:'%', polaridad:-1 },
+          { codigo:'P5_trafico',      texto:'Percibe tráfico intenso en su barrio',         unidad:'%', polaridad:-1 },
+          { codigo:'P5b',             texto:'Valora bien el medio ambiente de su barrio',   unidad:'%', polaridad:1 }
+        ]
+      },
+      {
+        nombre: 'Apoyo social funcional — Escala Duke-UNC',
+        nota: 'Escala validada de apoyo social percibido. 11 ítems, rango 11–55, punto de corte <32 indica bajo apoyo.',
+        indicadores: [
+          { codigo:'DUKE_bajo',  texto:'Apoyo social bajo (Duke-UNC < 32)', unidad:'%', polaridad:-1 },
+          { codigo:'DUKE_media', texto:'Puntuación media Duke-UNC',          unidad:'pts', polaridad:1 }
+        ]
+      },
+      {
+        nombre: 'Bienestar emocional (autopercibido)',
+        nota: 'Indicadores de bienestar subjetivo. No sustituyen evaluación clínica.',
+        indicadores: [
+          { codigo:'P57b1', texto:'Se siente deprimido/a frecuentemente',        unidad:'%', polaridad:-1 },
+          { codigo:'P57b2', texto:'Se siente feliz frecuentemente',               unidad:'%', polaridad:1 },
+          { codigo:'P57b3', texto:'Se siente solo/a frecuentemente',              unidad:'%', polaridad:-1 },
+          { codigo:'P57b4', texto:'Disfruta de la vida frecuentemente',           unidad:'%', polaridad:1 },
+          { codigo:'P57b5', texto:'Se siente con energía frecuentemente',         unidad:'%', polaridad:1 },
+          { codigo:'P57b6', texto:'Se siente tranquilo/a y relajado/a frecuentemente', unidad:'%', polaridad:1 }
+        ]
+      },
+      {
+        nombre: 'Situación económica (declarada)',
+        nota: 'Indicador de privación económica subjetiva.',
+        indicadores: [
+          { codigo:'P71_dificultad', texto:'Llega a fin de mes con dificultad',       unidad:'%', polaridad:-1 },
+          { codigo:'P71_mucha_dif',  texto:'Llega a fin de mes con mucha dificultad', unidad:'%', polaridad:-1 }
+        ]
+      }
+    ]
+  }
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getColor(valor, refAnd, polaridad) {
+  if (isNaN(valor) || isNaN(refAnd) || polaridad === 0) return 'neutro';
+  const diff = (valor - refAnd) / Math.max(Math.abs(refAnd), 1);
+  const umbral = 0.05;
+  if (polaridad === 1)  return diff > umbral ? 'verde' : diff < -umbral ? 'rojo' : 'neutro';
+  if (polaridad === -1) return diff < -umbral ? 'verde' : diff > umbral  ? 'rojo' : 'neutro';
+  return 'neutro';
+}
+
+function formatVal(v, unidad) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return (Math.round(v * 10) / 10) + ' ' + unidad;
+}
+
+function renderBar(valor, refAnd, polaridad, unidad) {
+  if (isNaN(valor) || isNaN(refAnd)) return '';
+  const maxVal = Math.max(valor, refAnd) * 1.2 || 100;
+  const pAnd = Math.min(refAnd / maxVal * 100, 100);
+  const pMun = Math.min(valor / maxVal * 100, 100);
+  const color = getColor(valor, refAnd, polaridad);
+  return `<div class="bar-container">
+    <div class="bar-and" style="width:${pAnd.toFixed(1)}%"></div>
+    <div class="bar-mun ${color}" style="left:calc(${pMun.toFixed(1)}% - 1.5px)"></div>
+  </div>`;
+}
+
+function countLoaded(valores) {
+  return Object.keys(valores).filter(k => valores[k] !== null && !isNaN(valores[k])).length;
+}
+
+function getSignals(valores, referencias, limit) {
+  const signals = [];
+  AREAS.forEach(area => {
+    area.grupos.forEach(g => {
+      g.indicadores.forEach(ind => {
+        const v = parseFloat(valores[ind.codigo]);
+        const ref = referencias[ind.codigo];
+        if (!ref) return;
+        const refAnd = parseFloat(ref.refAndalucia);
+        if (isNaN(v) || isNaN(refAnd) || ind.polaridad === 0) return;
+        const diff = (v - refAnd) / Math.max(Math.abs(refAnd), 1);
+        const signed = ind.polaridad === -1 ? diff : -diff; // signed > 0 means peor
+        if (Math.abs(diff) > 0.05) {
+          const pq = EAS_PREGUNTAS[ind.codigo];
+          signals.push({
+            codigo: ind.codigo,
+            texto: pq ? pq.q : ind.texto,
+            valor: v, refAnd, unidad: ind.unidad,
+            diff, signed, color: getColor(v, refAnd, ind.polaridad),
+            area: area.nombre.split(' ').slice(0,4).join(' ')
+          });
+        }
+      });
+    });
+  });
+  signals.sort((a,b) => Math.abs(b.signed) - Math.abs(a.signed));
+  return signals.slice(0, limit || 10);
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderIndicador(ind, valores, referencias) {
+  const v = parseFloat(valores[ind.codigo]);
+  const ref = referencias[ind.codigo] || {};
+  const refAnd = parseFloat(ref.refAndalucia);
+  const refGra = parseFloat(ref.refGranada);
+  const color  = getColor(v, refAnd, ind.polaridad);
+  const pq     = EAS_PREGUNTAS[ind.codigo] || {};
+
+  let valHtml;
+  if (isNaN(v)) {
+    valHtml = `<span class="ind-val-sin">Sin dato</span>`;
+  } else {
+    valHtml = `<span class="ind-val-mun ${color}">${formatVal(v, ind.unidad)}</span>`;
+    if (!isNaN(refAnd)) valHtml += ` <span class="ind-val-ref">And: ${formatVal(refAnd, ind.unidad)}</span>`;
+    if (!isNaN(refGra)) valHtml += ` <span class="ind-val-ref">Gra: ${formatVal(refGra, ind.unidad)}</span>`;
+  }
+
+  return `<div class="ind-row">
+    <div class="ind-left">
+      <div class="ind-code">${ind.codigo}</div>
+      <div class="ind-pregunta">${pq.q || ind.texto}</div>
+      <div class="ind-tipo">${TIPO_LABELS[pq.tipo] || ''}</div>
+    </div>
+    <div class="ind-right">
+      <div class="ind-valores">${valHtml}</div>
+      ${renderBar(v, refAnd, ind.polaridad, ind.unidad)}
+    </div>
+  </div>`;
+}
+
+function renderArea(area, valores, referencias) {
+  let html = `<div class="area-block">
+    <div class="area-header" onclick="toggleArea('${area.id}')">
+      <h2>${area.icono} ${area.nombre}</h2>
+      <span class="area-toggle" id="toggle-${area.id}">▼</span>
+    </div>
+    <div class="area-content" id="content-${area.id}">
+      <div style="padding:0.6rem 1.25rem 0.4rem; background:#f0f9ff; border-bottom:1px solid #e0f2fe; font-size:0.73rem; color:#0369a1;">
+        ℹ️ ${area.nota}
+      </div>`;
+  area.grupos.forEach(g => {
+    if (g.nombre) {
+      html += `<div class="grupo-header">${g.nombre}</div>`;
+      if (g.nota) html += `<div class="grupo-nota">⚠️ ${g.nota}</div>`;
+    }
+    g.indicadores.forEach(ind => {
+      html += renderIndicador(ind, valores, referencias);
+    });
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function toggleArea(id) {
+  const el = document.getElementById('content-' + id);
+  const tog = document.getElementById('toggle-' + id);
+  if (!el) return;
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? '' : 'none';
+  if (tog) tog.textContent = hidden ? '▼' : '▶';
+}
+
+function renderApp(data) {
+  const { valores, referencias, municipioNombre, municipio, timestamp } = data;
+  const total = 55;
+  const loaded = countLoaded(valores);
+  const signals = getSignals(valores, referencias, 8);
+  const peores = signals.filter(s => s.color === 'rojo');
+  const mejores = signals.filter(s => s.color === 'verde');
+
+  const fechaStr = timestamp ? new Date(timestamp).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+
+  let html = `
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>📊 Monitor EAS — Encuesta Andaluza de Salud</h1>
+          <div class="sub">Municipio: <strong>${municipioNombre || municipio || '—'}</strong></div>
+          <div class="badge-header">EAS 2023 · Estimación Bettersurveys</div>
+        </div>
+        <div class="header-meta">
+          <div>${fechaStr}</div>
+          <div style="margin-top:0.3rem">${loaded}/${total} indicadores cargados</div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="label">Indicadores cargados</div>
+          <div class="value">${loaded}<span style="font-size:1rem;color:var(--gris)">/${total}</span></div>
+          <div class="desc">${Math.round(loaded/total*100)}% de los indicadores EAS</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Señales detectadas</div>
+          <div class="value ${signals.length > 0 ? 'ambar' : 'verde'}">${signals.length}</div>
+          <div class="desc">Indicadores con desviación >5% de Andalucía</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Por mejorar (peor que And.)</div>
+          <div class="value ${peores.length > 0 ? 'rojo' : 'verde'}">${peores.length}</div>
+          <div class="desc">Indicadores en rojo</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Por encima (mejor que And.)</div>
+          <div class="value verde">${mejores.length}</div>
+          <div class="desc">Indicadores en verde</div>
+        </div>
+      </div>`;
+
+  if (signals.length > 0) {
+    html += `<div class="signals-card"><h3>⚡ Señales más destacadas (desviación respecto a Andalucía)</h3>`;
+    signals.forEach(s => {
+      const label = s.color === 'rojo' ? 'Peor' : 'Mejor';
+      const diffPct = Math.abs(Math.round(s.diff * 1000) / 10);
+      html += `<div class="signal-row">
+        <span class="signal-badge ${s.color === 'rojo' ? 'peor' : 'mejor'}">${label}</span>
+        <span class="signal-text">${s.texto}</span>
+        <span class="signal-vals">${formatVal(s.valor, s.unidad)} vs And. ${formatVal(s.refAnd, s.unidad)} · ${diffPct}%</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="nota-card">
+    ℹ️ <strong>Fuente:</strong> Estimaciones municipales Bettersurveys a partir de la Encuesta Andaluza de Salud (EAS) 2023.
+    Todos los indicadores son de <strong>autorreporte</strong> obtenidos mediante entrevista CAPI.
+    Las barras muestran el municipio (marcador vertical) frente a la referencia Andalucía (barra gris).
+    <strong>Verde</strong> = mejor que Andalucía · <strong>Rojo</strong> = peor que Andalucía · <strong>Gris</strong> = sin referencia/neutral.
+  </div>`;
+
+  AREAS.forEach(area => {
+    html += renderArea(area, valores, referencias);
+  });
+
+  html += `<div style="text-align:center; margin-top:1.5rem; color:var(--gris); font-size:0.75rem;">
+    Monitor EAS — COMPÁS · Datos exportados desde TAB 2 el ${fechaStr}
+    <br>Fuente primaria: Encuesta Andaluza de Salud 2023 — Consejería de Salud y Consumo, Junta de Andalucía
+  </div></div>`;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+function renderNoData() {
+  document.getElementById('app').innerHTML = `
+    <div class="header"><h1>📊 Monitor EAS — COMPÁS</h1></div>
+    <div class="container">
+      <div class="no-data">
+        <h2>Sin datos disponibles</h2>
+        <p>No se encontraron datos de la EAS para mostrar en este monitor.<br>
+        Accede desde COMPÁS → TAB 2 → Acordeón "05 Determinantes" → botón "📊 Abrir monitor EAS".</p>
+        <button class="btn-volver" onclick="window.close()">Cerrar ventana</button>
+      </div>
+    </div>`;
+}
+
+// ─── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  var raw = null;
+  try { raw = localStorage.getItem('compas_monitor_eas'); } catch(e) {}
+  if (!raw) { renderNoData(); return; }
+  var data = null;
+  try { data = JSON.parse(raw); } catch(e) {}
+  if (!data || !data.valores) { renderNoData(); return; }
+  renderApp(data);
+})();
+</script>
+</body>
+</html>

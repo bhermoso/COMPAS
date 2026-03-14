@@ -1233,7 +1233,7 @@
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; max-width:680px; margin:1.25rem auto 0; padding:0 1rem;">
                 <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:1.1rem 1.25rem; text-align:center;">
                     <div style="font-weight:700; color:#0074c8; font-size:1rem; margin-bottom:0.4rem;">🔍 Analizar</div>
-                    <div style="font-size:0.81rem; color:#475569; line-height:1.55;">Perfil de salud local, determinantes, indicadores y síntesis analítica.</div>
+                    <div style="font-size:0.81rem; color:#475569; line-height:1.55;">Perfil de salud local, indicadores EAS y síntesis analítica.</div>
                 </div>
                 <div style="background:#fef9ee; border:1px solid #fde68a; border-radius:12px; padding:1.1rem 1.25rem; text-align:center;">
                     <div style="font-weight:700; color:#b45309; font-size:1rem; margin-bottom:0.4rem;">🎯 Priorizar</div>
@@ -1483,7 +1483,7 @@
                     <!-- 4. DETERMINANTES EAS -->
                     <div style="border:2px solid #fde68a; border-radius:10px; overflow:hidden;">
                         <div style="background:linear-gradient(135deg,#d97706,#b45309); color:white; padding:0.75rem 1rem; display:flex; align-items:center; gap:0.5rem;">
-                            <span>🏠</span><strong>Determinantes (EAS)</strong>
+                            <span>🏠</span><strong>Encuesta Andaluza de Salud (EAS)</strong>
                             <span style="margin-left:auto; background:rgba(255,255,255,0.25); padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem;">⚠️ Estimación</span>
                         </div>
                         <div style="padding:1rem;">
@@ -1606,8 +1606,8 @@
             <div class="acordeon-item" style="margin-bottom:0.75rem;">
                 <div class="acordeon-header" onclick="toggleAcordeon(this); renderizarSeccionPriorizacion();" style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:0.75rem;">
-                        <span>04 Priorización ciudadana</span>
-                        <span style="background:#f0f9ff; color:#0369a1; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:600;">🎯 Estratégica · Temática · Mixta</span>
+                        <span>04 Priorización</span>
+                        <span style="background:#f0f9ff; color:#0369a1; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.7rem; font-weight:600;">🎯 Ciudadana · Técnica · VRELAS</span>
                     </div>
                     <span class="flecha">▼</span>
                 </div>
@@ -1667,7 +1667,7 @@
                             <div id="ia-check-estudios" style="font-size:0.85rem; color:#94a3b8;">⬜ Estudios complementarios</div>
                             <div id="ia-check-priorizacion" style="font-size:0.85rem; color:#94a3b8;">⬜ Priorización ciudadana (Temática · Estratégica · Mixta)</div>
                             <div id="ia-check-relas" style="font-size:0.85rem; color:#94a3b8;">⬜ Priorización Mixta (hábitos, problemas y colectivos)</div>
-                            <div id="ia-check-determinantes" style="font-size:0.85rem; color:#94a3b8;">⬜ Determinantes EAS</div>
+                            <div id="ia-check-determinantes" style="font-size:0.85rem; color:#94a3b8;">⬜ Indicadores EAS</div>
                             <div id="ia-check-indicadores" style="font-size:0.85rem; color:#94a3b8;">⬜ Indicadores de salud</div>
                         </div>
 
@@ -2933,7 +2933,7 @@
                     <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem;">Datos del municipio:</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="badges-container">
                         <span class="badge-dato" id="badge-informe" style="background:#fff9e6;color:#ff6600;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;">📄 Informe: --</span>
-                        <span class="badge-dato" id="badge-determinantes" style="background:#fff9e6;color:#ff6600;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;">📊 Determinantes: --</span>
+                        <span class="badge-dato" id="badge-determinantes" style="background:#fff9e6;color:#ff6600;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;">📊 EAS: --</span>
                         <span class="badge-dato" id="badge-conclusiones" style="background:#fff9e6;color:#ff6600;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;">💡 Conclusiones: --</span>
                         <span class="badge-dato" id="badge-priorizacion" style="background:#fff9e6;color:#ff6600;padding:0.25rem 0.5rem;border-radius:4px;font-size:0.75rem;">🗳️ Priorización: --</span>
                     </div>
@@ -2950,7 +2950,7 @@
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #475569;">
                         <li style="padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9;">📋 Marco estratégico EPVSA</li>
                         <li style="padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9;">📊 Informe situación de salud</li>
-                        <li style="padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9;">🏠 Determinantes de la salud</li>
+                        <li style="padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9;">🏠 Indicadores EAS</li>
                         <li style="padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9;">💡 Conclusiones y recomendaciones</li>
                         <li style="padding: 0.4rem 0;">🗳️ Priorización del Grupo motor</li>
                     </ul>
@@ -3767,7 +3767,7 @@
                     <span style="font-size:1.1rem; flex-shrink:0;">🔍</span>
                     <div>
                         <div style="font-weight:700; color:#1e293b; font-size:0.83rem;">Perfil de salud local</div>
-                        <div style="font-size:0.77rem; color:#64748b; line-height:1.45; margin-top:0.15rem;">Informe de salud, estudios complementarios, determinantes e indicadores integrados con conclusiones y recomendaciones.</div>
+                        <div style="font-size:0.77rem; color:#64748b; line-height:1.45; margin-top:0.15rem;">Informe de salud, estudios complementarios, datos EAS e indicadores integrados con conclusiones y recomendaciones.</div>
                     </div>
                 </div>
                 <div style="display:flex; gap:0.65rem; align-items:flex-start; padding:0.8rem 0.9rem; background:#fef9ee; border-radius:8px; border-left:3px solid #ffb61b;">
@@ -3873,7 +3873,7 @@
                     <div style="background:#0369a1; color:white; padding:0.65rem 0.85rem; font-size:0.65rem; font-weight:700; writing-mode:vertical-rl; text-orientation:mixed; text-align:center; letter-spacing:0.06em;">Síntesis analítica</div>
                     <div style="padding:0.65rem 0.9rem;">
                         <div style="font-weight:700; font-size:0.85rem; color:#1e293b; margin-bottom:0.2rem;">Síntesis del perfil de salud</div>
-                        <div style="font-size:0.79rem; color:#64748b; line-height:1.5;">Interpreta el perfil de salud local e identifica los problemas con mayor carga sobre la población a partir de indicadores, determinantes y priorización ciudadana. Requiere validación técnica.</div>
+                        <div style="font-size:0.79rem; color:#64748b; line-height:1.5;">Interpreta el perfil de salud local e identifica los problemas con mayor carga sobre la población a partir de indicadores EAS y priorización ciudadana. Requiere validación técnica.</div>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns:auto 1fr; border-radius:9px; overflow:hidden; border:1px solid #e2e8f0;">
@@ -5080,11 +5080,64 @@ let valoresMunicipio = {};
 const DETERMINANTES_EAS = ESTRUCTURA_DETERMINANTES;
 
 // Generar HTML de sección Determinantes
+// -- Monitor EAS: escribe datos en localStorage y abre monitor_eas.html --
+// Lee valoresMunicipio y referenciasEAS (globals de index.html)
+function easMonitor_abrir() {
+    var valores = (typeof valoresMunicipio !== 'undefined') ? valoresMunicipio : {};
+    var referencias = (typeof referenciasEAS !== 'undefined') ? referenciasEAS : {};
+    var municipio = (typeof getMunicipioActual === 'function') ? getMunicipioActual() : '';
+    var municipioNombre = (typeof getNombreMunicipio === 'function') ? getNombreMunicipio(municipio) : '';
+
+    // Tambien leer inputs del DOM por si valoresMunicipio no esta sincronizado
+    var valoresDOM = {};
+    try {
+        document.querySelectorAll('.det-input').forEach(function(inp) {
+            if (inp.value !== '') {
+                var cod = inp.id.replace('det-', '');
+                valoresDOM[cod] = parseFloat(inp.value);
+            }
+        });
+    } catch(e) {}
+    var valoresFinal = Object.assign({}, valores, valoresDOM);
+
+    if (Object.keys(valoresFinal).length === 0 && Object.keys(referencias).length === 0) {
+        alert('No hay datos EAS cargados. Introduce valores en la tabla antes de abrir el monitor.');
+        return;
+    }
+
+    var payload = {
+        municipio:       municipio,
+        municipioNombre: municipioNombre,
+        valores:         valoresFinal,
+        referencias:     referencias,
+        timestamp:       Date.now()
+    };
+    try { localStorage.setItem('compas_monitor_eas', JSON.stringify(payload)); } catch(e) {}
+
+    var url = 'monitor_eas.html';
+    var win = window.open(url, 'monitor_eas',
+        'width=1100,height=820,scrollbars=yes,resizable=yes');
+    if (!win) { window.open(url, '_blank'); }
+}
+
 function generarSeccionDeterminantes() {
     return `
+    <div style="margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:flex-start;gap:1rem;background:white;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+            <div style="width:42px;height:42px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📊</div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:0.9rem;color:#1e293b;margin-bottom:0.2rem;">Encuesta Andaluza de Salud (EAS) 2023</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-bottom:0.5rem;">Estimación municipal Bettersurveys · 55 indicadores en 3 áreas · Autorreporte poblacional (CAPI)</div>
+                <div id="eas-resumen-badge" style="font-size:0.75rem;color:#0369a1;background:#eff6ff;border-radius:6px;padding:0.2rem 0.5rem;display:inline-block;">Sin datos cargados</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;flex-shrink:0;">
+                <button onclick="easMonitor_abrir()" style="background:linear-gradient(135deg,#0074c8,#00acd9);color:white;border:none;border-radius:8px;padding:0.45rem 0.9rem;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;">📊 Abrir monitor EAS</button>
+            </div>
+        </div>
+    </div>
     <div class="acordeon-item">
         <div class="acordeon-header" onclick="toggleAcordeon(this)">
-            <span>03 Determinantes de la salud (Selección EAS 2023)</span>
+            <span>03 Encuesta Andaluza de Salud (EAS) — Selección 2023</span>
             <span class="flecha">▼</span>
         </div>
         <div class="acordeon-contenido">
@@ -5339,7 +5392,21 @@ function cargarDeterminantes() {
             }
         });
         // Aplicar colores según comparación con referencias
-        actualizarColoresDeterminantes();
+        actualizarColoresDeterminantes();
+    // Actualizar badge resumen EAS
+    try {
+        var badgeEl = document.getElementById('eas-resumen-badge');
+        if (badgeEl) {
+            var nCargados = 0;
+            document.querySelectorAll('.det-input').forEach(function(inp) {
+                if (inp.value !== '') nCargados++;
+            });
+            badgeEl.textContent = nCargados + '/55 indicadores cargados';
+            badgeEl.style.background = nCargados > 0 ? '#dcfce7' : '#fef9c3';
+            badgeEl.style.color = nCargados > 0 ? '#166534' : '#854d0e';
+        }
+    } catch(eB) {}
+
     });
 }
 
@@ -5563,14 +5630,14 @@ function actualizarBadgesFase4() {
                 const numDet = _contarDeterminantesValidos(datos.determinantes);
                 if (numDet >= TOTAL_DETERMINANTES_EPVSA) {
                     badgeDet.style.cssText = estiloOk;
-                    badgeDet.textContent = '📊 Determinantes: ' + numDet + '/' + TOTAL_DETERMINANTES_EPVSA;
+                    badgeDet.textContent = '📊 EAS: ' + numDet + '/' + TOTAL_DETERMINANTES_EPVSA;
                 } else {
                     badgeDet.style.cssText = estiloWarning;
-                    badgeDet.textContent = '📊 Determinantes: ' + numDet + '/' + TOTAL_DETERMINANTES_EPVSA;
+                    badgeDet.textContent = '📊 EAS: ' + numDet + '/' + TOTAL_DETERMINANTES_EPVSA;
                 }
             } else {
                 badgeDet.style.cssText = estiloPendiente;
-                badgeDet.textContent = '📊 Determinantes: 0/' + TOTAL_DETERMINANTES_EPVSA;
+                badgeDet.textContent = '📊 EAS: 0/' + TOTAL_DETERMINANTES_EPVSA;
             }
         }
         
@@ -5606,7 +5673,7 @@ function borrarDatosMunicipio() {
     const municipio = getMunicipioActual();
     const nombre = getNombreMunicipio(municipio);
     
-    if (!confirm('⚠️ ¿Está seguro de borrar TODOS los datos de ' + nombre + '?\n\nEsto eliminará:\n• Informe epidemiológico\n• Indicadores\n• Determinantes\n• Conclusiones y recomendaciones\n• Priorización\n• Programas\n\nEsta acción NO se puede deshacer.')) {
+    if (!confirm('⚠️ ¿Está seguro de borrar TODOS los datos de ' + nombre + '?\n\nEsto eliminará:\n• Informe epidemiológico\n• Indicadores\n• Indicadores EAS\n• Conclusiones y recomendaciones\n• Priorización\n• Programas\n\nEsta acción NO se puede deshacer.')) {
         return;
     }
     
@@ -6141,7 +6208,7 @@ function cargarDeterminantesCSV(input) {
         }
         
         if (resultado.contador === 0) {
-            alert('❌ No se encontraron determinantes válidos en el CSV');
+            alert('❌ No se encontraron indicadores EAS válidos en el CSV');
             return;
         }
         
@@ -6163,11 +6230,11 @@ function cargarDeterminantesCSV(input) {
                 // Mensaje de estado según completitud
                 let estadoHTML, alertMsg;
                 if (resultado.contador >= TOTAL_DETERMINANTES_EPVSA) {
-                    estadoHTML = '<span class="estado-ok">✅ ' + resultado.contador + '/' + TOTAL_DETERMINANTES_EPVSA + ' determinantes</span>';
-                    alertMsg = '✅ ' + resultado.contador + ' determinantes cargados correctamente';
+                    estadoHTML = '<span class="estado-ok">✅ ' + resultado.contador + '/' + TOTAL_DETERMINANTES_EPVSA + ' indicadores EAS</span>';
+                    alertMsg = '✅ ' + resultado.contador + ' indicadores EAS cargados correctamente';
                 } else {
                     estadoHTML = '<span class="estado-warning">⚠️ ' + resultado.contador + '/' + TOTAL_DETERMINANTES_EPVSA + ' (faltan ' + faltan + ')</span>';
-                    alertMsg = '⚠️ ' + resultado.contador + '/' + TOTAL_DETERMINANTES_EPVSA + ' determinantes cargados (faltan ' + faltan + ')';
+                    alertMsg = '⚠️ ' + resultado.contador + '/' + TOTAL_DETERMINANTES_EPVSA + ' indicadores EAS cargados (faltan ' + faltan + ')';
                 }
                 
                 if (tieneRefs) {
@@ -7075,7 +7142,7 @@ function generarPanelSinDatos(nombre) {
         <ul style="margin:0.5rem 0 0 1.5rem;">
             <li>Informe de Situación de Salud (Word)</li>
             <li>Indicadores (CSV)</li>
-            <li>Determinantes EAS (CSV)</li>
+            <li>Indicadores EAS (CSV)</li>
             <li>Conclusiones y Recomendaciones</li>
             <li>Priorización</li>
         </ul>
@@ -9668,7 +9735,7 @@ function generarNarrativaSalutogenica(analisis) {
     
     narrativa.contexto = `El presente análisis examina el perfil de salud de ${municipio} desde un enfoque salutogénico, ` +
         `priorizando la identificación de recursos y activos que generan salud en la comunidad. ` +
-        `Se han analizado ${totalDeterminantes} determinantes de la Encuesta Andaluza de Salud ` +
+        `Se han analizado ${totalDeterminantes} indicadores de la Encuesta Andaluza de Salud ` +
         `y ${totalIndicadores} indicadores del cuadro de mandos integral, comparando los valores locales ` +
         `con las referencias provinciales y autonómicas.\n\n` +
         `Este enfoque, coherente con la Estrategia de promoción de una vida saludable en Andalucía (EPVSA 2024-2030), ` +
@@ -19598,7 +19665,7 @@ function generarPropuestaPleno() {
     <div class="seccion">
         <h3>I. Antecedentes</h3>
         <p>El Ayuntamiento de ${nombre} formalizó su adhesión a la <strong>Red local de acción en salud de Andalucía (RELAS)</strong>, comprometiéndose a la elaboración de un Plan local de salud acompasado con la <strong>Estrategia de promoción de una vida saludable en Andalucía (EPVSA) 2024-2030</strong>.</p>
-        <p>Durante el proceso de elaboración se ha desarrollado un <strong>diagnóstico comunitario de salud</strong>, incluyendo el Informe sobre la Situación de Salud del municipio, el análisis de determinantes y un proceso de priorización participativo.</p>
+        <p>Durante el proceso de elaboración se ha desarrollado un <strong>diagnóstico comunitario de salud</strong>, incluyendo el Informe sobre la Situación de Salud del municipio, el análisis de indicadores EAS y un proceso de priorización participativo.</p>
         ${seccionParticipacion}
     </div>
     
@@ -19616,7 +19683,7 @@ function generarPropuestaPleno() {
         <h3>III. Contenido del Plan</h3>
         <p>el Plan local de salud de ${nombre} 2026-2030 incluye:</p>
         <ul>
-            <li><strong>Perfil de salud local:</strong> Diagnóstico de la situación de salud, determinantes y activos para la salud</li>
+            <li><strong>Perfil de salud local:</strong> Diagnóstico de la situación de salud, indicadores EAS y activos para la salud</li>
             <li><strong>Plan de acción:</strong> Líneas estratégicas, objetivos e indicadores alineados con la EPVSA</li>
             <li><strong>Agenda anual:</strong> Programación de actuaciones para el primer año de vigencia</li>
         </ul>
@@ -19872,7 +19939,7 @@ function generarConvocatoriaSesionDatos() {
         <h3>Orden del día</h3>
         <ol>
             <li><strong>Bienvenida y repaso de la sesión anterior</strong></li>
-            <li><strong>Presentación de los Determinantes de Salud de ${nombre}</strong> — Encuesta de Activos y Salud (EAS)</li>
+            <li><strong>Presentación de los Indicadores EAS de ${nombre}</strong> — Encuesta Andaluza de Salud (EAS)</li>
             <li><strong>Presentación de los Indicadores de Salud</strong> — Datos epidemiológicos actualizados</li>
             <li><strong>Resultados de la elección de prioridades</strong> — Prioridades identificadas por la población</li>
             <li><strong>Debate y análisis conjunto</strong></li>
@@ -19886,7 +19953,7 @@ function generarConvocatoriaSesionDatos() {
     </div>
     
     <div class="nota">
-        <strong>📊 Material de la sesión:</strong> Los informes de determinantes e indicadores se enviarán por correo electrónico con antelación a la reunión para facilitar su revisión previa.
+        <strong>📊 Material de la sesión:</strong> Los indicadores EAS se enviarán por correo electrónico con antelación a la reunión para facilitar su revisión previa.
     </div>
     
     <p>Se ruega confirmación de asistencia.</p>
@@ -19996,8 +20063,8 @@ function generarActaSesionDatos() {
     </div>
     
     <div class="seccion">
-        <h3>2. Determinantes de Salud presentados</h3>
-        <p>Principales hallazgos de la Encuesta de Activos y Salud (EAS):</p>
+        <h3>2. Indicadores EAS presentados</h3>
+        <p>Principales hallazgos de la Encuesta Andaluza de Salud (EAS):</p>
         <div class="campo-area"></div>
     </div>
     
@@ -22951,7 +23018,7 @@ function vrelas_generarPaginaVoto(municipio, sessionId) {
                     </li>
                     <li style="font-size:0.84rem; color:#0c4a6e; padding-left:0.25rem;">
                         <strong>Perfil de salud local</strong>
-                        <span style="display:block; color:#64748b; font-size:0.79rem; margin-top:0.1rem;">Informe de salud &middot; Estudios complementarios &middot; Determinantes sociales &middot; Indicadores &middot; Priorizaci&#243;n ciudadana.</span>
+                        <span style="display:block; color:#64748b; font-size:0.79rem; margin-top:0.1rem;">Informe de salud &middot; Estudios complementarios &middot; Datos EAS &middot; Indicadores &middot; Priorizaci&#243;n ciudadana.</span>
                     </li>
                     <li style="font-size:0.84rem; color:#0c4a6e; padding-left:0.25rem;">
                         <strong>Planificaci&#243;n</strong>
@@ -22979,7 +23046,7 @@ function vrelas_generarPaginaVoto(municipio, sessionId) {
                     </li>
                     <li style="font-size:0.84rem; color:#3730a3; padding-left:0.25rem;">
                         <strong>Actualizaci&#243;n del perfil de salud</strong>
-                        <span style="display:block; color:#64748b; font-size:0.79rem; margin-top:0.1rem;">Revisi&#243;n de indicadores, determinantes y nuevas evidencias disponibles.</span>
+                        <span style="display:block; color:#64748b; font-size:0.79rem; margin-top:0.1rem;">Revisi&#243;n de indicadores EAS y nuevas evidencias disponibles.</span>
                     </li>
                     <li style="font-size:0.84rem; color:#3730a3; padding-left:0.25rem;">
                         <strong>Revisi&#243;n de la planificaci&#243;n</strong>
@@ -23078,7 +23145,7 @@ function vrelas_generarPaginaVoto(municipio, sessionId) {
                 </div>
             </div>
             <div id="kit-2-contenido" style="padding: 1.5rem; display: none;">
-                <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.88rem;">Diagnóstico basado en informe de salud, determinantes e indicadores con priorización ciudadana <strong>(Año 1)</strong> · Revisión de indicadores, determinantes y evidencias disponibles <strong>(Años siguientes)</strong></p>
+                <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.88rem;">Diagnóstico basado en informe de salud, datos EAS e indicadores con priorización ciudadana <strong>(Año 1)</strong> · Revisión de indicadores EAS y evidencias disponibles <strong>(Años siguientes)</strong></p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
                     <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 1rem;">
@@ -23424,7 +23491,7 @@ function actualizarChecklistIA() {
         'ia-check-estudios': ' Estudios complementarios',
         'ia-check-priorizacion': ' Priorización ciudadana',
         'ia-check-relas': ' Priorización Mixta (hábitos, problemas y colectivos)',
-        'ia-check-determinantes': ' Determinantes EAS',
+        'ia-check-determinantes': ' Indicadores EAS',
         'ia-check-indicadores': ' Indicadores de salud',
     };
     Object.entries(checks).forEach(([id, ok]) => {
@@ -23585,6 +23652,42 @@ function generarResumenEscalasDiagnosticas(){
     var escalas = _compasEscalasGet();
     if (!escalas.length) return '';
     return escalas.map(function(e){ return '<li><strong>'+e.nombre_escala+':</strong> '+(e.interpretacion || e.resultado_principal || 'sin interpretaci\u00f3n registrada')+'</li>'; }).join('');
+}
+
+// ── Monitor real de escalas diagnósticas — abre monitor_escalas.html?tipo= ─────────────
+// Escribe los datos de la escala en localStorage y abre el monitor en ventana nueva.
+// Si la escala no tiene datos registrados, muestra el modal de registro.
+function escalaMonitor_abrir(escalaId) {
+    var mapaNombre = { sf12:'SF-12', duke:'Duke-UNC', cage:'CAGE', predimed:'PREDIMED' };
+    var nombreEscala = mapaNombre[escalaId] || escalaId;
+    var escalas = (typeof _compasEscalasGet === 'function') ? _compasEscalasGet() : [];
+    var datos   = escalas.find(function(e){ return e.nombre_escala === nombreEscala; }) || null;
+
+    // Sin datos registrados → abrir modal de registro preseleccionado
+    if (!datos || !datos.resultado_principal) {
+        if (typeof abrirModalEscalasDiagnosticas === 'function') {
+            abrirModalEscalasDiagnosticas(escalaId);
+        }
+        return;
+    }
+
+    // Con datos → escribir en localStorage y abrir monitor
+    var payload = {
+        tipo:             escalaId,
+        escala:           datos,
+        municipio:        (typeof getMunicipioActual === 'function') ? getMunicipioActual() : '',
+        municipioNombre:  (typeof getNombreMunicipio === 'function') ? getNombreMunicipio(getMunicipioActual()) : '',
+        timestamp:        Date.now()
+    };
+    try { localStorage.setItem('compas_monitor_escala', JSON.stringify(payload)); } catch(e) {}
+
+    var url = 'monitor_escalas.html?tipo=' + escalaId;
+    var win = window.open(url, 'monitor_escala_' + escalaId,
+        'width=960,height=760,scrollbars=yes,resizable=yes');
+    if (!win) {
+        // Popup bloqueado: abrir en pestaña nueva
+        window.open(url, '_blank');
+    }
 }
 
 // ── Helper: tarjeta común para cualquier estudio complementario ──────────────
@@ -23809,9 +23912,13 @@ function renderizarSeccionEstudios() {
             estadoBg: tieneDatos ? '#f0fdf4' : '#f1f5f9',
             estadoFg: tieneDatos ? '#16a34a' : '#94a3b8',
             datoHtml: datoHtml,
-            monitorFn: 'abrirModalEscalasDiagnosticas(\'' + cfg.id + '\')',
+            monitorFn: 'escalaMonitor_abrir(\'' + cfg.id + '\')',
             monitorLabel: '\ud83d\udcca Abrir monitor',
-            accionesHtml: '',
+            accionesHtml: tieneDatos ? '' :
+                '<button onclick="abrirModalEscalasDiagnosticas(\'' + cfg.id + '\')" '
+                + 'style="background:white;border:1px solid #e2e8f0;border-radius:7px;'
+                + 'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;"
+                + 'title="Abrir formulario de registro de datos">\u270f\ufe0f Registrar datos</button>',
             detalleHtml: cfg.detalleHtml
         });
     });
@@ -23873,212 +23980,552 @@ function renderizarSeccionEstudios() {
     el.innerHTML = html;
 }
 
-// Renderizar sección 04 — Visor unificado de priorización ciudadana (Estratégica · Temática · Mixta)
-function renderizarSeccionPriorizacion() {
-    var el = document.getElementById('seccion-priorizacion-popular');
-    if (!el) return;
-    var municipio = (typeof getMunicipioActual === 'function') ? getMunicipioActual() : null;
-
-    // ── Estado de cada tipo ────────────────────────────────────────────────────
-    // Temática (VRELAS / temasFreq)
-    var pTem = window.datosParticipacionCiudadana;
-    // [M1-GUARDIA] descartar si pertenece a otro municipio
-    if (pTem && window.datosParticipacionCiudadanaMunicipio && municipio &&
-        window.datosParticipacionCiudadanaMunicipio !== municipio) { pTem = null; }
-    var tieneTem = !!(pTem && (pTem.temasFreq || pTem.fuente === 'votacion_relas'));
-    var nTem = tieneTem ? (pTem.n || pTem.totalParticipantes || '?') : null;
-
-    // Estratégica (objetivos EPVSA)
-    var pEst = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.epvsa;
-    var tieneEst = !!(pEst && (pEst.n > 0 || (pEst.rankingObjetivos && pEst.rankingObjetivos.length)));
-    var nEst = tieneEst ? (pEst.n || '?') : null;
-    // Fallback: si datosParticipacionCiudadana tiene formato EPVSA y no VRELAS
-    if (!tieneEst && pTem && !pTem.temasFreq && pTem.rankingObjetivos && pTem.rankingObjetivos.length) {
-        tieneEst = true; pEst = pTem; nEst = pTem.totalParticipantes || pTem.n || '?';
-    }
-
-    // Mixta (hábitos, problemas y colectivos — RELAS)
-    var pMix = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.relas;
-    var tieneMix = !!(pMix && pMix.n > 0);
-    // Fallback: relas_globalData directamente
-    if (!tieneMix && typeof relas_globalData !== 'undefined' && relas_globalData && relas_globalData._n) {
-        pMix = { n: relas_globalData._n, fuente: 'relas_datos',
-                 topHab: relas_globalData._habFreq, topProb: relas_globalData._probFreq };
-        tieneMix = true;
-    }
-    var nMix = tieneMix ? (pMix.n || '?') : null;
-    // Normalizar pMix: COMPAS_cargarPrioridadesFirebase guarda habitosMasFrecuentes (array {id,n})
-    // pero el render espera topHab/topProb (objeto id→count). Alinear formato aquí.
-    if (tieneMix && pMix && pMix.habitosMasFrecuentes && !pMix.topHab) {
-        var _toFreqObj = function(arr) {
-            var o = {}; (arr||[]).forEach(function(x){ if (x && x.id !== undefined) o[x.id] = x.n; }); return o;
-        };
-        pMix = { n: pMix.n, fuente: pMix.fuente,
-                 topHab:  _toFreqObj(pMix.habitosMasFrecuentes),
-                 topProb: _toFreqObj(pMix.problemasMasFrecuentes) };
-    }
-
-    // Intentar carga Firebase si no hay datos aún (silencioso, no bloquea render)
-    if (!tieneTem && !tieneEst && !tieneMix && municipio) {
-        resolverPriorizacionCiudadana(municipio).then(function(res){
-            if (res) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
-        });
-    }
-
-    var html = '<div style="padding:0.85rem; display:flex; flex-direction:column; gap:0.6rem;">';
-
-    // ── Bloque 1: ESTRATÉGICA ─────────────────────────────────────────────────
-    html += '<div style="border:1px solid ' + (tieneEst ? '#fbcfe8' : '#e2e8f0') + '; border-radius:10px; background:white; overflow:hidden;">';
-    // Cabecera
-    html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem;' +
-            ' background:' + (tieneEst ? '#fdf4ff' : '#f8fafc') + ';' +
-            ' border-bottom:1px solid ' + (tieneEst ? '#fbcfe8' : '#f0f0f0') + ';">' +
-        '<span style="font-size:1rem; flex-shrink:0;">🎯</span>' +
-        '<div style="flex:1; min-width:0;">' +
-            '<div style="font-weight:700; font-size:0.8rem; color:#1e293b;">Priorización Estratégica</div>' +
-            '<div style="font-size:0.67rem; color:#64748b; margin-top:0.08rem;">Objetivos EPVSA y colectivos</div>' +
-        '</div>' +
-        (tieneEst
-            ? '<span style="background:#fce7f3; color:#be185d; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; font-weight:600; white-space:nowrap; flex-shrink:0; margin-right:0.35rem;">🟢 ' + nEst + ' part.</span>'
-            : '<span style="background:#f1f5f9; color:#94a3b8; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; flex-shrink:0; margin-right:0.35rem;">⚪ Sin datos</span>') +
-        '<button onclick="cambiarTabManual(\'votacion\')" style="padding:.22rem .55rem; background:' + (tieneEst ? 'linear-gradient(135deg,#ec4899,#be185d)' : '#f1f5f9') + '; color:' + (tieneEst ? 'white' : '#94a3b8') + '; border:none; border-radius:6px; font-size:.67rem; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">' +
-            (tieneEst ? '🎯 Ver' : '🎯 Abrir') + '</button>' +
-    '</div>';
-    // Contenido
-    html += '<div style="padding:0.55rem 0.85rem;">';
-    if (tieneEst && pEst && pEst.rankingObjetivos && pEst.rankingObjetivos.length) {
-        pEst.rankingObjetivos.slice(0, 4).forEach(function(o, i) {
-            html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.32rem 0.55rem; background:#fdf4ff; border:1px solid #fbcfe8; border-radius:6px; margin-bottom:0.2rem;">' +
-                '<span style="font-weight:700; color:#be185d; flex-shrink:0; min-width:1.3rem; font-size:.71rem;">' + (i+1) + 'º</span>' +
-                '<span style="flex:1; font-size:.75rem; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (o.icono||'🎯') + ' ' + o.texto + '</span>' +
-                '<span style="font-size:.68rem; color:#9d174d; flex-shrink:0; font-weight:600;">' + (o.votos||0) + ' (' + (o.porcentaje||0) + '%)</span>' +
-            '</div>';
-        });
-    } else if (tieneEst) {
-        html += '<div style="font-size:.72rem; color:#64748b; padding:.15rem 0;">Datos de ' + (nEst||'?') + ' participantes registrados. Ver análisis en la herramienta.</div>';
-    } else {
-        html += '<div style="font-size:.72rem; color:#94a3b8; padding:.15rem 0;">Herramienta disponible · Sin resultados confirmados aún.</div>';
-    }
-    html += '</div></div>'; // end contenido + bloque Estratégica
-
-    // ── Bloque 2: TEMÁTICA ────────────────────────────────────────────────────
-    html += '<div style="border:1px solid ' + (tieneTem ? '#bae6fd' : '#e2e8f0') + '; border-radius:10px; background:white; overflow:hidden;">';
-    // Cabecera
-    html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem;' +
-            ' background:' + (tieneTem ? '#f0f9ff' : '#f8fafc') + ';' +
-            ' border-bottom:1px solid ' + (tieneTem ? '#bae6fd' : '#f0f0f0') + ';">' +
-        '<span style="font-size:1rem; flex-shrink:0;">🗳️</span>' +
-        '<div style="flex:1; min-width:0;">' +
-            '<div style="font-weight:700; font-size:0.8rem; color:#1e293b;">Priorización Temática</div>' +
-            '<div style="font-size:0.67rem; color:#64748b; margin-top:0.08rem;">10 temas de salud prioritarios</div>' +
-        '</div>' +
-        (tieneTem
-            ? '<span style="background:#e0f2fe; color:#0369a1; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; font-weight:600; white-space:nowrap; flex-shrink:0; margin-right:0.35rem;">🟢 ' + nTem + ' part.</span>'
-            : '<span style="background:#f1f5f9; color:#94a3b8; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; flex-shrink:0; margin-right:0.35rem;">⚪ Sin datos</span>') +
-        (tieneTem ? '<button onclick="cambiarTabManual(\'analizador-ciudadano\')" style="padding:.22rem .55rem; background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; font-size:.67rem; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0; margin-right:0.2rem;" title="Dashboard de análisis temático">📊 Análisis</button>' : '') +
-        '<button onclick="cambiarTabManual(\'votacion-relas\')" style="padding:.22rem .55rem; background:' + (tieneTem ? 'linear-gradient(135deg,#0074c8,#00acd9)' : '#f1f5f9') + '; color:' + (tieneTem ? 'white' : '#94a3b8') + '; border:none; border-radius:6px; font-size:.67rem; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">' +
-            (tieneTem ? '🗳️ Herramienta' : '🗳️ Abrir') + '</button>' +
-    '</div>';
-    // Contenido
-    html += '<div style="padding:0.55rem 0.85rem;">';
-    if (tieneTem && pTem && pTem.temasFreq) {
-        var sorted = Object.entries(pTem.temasFreq)
-            .map(function(e){ return { k: parseInt(e[0]), v: e[1] }; })
-            .sort(function(a,b){ return b.v - a.v; })
-            .slice(0, 5);
-        var maxV = sorted[0] ? sorted[0].v : 1;
-        var nR   = pTem.n || pTem.totalParticipantes || 1;
-        var medallas = ['🥇','🥈','🥉'];
-        html += '<div style="display:flex; flex-direction:column; gap:0.2rem;">';
-        sorted.forEach(function(item, i) {
-            var ico  = (typeof VRELAS_ICONOS_TEMAS !== 'undefined' ? VRELAS_ICONOS_TEMAS[item.k] : '') || '•';
-            var lbl  = (typeof VRELAS_TEMAS !== 'undefined' ? VRELAS_TEMAS[item.k] : '') || ('Tema ' + item.k);
-            var pct  = nR !== '?' ? Math.round(item.v / nR * 100) : '?';
-            var barW = Math.round(item.v / maxV * 100);
-            var isTop = i < 3;
-            var medal = medallas[i] || '';
-            var bg  = isTop ? '#f0f9ff' : '#f8fafc';
-            var brd = isTop ? '#bae6fd' : '#f0f0f0';
-            var acc = isTop ? '#0074c8' : '#64748b';
-            html += '<div style="display:flex; align-items:center; gap:0.45rem; padding:' + (isTop ? '0.4rem 0.55rem' : '0.25rem 0.55rem') + '; background:' + bg + '; border:1px solid ' + brd + '; border-radius:6px;">' +
-                (medal ? '<span style="font-size:' + (isTop ? '0.9rem' : '0.72rem') + '; flex-shrink:0;">' + medal + '</span>'
-                       : '<span style="width:1.1rem; text-align:center; font-size:.6rem; color:#94a3b8; font-weight:700; flex-shrink:0;">' + (i+1) + 'º</span>') +
-                '<span style="font-size:' + (isTop ? '0.95rem' : '0.78rem') + '; flex-shrink:0;">' + ico + '</span>' +
-                '<div style="flex:1; min-width:0;">' +
-                    '<div style="font-size:' + (isTop ? '0.76rem' : '0.69rem') + '; font-weight:' + (isTop ? '600' : '400') + '; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + lbl + '</div>' +
-                    '<div style="height:3px; background:#e5e7eb; border-radius:2px; margin-top:0.12rem; overflow:hidden;">' +
-                    '<div style="height:100%; width:' + barW + '%; background:' + acc + '; border-radius:2px;"></div>' +
-                    '</div>' +
-                '</div>' +
-                '<span style="font-size:' + (isTop ? '0.76rem' : '0.66rem') + '; font-weight:700; color:' + acc + '; flex-shrink:0; min-width:2rem; text-align:right;">' + pct + '%</span>' +
-            '</div>';
-        });
-        html += '</div>';
-    } else {
-        html += '<div style="font-size:.72rem; color:#94a3b8; padding:.15rem 0;">Herramienta disponible · Sin resultados confirmados aún.</div>';
-    }
-    html += '</div></div>'; // end contenido + bloque Temática
-
-    // ── Bloque 3: MIXTA ───────────────────────────────────────────────────────
-    html += '<div style="border:1px solid ' + (tieneMix ? '#86efac' : '#e2e8f0') + '; border-radius:10px; background:white; overflow:hidden;">';
-    // Cabecera
-    html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.85rem;' +
-            ' background:' + (tieneMix ? '#f0fdf4' : '#f8fafc') + ';' +
-            ' border-bottom:1px solid ' + (tieneMix ? '#86efac' : '#f0f0f0') + ';">' +
-        '<span style="font-size:1rem; flex-shrink:0;">🗂️</span>' +
-        '<div style="flex:1; min-width:0;">' +
-            '<div style="font-weight:700; font-size:0.8rem; color:#1e293b;">Priorización Mixta</div>' +
-            '<div style="font-size:0.67rem; color:#64748b; margin-top:0.08rem;">Hábitos · Problemas · Colectivos</div>' +
-        '</div>' +
-        (tieneMix
-            ? '<span style="background:#dcfce7; color:#166534; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; font-weight:600; white-space:nowrap; flex-shrink:0; margin-right:0.35rem;">🟢 ' + nMix + ' part.</span>'
-            : '<span style="background:#f1f5f9; color:#94a3b8; padding:.1rem .4rem; border-radius:8px; font-size:.62rem; flex-shrink:0; margin-right:0.35rem;">⚪ Sin datos</span>') +
-        '<button onclick="cambiarTabManual(\'relas\')" style="padding:.22rem .55rem; background:' + (tieneMix ? 'linear-gradient(135deg,#2d6a4f,#40916c)' : '#f1f5f9') + '; color:' + (tieneMix ? 'white' : '#94a3b8') + '; border:none; border-radius:6px; font-size:.67rem; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">' +
-            (tieneMix ? '🗂️ Ver' : '🗂️ Abrir') + '</button>' +
-    '</div>';
-    // Contenido
-    html += '<div style="padding:0.55rem 0.85rem;">';
-    if (tieneMix && pMix) {
-        var _hasDatosMix = false;
-        if (pMix.topHab && Object.keys(pMix.topHab).length) {
-            var habTop = Object.entries(pMix.topHab).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
-            if (habTop.length) {
-                _hasDatosMix = true;
-                html += '<div style="font-size:.68rem; font-weight:600; color:#2d6a4f; margin-bottom:0.2rem;">🏃 Hábitos más señalados</div>';
-                habTop.forEach(function(e) {
-                    var lbl = (typeof RELAS_HABITOS !== 'undefined' && RELAS_HABITOS[e[0]]) ? RELAS_HABITOS[e[0]] : ('Hábito ' + e[0]);
-                    html += '<div style="font-size:.71rem; padding:.18rem .45rem; background:#f0fdf4; border:1px solid #d1fae5; border-radius:5px; margin-bottom:.15rem; display:flex; justify-content:space-between;">' +
-                        '<span style="color:#1e293b;">' + lbl + '</span>' +
-                        '<span style="color:#2d6a4f; font-weight:600;">' + e[1] + '</span>' +
-                    '</div>';
-                });
-            }
-        }
-        if (pMix.topProb && Object.keys(pMix.topProb).length) {
-            var probTop = Object.entries(pMix.topProb).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
-            if (probTop.length) {
-                _hasDatosMix = true;
-                html += '<div style="font-size:.68rem; font-weight:600; color:#dc2626; margin-bottom:0.2rem;' + (_hasDatosMix ? ' margin-top:0.38rem;' : '') + '">⚠️ Problemas más señalados</div>';
-                probTop.forEach(function(e) {
-                    var lbl = (typeof RELAS_PROBLEMAS !== 'undefined' && RELAS_PROBLEMAS[e[0]]) ? RELAS_PROBLEMAS[e[0]] : ('Problema ' + e[0]);
-                    html += '<div style="font-size:.71rem; padding:.18rem .45rem; background:#fff9f9; border:1px solid #fecaca; border-radius:5px; margin-bottom:.15rem; display:flex; justify-content:space-between;">' +
-                        '<span style="color:#1e293b;">' + lbl + '</span>' +
-                        '<span style="color:#dc2626; font-weight:600;">' + e[1] + '</span>' +
-                    '</div>';
-                });
-            }
-        }
-        if (!_hasDatosMix) {
-            html += '<div style="font-size:.72rem; color:#64748b; padding:.15rem 0;">Datos de ' + (pMix.n||'?') + ' participantes cargados · Ver análisis completo en la herramienta.</div>';
-        }
-    } else {
-        html += '<div style="font-size:.72rem; color:#94a3b8; padding:.15rem 0;">Herramienta disponible · Sin resultados confirmados aún.</div>';
-    }
-    html += '</div></div>'; // end contenido + bloque Mixta
-
-    html += '</div>'; // end contenedor
-    el.innerHTML = html;
-}
+// Renderizar sección 04 — Métodos de priorización (config-driven: Ciudadana · Técnica · VRELAS)
+
+// ── Helper: tarjeta común para cualquier método de priorización ───────────────
+// cfg: { icon, iconBg, nombre, descripcion, estado, estadoBg, estadoFg,
+//        datoHtml, monitorFn, monitorLabel, accionesHtml, detalleHtml }
+function _renderTarjetaPriorizacion(cfg) {
+    var monitorLabel = cfg.monitorLabel || '\ud83d\udcca Abrir monitor';
+    var detalle = cfg.detalleHtml
+        ? '<details style="margin-top:0.55rem;">' +
+          '<summary style="font-size:0.74rem;color:#64748b;cursor:pointer;font-weight:600;' +
+          'list-style:none;display:inline-flex;align-items:center;gap:0.3rem;">\u25b8 Ver descripci\u00f3n</summary>' +
+          '<div style="margin-top:0.45rem;padding:0.55rem 0.7rem;background:#f8fafc;border-radius:7px;' +
+          'font-size:0.75rem;color:#475569;line-height:1.6;">' + cfg.detalleHtml + '</div>' +
+          '</details>'
+        : '';
+    return (
+        '<div style="background:white;border:1px solid #e2e8f0;border-radius:12px;' +
+        'margin-bottom:0.7rem;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.05);">' +
+            '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;' +
+            'border-bottom:1px solid #f1f5f9;background:#fafbfc;">' +
+                '<div style="width:2.1rem;height:2.1rem;border-radius:9px;background:' +
+                (cfg.iconBg || '#f0f9ff') + ';display:flex;align-items:center;' +
+                'justify-content:center;font-size:1rem;flex-shrink:0;">' + (cfg.icon || '\ud83d\udcc4') + '</div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-weight:700;font-size:0.86rem;color:#1e293b;line-height:1.3;">' +
+                    cfg.nombre + '</div>' +
+                    (cfg.descripcion
+                        ? '<div style="font-size:0.71rem;color:#64748b;margin-top:0.04rem;">' +
+                          cfg.descripcion + '</div>'
+                        : '') +
+                '</div>' +
+                '<span style="background:' + (cfg.estadoBg || '#f1f5f9') + ';color:' +
+                (cfg.estadoFg || '#475569') + ';padding:0.13rem 0.5rem;border-radius:999px;' +
+                'font-size:0.66rem;font-weight:700;flex-shrink:0;white-space:nowrap;">' +
+                (cfg.estado || '') + '</span>' +
+            '</div>' +
+            '<div style="padding:0.75rem 1rem;">' +
+                (cfg.datoHtml || '') +
+                '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:' +
+                (cfg.datoHtml ? '0.6rem' : '0') + ';">' +
+                    '<button onclick="' + cfg.monitorFn + '" style="background:#0074c8;color:white;' +
+                    'border:none;border-radius:7px;padding:0.36rem 0.85rem;font-size:0.77rem;' +
+                    'font-weight:600;cursor:pointer;flex-shrink:0;">' + monitorLabel + '</button>' +
+                    (cfg.accionesHtml || '') +
+                '</div>' +
+                detalle +
+            '</div>' +
+        '</div>'
+    );
+}
+
+// ── Monitor de priorización — modal inline (placeholder mientras no existe monitor_priorizacion.html)
+function priorizacion_abrirMonitor(tipo) {
+    var m = document.getElementById('modal-monitor-priorizacion');
+    if (!m) {
+        m = document.createElement('div');
+        m.id = 'modal-monitor-priorizacion';
+        m.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);' +
+            'z-index:20000;display:flex;align-items:flex-start;justify-content:center;' +
+            'padding:2rem;overflow-y:auto;';
+        m.onclick = function(e){ if (e.target === m) m.style.display = 'none'; };
+        document.body.appendChild(m);
+    }
+
+    var TEMAS = (typeof VRELAS_TEMAS !== 'undefined') ? VRELAS_TEMAS : {};
+    var ICONOS = (typeof VRELAS_ICONOS_TEMAS !== 'undefined') ? VRELAS_ICONOS_TEMAS : {};
+    var HABITOS = (typeof RELAS_HABITOS !== 'undefined') ? RELAS_HABITOS : {};
+    var PROBLEMAS = (typeof RELAS_PROBLEMAS !== 'undefined') ? RELAS_PROBLEMAS : {};
+
+    var titulos = {
+        ciudadana: '\ud83c\udfaf Monitor — Priorizaci\u00f3n ciudadana',
+        tecnica:   '\ud83d\udcca Monitor — Priorizaci\u00f3n t\u00e9cnica',
+        vrelas:    '\ud83d\uddf3\ufe0f Monitor — VRELAS'
+    };
+    var colores = { ciudadana: '#be185d', tecnica: '#1d4ed8', vrelas: '#0369a1' };
+    var titulo = titulos[tipo] || ('Monitor — ' + tipo);
+    var color  = colores[tipo] || '#0074c8';
+
+    var cuerpo = '';
+
+    if (tipo === 'ciudadana') {
+        var pTem = window.datosParticipacionCiudadana;
+        var pEst = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.epvsa;
+        var pMix = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.relas;
+        var tieneEst = !!(pEst && (pEst.n > 0 || (pEst.rankingObjetivos && pEst.rankingObjetivos.length)));
+        if (!tieneEst && pTem && !pTem.temasFreq && pTem.rankingObjetivos && pTem.rankingObjetivos.length) {
+            tieneEst = true; pEst = pTem;
+        }
+        var tieneTem = !!(pTem && pTem.temasFreq);
+        var tieneMix = !!(pMix && pMix.n > 0);
+        var hayAlgo = tieneEst || tieneTem || tieneMix;
+
+        if (!hayAlgo) {
+            cuerpo = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.9rem;">' +
+                '\u23f3 Sin datos de priorizaci\u00f3n ciudadana confirmados.<br>' +
+                '<span style="font-size:0.8rem;">Usa las herramientas de votaci\u00f3n para registrar resultados.</span></div>';
+        } else {
+            if (tieneEst && pEst && pEst.rankingObjetivos && pEst.rankingObjetivos.length) {
+                cuerpo += '<h4 style="color:#be185d;font-size:0.85rem;margin:0 0 0.5rem;">\ud83c\udfaf Priorizaci\u00f3n Estrat\u00e9gica — ' +
+                    (pEst.n || '?') + ' participantes</h4>';
+                pEst.rankingObjetivos.slice(0, 5).forEach(function(o, i) {
+                    cuerpo += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0.6rem;' +
+                        'background:#fdf4ff;border:1px solid #f3e8ff;border-radius:7px;margin-bottom:0.2rem;">' +
+                        '<span style="font-weight:700;color:#be185d;min-width:1.4rem;font-size:0.75rem;">' + (i+1) + '\u00ba</span>' +
+                        '<span style="flex:1;font-size:0.8rem;color:#1e293b;">' + (o.icono||'\ud83c\udfaf') + ' ' + o.texto + '</span>' +
+                        '<span style="color:#9d174d;font-weight:600;font-size:0.75rem;">' + (o.votos||0) + ' v.</span>' +
+                        '</div>';
+                });
+            }
+            if (tieneTem && pTem && pTem.temasFreq) {
+                cuerpo += '<h4 style="color:#0369a1;font-size:0.85rem;margin:0.8rem 0 0.5rem;">\ud83d\uddf3\ufe0f Priorizaci\u00f3n Tem\u00e1tica — ' +
+                    (pTem.n || pTem.totalParticipantes || '?') + ' participantes</h4>';
+                Object.entries(pTem.temasFreq)
+                    .map(function(e){ return { k: parseInt(e[0]), v: e[1] }; })
+                    .sort(function(a,b){ return b.v - a.v; })
+                    .slice(0, 5)
+                    .forEach(function(item, i) {
+                        var ico = ICONOS[item.k] || '\u2022';
+                        var lbl = TEMAS[item.k] || ('Tema ' + item.k);
+                        var nR  = pTem.n || pTem.totalParticipantes || 1;
+                        var pct = nR !== '?' ? Math.round(item.v / nR * 100) : '?';
+                        cuerpo += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.6rem;' +
+                            'background:#f0f9ff;border:1px solid #bae6fd;border-radius:7px;margin-bottom:0.2rem;">' +
+                            '<span style="font-size:0.85rem;">' + ico + '</span>' +
+                            '<span style="flex:1;font-size:0.78rem;color:#1e293b;">' + lbl + '</span>' +
+                            '<span style="color:#0074c8;font-weight:600;font-size:0.75rem;">' + pct + '%</span>' +
+                            '</div>';
+                    });
+            }
+            if (tieneMix && pMix) {
+                var _toFreqObj = function(arr) {
+                    var o = {}; (arr||[]).forEach(function(x){ if (x && x.id !== undefined) o[x.id] = x.n; }); return o;
+                };
+                var topH = pMix.topHab || (pMix.habitosMasFrecuentes ? _toFreqObj(pMix.habitosMasFrecuentes) : {});
+                var topP = pMix.topProb || (pMix.problemasMasFrecuentes ? _toFreqObj(pMix.problemasMasFrecuentes) : {});
+                cuerpo += '<h4 style="color:#166534;font-size:0.85rem;margin:0.8rem 0 0.5rem;">\ud83d\uddc2\ufe0f Priorizaci\u00f3n Mixta — ' +
+                    (pMix.n || '?') + ' participantes</h4>';
+                if (topH && Object.keys(topH).length) {
+                    cuerpo += '<div style="font-size:0.73rem;font-weight:600;color:#2d6a4f;margin-bottom:0.2rem;">\ud83c\udfc3 H\u00e1bitos</div>';
+                    Object.entries(topH).sort(function(a,b){return b[1]-a[1];}).slice(0,3).forEach(function(e){
+                        var lbl = HABITOS[e[0]] || ('H\u00e1bito ' + e[0]);
+                        cuerpo += '<div style="font-size:0.77rem;padding:0.2rem 0.5rem;background:#f0fdf4;' +
+                            'border:1px solid #d1fae5;border-radius:5px;margin-bottom:0.12rem;display:flex;' +
+                            'justify-content:space-between;"><span>' + lbl + '</span><span style="color:#2d6a4f;font-weight:600;">' + e[1] + '</span></div>';
+                    });
+                }
+                if (topP && Object.keys(topP).length) {
+                    cuerpo += '<div style="font-size:0.73rem;font-weight:600;color:#dc2626;margin-top:0.4rem;margin-bottom:0.2rem;">\u26a0\ufe0f Problemas</div>';
+                    Object.entries(topP).sort(function(a,b){return b[1]-a[1];}).slice(0,3).forEach(function(e){
+                        var lbl = PROBLEMAS[e[0]] || ('Problema ' + e[0]);
+                        cuerpo += '<div style="font-size:0.77rem;padding:0.2rem 0.5rem;background:#fff9f9;' +
+                            'border:1px solid #fecaca;border-radius:5px;margin-bottom:0.12rem;display:flex;' +
+                            'justify-content:space-between;"><span>' + lbl + '</span><span style="color:#dc2626;font-weight:600;">' + e[1] + '</span></div>';
+                    });
+                }
+            }
+        }
+    } else if (tipo === 'tecnica') {
+        var decision = window.decisionPriorizacionActual;
+        var metodosTxt = { epidemiologica: 'Epidemiol\u00f3gica', ciudadana: 'Ciudadana', integracion: 'Integrada (70% epid. + 30% ciudadana)' };
+        if (!decision || !decision.metodo) {
+            cuerpo = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.9rem;">' +
+                '\u23f3 Sin decisi\u00f3n t\u00e9cnica registrada.<br>' +
+                '<span style="font-size:0.8rem;">Usa la herramienta de priorizaci\u00f3n dual para registrar una decisi\u00f3n.</span></div>' +
+                '<div style="text-align:center;margin-top:1rem;">' +
+                '<button onclick="document.getElementById(\'modal-monitor-priorizacion\').style.display=\'none\';mostrarPriorizacionDual();" ' +
+                'style="background:#6366f1;color:white;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.85rem;font-weight:600;cursor:pointer;">' +
+                '\u2696\ufe0f Ir a priorizaci\u00f3n dual</button></div>';
+        } else {
+            cuerpo = '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.6rem;">' +
+                '<div style="font-size:0.8rem;font-weight:700;color:#1d4ed8;margin-bottom:0.3rem;">\u2714 Decisi\u00f3n registrada</div>' +
+                '<div style="font-size:0.82rem;color:#1e293b;"><strong>M\u00e9todo:</strong> ' + (metodosTxt[decision.metodo] || decision.metodo) + '</div>' +
+                (decision.areaPrioritaria ? '<div style="font-size:0.78rem;color:#475569;margin-top:0.2rem;"><strong>\u00c1rea prioritaria:</strong> ' + decision.areaPrioritaria + '</div>' : '') +
+                (decision.objetivo ? '<div style="font-size:0.78rem;color:#475569;margin-top:0.2rem;"><strong>Objetivo:</strong> ' + decision.objetivo + '</div>' : '') +
+                '</div>';
+            var fusion = window.datosFusionPriorizacion;
+            if (fusion && fusion.ranking && fusion.ranking.length) {
+                cuerpo += '<h4 style="font-size:0.83rem;color:#1d4ed8;margin:0.5rem 0;">Ranking integrado</h4>';
+                fusion.ranking.slice(0, 5).forEach(function(r, i) {
+                    cuerpo += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.6rem;' +
+                        'background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;margin-bottom:0.2rem;">' +
+                        '<span style="font-weight:700;color:#1d4ed8;min-width:1.3rem;font-size:0.75rem;">' + (i+1) + '\u00ba</span>' +
+                        '<span style="flex:1;font-size:0.78rem;color:#1e293b;">' + (r.area || r.label || r.texto || '') + '</span>' +
+                        '<span style="color:#1d4ed8;font-weight:600;font-size:0.73rem;">' + (r.puntuacion != null ? r.puntuacion : '') + '</span>' +
+                        '</div>';
+                });
+            }
+        }
+    } else if (tipo === 'vrelas') {
+        var pV = window.datosParticipacionCiudadana;
+        var tieneV = !!(pV && pV.temasFreq);
+        if (!tieneV) {
+            cuerpo = '<div style="text-align:center;padding:2rem;color:#94a3b8;font-size:0.9rem;">' +
+                '\u23f3 Sin datos VRELAS confirmados.<br>' +
+                '<span style="font-size:0.8rem;">Usa la herramienta de votaci\u00f3n tem\u00e1tica para registrar resultados.</span></div>' +
+                '<div style="text-align:center;margin-top:1rem;">' +
+                '<button onclick="document.getElementById(\'modal-monitor-priorizacion\').style.display=\'none\';cambiarTabManual(\'votacion-relas\');" ' +
+                'style="background:#0074c8;color:white;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.85rem;font-weight:600;cursor:pointer;">' +
+                '\ud83d\uddf3\ufe0f Abrir herramienta VRELAS</button></div>';
+        } else {
+            var nV = pV.n || pV.totalParticipantes || '?';
+            cuerpo = '<div style="font-size:0.8rem;color:#0369a1;font-weight:700;margin-bottom:0.5rem;">' +
+                '\ud83d\uddf3\ufe0f Resultados tem\u00e1ticos \u2014 ' + nV + ' participantes</div>';
+            var sorted = Object.entries(pV.temasFreq)
+                .map(function(e){ return { k: parseInt(e[0]), v: e[1] }; })
+                .sort(function(a,b){ return b.v - a.v; });
+            var maxV = sorted[0] ? sorted[0].v : 1;
+            var medallas = ['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
+            sorted.forEach(function(item, i) {
+                var ico  = ICONOS[item.k] || '\u2022';
+                var lbl  = TEMAS[item.k] || ('Tema ' + item.k);
+                var pct  = nV !== '?' ? Math.round(item.v / nV * 100) : '?';
+                var barW = Math.round(item.v / maxV * 100);
+                var isTop = i < 3;
+                var bg  = isTop ? '#f0f9ff' : '#f8fafc';
+                var brd = isTop ? '#bae6fd' : '#f0f0f0';
+                var acc = isTop ? '#0074c8' : '#64748b';
+                var medal = medallas[i] || '';
+                cuerpo += '<div style="display:flex;align-items:center;gap:0.45rem;padding:' + (isTop ? '0.4rem 0.6rem' : '0.25rem 0.6rem') + ';' +
+                    'background:' + bg + ';border:1px solid ' + brd + ';border-radius:7px;margin-bottom:0.2rem;">' +
+                    (medal ? '<span style="font-size:' + (isTop ? '0.9rem' : '0.72rem') + ';flex-shrink:0;">' + medal + '</span>'
+                           : '<span style="width:1.2rem;text-align:center;font-size:0.62rem;color:#94a3b8;font-weight:700;flex-shrink:0;">' + (i+1) + '\u00ba</span>') +
+                    '<span style="font-size:' + (isTop ? '0.9rem' : '0.78rem') + ';flex-shrink:0;">' + ico + '</span>' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="font-size:' + (isTop ? '0.78rem' : '0.7rem') + ';font-weight:' + (isTop ? '600' : '400') + ';color:#1e293b;' +
+                        'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + lbl + '</div>' +
+                        '<div style="height:3px;background:#e5e7eb;border-radius:2px;margin-top:0.1rem;overflow:hidden;">' +
+                        '<div style="height:100%;width:' + barW + '%;background:' + acc + ';border-radius:2px;"></div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<span style="font-size:' + (isTop ? '0.77rem' : '0.67rem') + ';font-weight:700;color:' + acc + ';flex-shrink:0;min-width:2rem;text-align:right;">' + pct + '%</span>' +
+                    '</div>';
+            });
+        }
+    }
+
+    m.innerHTML =
+        '<div style="background:white;border-radius:16px;max-width:820px;width:100%;' +
+        'box-shadow:0 20px 50px rgba(0,0,0,0.2);overflow:hidden;">' +
+            '<div style="background:linear-gradient(135deg,' + color + ',' + color + 'cc);color:white;' +
+            'padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;">' +
+                '<div style="display:flex;align-items:center;gap:0.6rem;">' +
+                    '<span style="font-size:1.1rem;">\ud83d\udcca</span>' +
+                    '<strong style="font-size:0.95rem;">' + titulo + '</strong>' +
+                '</div>' +
+                '<button onclick="document.getElementById(\'modal-monitor-priorizacion\').style.display=\'none\'" ' +
+                'style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;' +
+                'border-radius:50%;cursor:pointer;font-size:1rem;">\u2715</button>' +
+            '</div>' +
+            '<div style="padding:1.5rem;max-height:70vh;overflow-y:auto;">' +
+                cuerpo +
+                '<div style="margin-top:1.2rem;padding-top:0.8rem;border-top:1px solid #f1f5f9;' +
+                'font-size:0.72rem;color:#94a3b8;text-align:center;">' +
+                'Monitor provisional \u2014 monitor_priorizacion.html en desarrollo</div>' +
+            '</div>' +
+        '</div>';
+    m.style.display = 'flex';
+}
+
+// ── Borrar priorización ciudadana (in-memory + re-render)
+function priorizacion_borrarCiudadana() {
+    if (!confirm('Borrar datos de priorizaci\u00f3n ciudadana cargados en memoria?\n\nEsto no borra datos en Firebase.')) return;
+    window.datosParticipacionCiudadana = null;
+    window.datosParticipacionCiudadanaMunicipio = null;
+    if (window.COMPAS && window.COMPAS.prioridades) {
+        window.COMPAS.prioridades.epvsa = null;
+    }
+    try { renderizarSeccionPriorizacion(); } catch(e) {}
+    try { actualizarChecklistIA(); } catch(e) {}
+}
+
+// ── Borrar datos VRELAS (in-memory + re-render)
+function priorizacion_borrarVrelas() {
+    if (!confirm('Borrar datos VRELAS cargados en memoria?\n\nEsto no borra datos en Firebase.')) return;
+    window.datosParticipacionCiudadana = null;
+    window.datosParticipacionCiudadanaMunicipio = null;
+    if (window.COMPAS && window.COMPAS.prioridades) {
+        window.COMPAS.prioridades.relas = null;
+    }
+    try { renderizarSeccionPriorizacion(); } catch(e) {}
+    try { actualizarChecklistIA(); } catch(e) {}
+}
+
+// ── Borrar decisión técnica (in-memory + re-render)
+function priorizacion_borrarTecnica() {
+    if (!confirm('Borrar la decisi\u00f3n t\u00e9cnica de priorizaci\u00f3n en memoria?\n\nEsto no borra datos en Firebase.')) return;
+    window.decisionPriorizacionActual = null;
+    window.datosFusionPriorizacion = null;
+    if (window.COMPAS && window.COMPAS.prioridades) {
+        window.COMPAS.prioridades.fusion = null;
+    }
+    try { renderizarSeccionPriorizacion(); } catch(e) {}
+}
+
+function renderizarSeccionPriorizacion() {
+    var el = document.getElementById('seccion-priorizacion-popular');
+    if (!el) return;
+    var municipio = (typeof getMunicipioActual === 'function') ? getMunicipioActual() : null;
+
+    // ── Estado: Priorización ciudadana ────────────────────────────────────────
+    var pTem = window.datosParticipacionCiudadana;
+    // [M1-GUARDIA] descartar si pertenece a otro municipio
+    if (pTem && window.datosParticipacionCiudadanaMunicipio && municipio &&
+        window.datosParticipacionCiudadanaMunicipio !== municipio) { pTem = null; }
+    var tieneTem = !!(pTem && (pTem.temasFreq || pTem.fuente === 'votacion_relas'));
+    var nTem = tieneTem ? (pTem.n || pTem.totalParticipantes || '?') : null;
+
+    var pEst = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.epvsa;
+    var tieneEst = !!(pEst && (pEst.n > 0 || (pEst.rankingObjetivos && pEst.rankingObjetivos.length)));
+    var nEst = tieneEst ? (pEst.n || '?') : null;
+    if (!tieneEst && pTem && !pTem.temasFreq && pTem.rankingObjetivos && pTem.rankingObjetivos.length) {
+        tieneEst = true; pEst = pTem; nEst = pTem.totalParticipantes || pTem.n || '?';
+    }
+
+    var pMix = window.COMPAS && window.COMPAS.prioridades && window.COMPAS.prioridades.relas;
+    var tieneMix = !!(pMix && pMix.n > 0);
+    if (!tieneMix && typeof relas_globalData !== 'undefined' && relas_globalData && relas_globalData._n) {
+        pMix = { n: relas_globalData._n, fuente: 'relas_datos',
+                 topHab: relas_globalData._habFreq, topProb: relas_globalData._probFreq };
+        tieneMix = true;
+    }
+    // Normalizar pMix: habitosMasFrecuentes (array) → topHab (objeto)
+    if (tieneMix && pMix && pMix.habitosMasFrecuentes && !pMix.topHab) {
+        var _toFreqObj = function(arr) {
+            var o = {}; (arr||[]).forEach(function(x){ if (x && x.id !== undefined) o[x.id] = x.n; }); return o;
+        };
+        pMix = { n: pMix.n, fuente: pMix.fuente,
+                 topHab: _toFreqObj(pMix.habitosMasFrecuentes),
+                 topProb: _toFreqObj(pMix.problemasMasFrecuentes) };
+    }
+    var nMix = tieneMix ? (pMix.n || '?') : null;
+
+    var tieneCiudadana = tieneTem || tieneEst || tieneMix;
+    var nCiudadana = nTem || nEst || nMix;
+
+    // ── Estado: Priorización técnica ──────────────────────────────────────────
+    var decision = window.decisionPriorizacionActual;
+    var tieneTecnica = !!(decision && decision.metodo);
+    var metodosTxt = { epidemiologica: 'Epidemiol\u00f3gica', ciudadana: 'Ciudadana', integracion: 'Integrada' };
+
+    // ── Estado: VRELAS ────────────────────────────────────────────────────────
+    var tieneVrelas = !!(pTem && pTem.temasFreq);
+    var nVrelas = tieneVrelas ? (pTem.n || pTem.totalParticipantes || '?') : null;
+
+    // Auto-carga silenciosa si no hay datos
+    if (!tieneCiudadana && municipio) {
+        resolverPriorizacionCiudadana(municipio).then(function(res){
+            if (res) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
+        });
+    }
+
+    var html = '<div style="padding:0.75rem;">';
+
+    // ══ TARJETA 1 — PRIORIZACIÓN CIUDADANA ════════════════════════════════════
+    var datoHtmlCiudadana = '';
+    if (tieneCiudadana) {
+        // Resumen de tipos disponibles
+        var subtipos = [];
+        if (tieneEst) subtipos.push('<span style="background:#fce7f3;color:#be185d;padding:.1rem .38rem;' +
+            'border-radius:6px;font-size:.64rem;font-weight:600;">\ud83c\udfaf Estrat\u00e9gica ' + nEst + '</span>');
+        if (tieneTem) subtipos.push('<span style="background:#e0f2fe;color:#0369a1;padding:.1rem .38rem;' +
+            'border-radius:6px;font-size:.64rem;font-weight:600;">\ud83d\uddf3\ufe0f Tem\u00e1tica ' + nTem + '</span>');
+        if (tieneMix) subtipos.push('<span style="background:#dcfce7;color:#166534;padding:.1rem .38rem;' +
+            'border-radius:6px;font-size:.64rem;font-weight:600;">\ud83d\uddc2\ufe0f Mixta ' + nMix + '</span>');
+        datoHtmlCiudadana = '<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.4rem;">' +
+            subtipos.join('') + '</div>';
+        // Top objetivo estratégico si existe
+        if (tieneEst && pEst && pEst.rankingObjetivos && pEst.rankingObjetivos.length) {
+            var topObj = pEst.rankingObjetivos[0];
+            datoHtmlCiudadana += '<div style="display:flex;align-items:center;gap:0.4rem;padding:0.32rem 0.55rem;' +
+                'background:#fdf4ff;border:1px solid #f3e8ff;border-radius:6px;">' +
+                '<span style="font-size:0.85rem;">\ud83e\udd47</span>' +
+                '<span style="flex:1;font-size:0.76rem;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+                (topObj.icono||'\ud83c\udfaf') + ' ' + topObj.texto + '</span>' +
+                '<span style="font-size:0.7rem;color:#9d174d;font-weight:600;flex-shrink:0;">' + (topObj.votos||0) + ' v.</span>' +
+                '</div>';
+        } else if (tieneVrelas && pTem && pTem.temasFreq) {
+            // Top tema temático como resumen
+            var temas = Object.entries(pTem.temasFreq)
+                .map(function(e){ return { k: parseInt(e[0]), v: e[1] }; })
+                .sort(function(a,b){ return b.v - a.v; });
+            if (temas.length) {
+                var top1 = temas[0];
+                var TEMAS_L = (typeof VRELAS_TEMAS !== 'undefined') ? VRELAS_TEMAS : {};
+                var ICONOS_L = (typeof VRELAS_ICONOS_TEMAS !== 'undefined') ? VRELAS_ICONOS_TEMAS : {};
+                var nTot = pTem.n || pTem.totalParticipantes || 1;
+                var pct1 = nTot !== '?' ? Math.round(top1.v / nTot * 100) : '?';
+                datoHtmlCiudadana += '<div style="display:flex;align-items:center;gap:0.4rem;padding:0.32rem 0.55rem;' +
+                    'background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;">' +
+                    '<span style="font-size:0.85rem;">\ud83e\udd47</span>' +
+                    '<span style="font-size:0.88rem;flex-shrink:0;">' + (ICONOS_L[top1.k]||'\u2022') + '</span>' +
+                    '<span style="flex:1;font-size:0.76rem;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+                    (TEMAS_L[top1.k]||('Tema ' + top1.k)) + '</span>' +
+                    '<span style="font-size:0.7rem;color:#0074c8;font-weight:600;flex-shrink:0;">' + pct1 + '%</span>' +
+                    '</div>';
+            }
+        }
+    }
+    var btnsCiudadana =
+        '<button onclick="cambiarTabManual(\'votacion\')" ' +
+        'style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
+        'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;" ' +
+        'title="Herramienta de votaci\u00f3n estrat\u00e9gica">\ud83c\udfaf Estrat\u00e9gica</button>' +
+        '<button onclick="cambiarTabManual(\'votacion-relas\')" ' +
+        'style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
+        'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;" ' +
+        'title="Herramienta de votaci\u00f3n tem\u00e1tica VRELAS">\ud83d\uddf3\ufe0f Tem\u00e1tica</button>' +
+        (tieneCiudadana
+            ? '<button onclick="priorizacion_borrarCiudadana()" ' +
+              'style="background:white;border:1px solid #fca5a5;border-radius:7px;' +
+              'padding:0.36rem 0.55rem;font-size:0.72rem;color:#dc2626;cursor:pointer;" ' +
+              'title="Borrar datos ciudadanos en memoria">\ud83d\uddd1\ufe0f</button>'
+            : '');
+    html += _renderTarjetaPriorizacion({
+        icon: '\ud83c\udfaf', iconBg: tieneCiudadana ? '#fdf4ff' : '#f8f0ff',
+        nombre: 'Priorizaci\u00f3n ciudadana',
+        descripcion: 'Estrat\u00e9gica \u00b7 Tem\u00e1tica \u00b7 Mixta',
+        estado: tieneCiudadana ? ('\ud83d\udfe2 ' + nCiudadana + ' part.') : 'Sin datos',
+        estadoBg: tieneCiudadana ? '#fce7f3' : '#f1f5f9',
+        estadoFg: tieneCiudadana ? '#be185d' : '#94a3b8',
+        datoHtml: datoHtmlCiudadana,
+        monitorFn: 'priorizacion_abrirMonitor(\'ciudadana\')',
+        monitorLabel: '\ud83d\udcca Abrir monitor',
+        accionesHtml: btnsCiudadana,
+        detalleHtml: 'Incluye priorizaci\u00f3n estrat\u00e9gica (objetivos EPVSA), tem\u00e1tica (10 temas de salud — VRELAS) ' +
+            'y mixta (h\u00e1bitos, problemas y colectivos — RELAS). Usa las herramientas de votaci\u00f3n para registrar resultados.'
+    });
+
+    // ══ TARJETA 2 — PRIORIZACIÓN TÉCNICA ══════════════════════════════════════
+    var datoHtmlTecnica = '';
+    if (tieneTecnica) {
+        datoHtmlTecnica = '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.38rem 0.6rem;' +
+            'background:#eff6ff;border:1px solid #bfdbfe;border-radius:7px;">' +
+            '<span style="font-size:0.85rem;">\u2714\ufe0f</span>' +
+            '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.76rem;font-weight:700;color:#1d4ed8;">Decisi\u00f3n registrada</div>' +
+            '<div style="font-size:0.72rem;color:#475569;margin-top:0.08rem;">' +
+            (metodosTxt[decision.metodo] || decision.metodo) +
+            (decision.areaPrioritaria ? ' \u00b7 ' + decision.areaPrioritaria : '') + '</div>' +
+            '</div></div>';
+    }
+    var btnsTecnica =
+        '<button onclick="mostrarPriorizacionDual()" ' +
+        'style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
+        'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;" ' +
+        'title="Priorizaci\u00f3n dual: epidemiol\u00f3gica vs ciudadana">\u2696\ufe0f Priorizar</button>' +
+        (tieneTecnica
+            ? '<button onclick="priorizacion_borrarTecnica()" ' +
+              'style="background:white;border:1px solid #fca5a5;border-radius:7px;' +
+              'padding:0.36rem 0.55rem;font-size:0.72rem;color:#dc2626;cursor:pointer;" ' +
+              'title="Borrar decisi\u00f3n t\u00e9cnica en memoria">\ud83d\uddd1\ufe0f</button>'
+            : '');
+    html += _renderTarjetaPriorizacion({
+        icon: '\ud83d\udcca', iconBg: tieneTecnica ? '#eff6ff' : '#f0f4ff',
+        nombre: 'Priorizaci\u00f3n t\u00e9cnica',
+        descripcion: 'An\u00e1lisis epidemiol\u00f3gico integrado',
+        estado: tieneTecnica ? ('\u2714 ' + (metodosTxt[decision.metodo]||decision.metodo)) : 'Sin decisi\u00f3n',
+        estadoBg: tieneTecnica ? '#eff6ff' : '#f1f5f9',
+        estadoFg: tieneTecnica ? '#1d4ed8' : '#94a3b8',
+        datoHtml: datoHtmlTecnica,
+        monitorFn: 'priorizacion_abrirMonitor(\'tecnica\')',
+        monitorLabel: '\ud83d\udcca Abrir monitor',
+        accionesHtml: btnsTecnica,
+        detalleHtml: 'Combina el an\u00e1lisis epidemiol\u00f3gico del perfil de salud con la priorizaci\u00f3n ciudadana para ' +
+            'generar una decisi\u00f3n t\u00e9cnica integrada (70% epidemiol\u00f3gico + 30% ciudadano, u otros m\u00e9todos).'
+    });
+
+    // ══ TARJETA 3 — VRELAS ════════════════════════════════════════════════════
+    var datoHtmlVrelas = '';
+    if (tieneVrelas && pTem && pTem.temasFreq) {
+        var ICONOS_V = (typeof VRELAS_ICONOS_TEMAS !== 'undefined') ? VRELAS_ICONOS_TEMAS : {};
+        var TEMAS_V  = (typeof VRELAS_TEMAS !== 'undefined') ? VRELAS_TEMAS : {};
+        var sortedV = Object.entries(pTem.temasFreq)
+            .map(function(e){ return { k: parseInt(e[0]), v: e[1] }; })
+            .sort(function(a,b){ return b.v - a.v; })
+            .slice(0, 5);
+        var maxVV = sortedV[0] ? sortedV[0].v : 1;
+        var nRV   = pTem.n || pTem.totalParticipantes || 1;
+        var medallasV = ['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
+        datoHtmlVrelas = '<div style="display:flex;flex-direction:column;gap:0.2rem;">';
+        sortedV.forEach(function(item, i) {
+            var ico  = ICONOS_V[item.k] || '\u2022';
+            var lbl  = TEMAS_V[item.k]  || ('Tema ' + item.k);
+            var pct  = nRV !== '?' ? Math.round(item.v / nRV * 100) : '?';
+            var barW = Math.round(item.v / maxVV * 100);
+            var isTop = i < 3;
+            var bg   = isTop ? '#f0f9ff' : '#f8fafc';
+            var brd  = isTop ? '#bae6fd' : '#f0f0f0';
+            var acc  = isTop ? '#0074c8' : '#64748b';
+            var mdl  = medallasV[i] || '';
+            datoHtmlVrelas +=
+                '<div style="display:flex;align-items:center;gap:0.45rem;padding:' +
+                (isTop ? '0.4rem 0.55rem' : '0.25rem 0.55rem') +
+                ';background:' + bg + ';border:1px solid ' + brd + ';border-radius:6px;">' +
+                (mdl ? '<span style="font-size:' + (isTop ? '0.9rem' : '0.72rem') + ';flex-shrink:0;">' + mdl + '</span>'
+                     : '<span style="width:1.1rem;text-align:center;font-size:.6rem;color:#94a3b8;font-weight:700;flex-shrink:0;">' + (i+1) + '\u00ba</span>') +
+                '<span style="font-size:' + (isTop ? '0.9rem' : '0.78rem') + ';flex-shrink:0;">' + ico + '</span>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:' + (isTop ? '0.76rem' : '0.69rem') + ';font-weight:' + (isTop ? '600' : '400') + ';' +
+                    'color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + lbl + '</div>' +
+                    '<div style="height:3px;background:#e5e7eb;border-radius:2px;margin-top:0.12rem;overflow:hidden;">' +
+                    '<div style="height:100%;width:' + barW + '%;background:' + acc + ';border-radius:2px;"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<span style="font-size:' + (isTop ? '0.76rem' : '0.66rem') + ';font-weight:700;color:' + acc + ';flex-shrink:0;min-width:2rem;text-align:right;">' + pct + '%</span>' +
+                '</div>';
+        });
+        datoHtmlVrelas += '</div>';
+    }
+    var btnsVrelas =
+        '<button onclick="cambiarTabManual(\'votacion-relas\')" ' +
+        'style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
+        'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;" ' +
+        'title="Herramienta de votaci\u00f3n VRELAS">\ud83d\uddf3\ufe0f Herramienta</button>' +
+        '<button onclick="cambiarTabManual(\'relas\')" ' +
+        'style="background:white;border:1px solid #e2e8f0;border-radius:7px;' +
+        'padding:0.36rem 0.65rem;font-size:0.74rem;font-weight:600;color:#475569;cursor:pointer;" ' +
+        'title="Herramienta RELAS: h\u00e1bitos, problemas, colectivos">\ud83d\uddc2\ufe0f RELAS</button>' +
+        (tieneVrelas
+            ? '<button onclick="priorizacion_borrarVrelas()" ' +
+              'style="background:white;border:1px solid #fca5a5;border-radius:7px;' +
+              'padding:0.36rem 0.55rem;font-size:0.72rem;color:#dc2626;cursor:pointer;" ' +
+              'title="Borrar datos VRELAS en memoria">\ud83d\uddd1\ufe0f</button>'
+            : '');
+    html += _renderTarjetaPriorizacion({
+        icon: '\ud83d\uddf3\ufe0f', iconBg: tieneVrelas ? '#f0fdf4' : '#f0f9ff',
+        nombre: 'VRELAS',
+        descripcion: '10 temas de salud \u00b7 H\u00e1bitos \u00b7 Colectivos',
+        estado: tieneVrelas ? ('\ud83d\udfe2 ' + nVrelas + ' part.') : 'Sin datos',
+        estadoBg: tieneVrelas ? '#dcfce7' : '#f1f5f9',
+        estadoFg: tieneVrelas ? '#166534' : '#94a3b8',
+        datoHtml: datoHtmlVrelas,
+        monitorFn: 'priorizacion_abrirMonitor(\'vrelas\')',
+        monitorLabel: '\ud83d\udcca Abrir monitor',
+        accionesHtml: btnsVrelas,
+        detalleHtml: 'VRELAS: votaci\u00f3n sobre los 10 temas de salud prioritarios (alimentaci\u00f3n, ' +
+            'actividad f\u00edsica, bienestar emocional, pantallas, sue\u00f1o, t\u00f3xicos, sexualidad, ' +
+            'violencia de g\u00e9nero, medioambiente, accidentes).<br>' +
+            'RELAS: h\u00e1bitos, problemas y colectivos prioritarios.'
+    });
+
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+
 
 // ============================================================
 // GENERADOR DE ANÁLISIS IA

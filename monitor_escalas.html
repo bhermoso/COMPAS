@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Escalas Diagnósticas · COMPÁS</title>
+
+    <style>
+        /* =====================================================================
+           MONITOR ESCALAS DIAGNÓSTICAS — IDENTIDAD VISUAL COMPÁS
+           Paleta: #0074c8 azul · #00acd9 cyan · #94d40b verde · #ffb61b amarillo
+                   #ff6600 naranja · #dc143c rojo
+        ===================================================================== */
+        :root {
+            --azul:     #0074c8;
+            --cyan:     #00acd9;
+            --verde:    #94d40b;
+            --amarillo: #ffb61b;
+            --naranja:  #ff6600;
+            --rojo:     #dc143c;
+            --oscuro:   #1a1a2e;
+            --texto:    #2d3748;
+            --gris:     #64748b;
+            --fondo:    #f8f9fa;
+            --blanco:   #ffffff;
+            --borde:    #e9ecef;
+            --gradient: linear-gradient(90deg, #0074c8 0%, #00acd9 20%, #94d40b 40%, #ffb61b 60%, #ff6600 80%, #dc143c 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--fondo);
+            min-height: 100vh;
+            color: var(--texto);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+        /* ── Header ── */
+        .header {
+            background: var(--blanco);
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--borde);
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.2rem;
+        }
+        .header p { color: var(--gris); font-size: 0.85rem; letter-spacing: 1px; }
+
+        .franja-compas { height: 5px; background: var(--gradient); }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--blanco);
+            border-bottom: 1px solid var(--borde);
+            padding: 0.65rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .badge-escala {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.3rem 0.75rem; border-radius: 999px;
+            font-size: 0.78rem; font-weight: 700; color: white;
+        }
+        .btn-back {
+            padding: 0.3rem 0.8rem; background: var(--fondo);
+            border: 1px solid var(--borde); border-radius: 6px;
+            font-size: 0.78rem; color: var(--gris); cursor: pointer;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;
+        }
+        .btn-back:hover { background: #e9ecef; }
+
+        /* ── Main grid ── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+        @media (max-width: 640px) { .main-grid { grid-template-columns: 1fr; } }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--blanco);
+            border: 1px solid var(--borde);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(15,23,42,0.06);
+        }
+        .card-header {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.8rem 1.1rem;
+            border-bottom: 1px solid var(--borde);
+            background: #fafbfc;
+        }
+        .card-icon {
+            width: 2rem; height: 2rem; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .card-title { font-weight: 700; font-size: 0.85rem; color: #1e293b; }
+        .card-subtitle { font-size: 0.7rem; color: var(--gris); }
+        .card-body { padding: 1rem 1.1rem; }
+
+        /* ── Full-width card ── */
+        .card-full { grid-column: 1 / -1; }
+
+        /* ── Resultado principal ── */
+        .resultado-box {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1rem; border-radius: 10px;
+            border: 1px solid; margin-bottom: 0.75rem;
+        }
+        .score-big {
+            font-size: 2.2rem; font-weight: 800; line-height: 1;
+            flex-shrink: 0; min-width: 4rem; text-align: center;
+        }
+        .score-label { font-size: 0.62rem; opacity: 0.7; margin-top: 0.15rem; }
+        .resultado-texto { font-size: 0.82rem; color: #334155; line-height: 1.55; }
+        .resultado-texto strong { display: block; font-size: 0.9rem; margin-bottom: 0.25rem; }
+
+        /* ── Barra de referencia ── */
+        .ref-bar-wrap { margin: 0.5rem 0; }
+        .ref-bar-label {
+            display: flex; justify-content: space-between;
+            font-size: 0.68rem; color: var(--gris); margin-bottom: 0.2rem;
+        }
+        .ref-bar-track {
+            height: 12px; background: #e5e7eb; border-radius: 6px;
+            overflow: visible; position: relative;
+        }
+        .ref-bar-fill {
+            height: 100%; border-radius: 6px; transition: width .5s ease;
+            position: relative;
+        }
+        .ref-bar-marker {
+            position: absolute; top: -4px; bottom: -4px;
+            width: 2px; background: rgba(0,0,0,0.3);
+            border-radius: 1px;
+        }
+        .ref-bar-marker-label {
+            position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+            font-size: 0.6rem; white-space: nowrap; color: var(--gris); font-weight: 600;
+        }
+
+        /* ── Umbrales ── */
+        .umbral-list { display: flex; flex-direction: column; gap: 0.35rem; }
+        .umbral-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.35rem 0.55rem; border-radius: 6px;
+            font-size: 0.77rem;
+        }
+        .umbral-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .umbral-activo { font-weight: 700; }
+
+        /* ── Interpretación ── */
+        .interpretacion-box {
+            background: #f0f9ff; border: 1px solid #bae6fd;
+            border-radius: 8px; padding: 0.75rem 1rem;
+            font-size: 0.82rem; color: #1e293b; line-height: 1.6;
+        }
+
+        /* ── Metadatos ── */
+        .meta-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0.5rem; margin-top: 0.5rem;
+        }
+        .meta-item {
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 7px; padding: 0.5rem 0.7rem;
+        }
+        .meta-key { font-size: 0.65rem; color: var(--gris); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+        .meta-val { font-size: 0.82rem; color: #1e293b; font-weight: 600; margin-top: 0.08rem; }
+
+        /* ── Sin datos ── */
+        .sin-datos {
+            text-align: center; padding: 3rem 2rem;
+            color: var(--gris); font-size: 0.9rem;
+        }
+        .sin-datos .emoji { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .sin-datos a {
+            display: inline-block; margin-top: 1rem;
+            padding: 0.5rem 1.2rem; background: var(--azul);
+            color: white; border-radius: 8px; text-decoration: none;
+            font-weight: 600; font-size: 0.85rem;
+        }
+
+        /* ── Observaciones ── */
+        .obs-box {
+            background: #fffbeb; border: 1px solid #fde68a;
+            border-radius: 8px; padding: 0.65rem 0.9rem;
+            font-size: 0.8rem; color: #78350f; line-height: 1.55;
+        }
+        .obs-label { font-weight: 700; font-size: 0.72rem; color: #92400e; margin-bottom: 0.2rem; }
+
+        /* ── Footer info ── */
+        .footer-info {
+            margin-top: 1.5rem; text-align: center;
+            font-size: 0.72rem; color: #94a3b8;
+            padding: 0.75rem; border-top: 1px solid var(--borde);
+        }
+
+        /* ── Gauge circular (SVG) ── */
+        .gauge-wrap { display: flex; justify-content: center; padding: 0.5rem 0; }
+        .gauge-text-center { text-anchor: middle; dominant-baseline: central; }
+
+        /* ── Animación ── */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .card { animation: fadeIn .25s ease; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>COMPÁS</h1>
+    <p id="header-sub">Monitor · Escalas diagnósticas</p>
+</div>
+<div class="franja-compas"></div>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <span id="badge-escala" class="badge-escala" style="background:#0074c8;">📊 Cargando...</span>
+        <span id="topbar-mun" style="color:#64748b;">—</span>
+        <span id="topbar-n" style="color:#64748b;"></span>
+    </div>
+    <a href="javascript:history.back()" class="btn-back">← Volver a COMPÁS</a>
+</div>
+
+<div class="container">
+    <div id="root-content">
+        <div class="sin-datos"><div class="emoji">⏳</div>Cargando monitor...</div>
+    </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// MONITOR ESCALAS DIAGNÓSTICAS — COMPÁS
+// Lee datos desde localStorage['compas_monitor_escala'] + URL ?tipo=
+// Escrito por escalaMonitor_abrir() en index.html antes de abrir esta página.
+// ══════════════════════════════════════════════════════════════════════════════
+
+var ESCALAS_META = {
+    sf12: {
+        nombre: 'SF-12',
+        nombreCompleto: 'SF-12 — Calidad de vida relacionada con la salud',
+        icon: '🏥',
+        iconBg: '#eff6ff',
+        accentColor: '#1d4ed8',
+        descripcion: 'Mide componentes físico (PCS) y mental (MCS) de la calidad de vida (0–100).',
+        umbral: [
+            { label: 'Muy buena calidad de vida', min: 55, max: 100, color: '#16a34a', bg: '#f0fdf4' },
+            { label: 'Rango normativo (referencia)', min: 45, max: 55, color: '#0369a1', bg: '#eff6ff' },
+            { label: 'Deterioro leve (atención)', min: 35, max: 45, color: '#d97706', bg: '#fffbeb' },
+            { label: 'Deterioro relevante (<45)', min: 0, max: 35, color: '#dc2626', bg: '#fef2f2' }
+        ],
+        corte: 45,
+        corteMax: 100,
+        corteLabel: 'Referencia: 50',
+        parseFn: function(texto) {
+            // "PCS medio 47 / MCS medio 51" → { pcs: 47, mcs: 51 }
+            var pcsM = texto.match(/PCS\s+(?:medio|media|mean)?\s*:?\s*([\d.,]+)/i);
+            var mcsM = texto.match(/MCS\s+(?:medio|media|mean)?\s*:?\s*([\d.,]+)/i);
+            var pcs = pcsM ? parseFloat(pcsM[1].replace(',', '.')) : null;
+            var mcs = mcsM ? parseFloat(mcsM[1].replace(',', '.')) : null;
+            // Si no, buscar dos números cualesquiera
+            if (pcs == null && mcs == null) {
+                var nums = texto.match(/([\d]+(?:[.,]\d+)?)/g);
+                if (nums && nums.length >= 2) {
+                    pcs = parseFloat(nums[0].replace(',', '.'));
+                    mcs = parseFloat(nums[1].replace(',', '.'));
+                } else if (nums && nums.length === 1) {
+                    pcs = parseFloat(nums[0].replace(',', '.'));
+                }
+            }
+            return { pcs: pcs, mcs: mcs, valor: pcs != null ? pcs : null };
+        }
+    },
+    duke: {
+        nombre: 'Duke-UNC',
+        nombreCompleto: 'Duke-UNC — Apoyo social funcional percibido',
+        icon: '🤝',
+        iconBg: '#fefce8',
+        accentColor: '#92400e',
+        descripcion: 'Evalúa apoyo confidencial y afectivo. Escala 11–55 puntos.',
+        umbral: [
+            { label: 'Apoyo social alto (≥44)', min: 44, max: 55, color: '#16a34a', bg: '#f0fdf4' },
+            { label: 'Apoyo social moderado (32–43)', min: 32, max: 44, color: '#0369a1', bg: '#eff6ff' },
+            { label: 'Bajo apoyo social (<32)', min: 11, max: 32, color: '#dc2626', bg: '#fef2f2' }
+        ],
+        corte: 32,
+        corteMax: 55,
+        corteMin: 11,
+        corteLabel: 'Corte: 32',
+        parseFn: function(texto) {
+            var m = texto.match(/([\d]+(?:[.,]\d+)?)/);
+            return { valor: m ? parseFloat(m[1].replace(',', '.')) : null };
+        }
+    },
+    cage: {
+        nombre: 'CAGE',
+        nombreCompleto: 'CAGE — Cribado de consumo de riesgo de alcohol',
+        icon: '🍷',
+        iconBg: '#fff7ed',
+        accentColor: '#c2410c',
+        descripcion: 'Cribado comunitario. ≥2 respuestas positivas = probable consumo de riesgo.',
+        umbral: [
+            { label: 'Sin señal de riesgo (<5%)', min: 0, max: 5, color: '#16a34a', bg: '#f0fdf4' },
+            { label: 'Señal moderada (5–10%)', min: 5, max: 10, color: '#d97706', bg: '#fffbeb' },
+            { label: 'Señal relevante (>10%)', min: 10, max: 100, color: '#dc2626', bg: '#fef2f2' }
+        ],
+        corte: null,
+        corteMax: 100,
+        corteLabel: 'Referencia: ~5%',
+        unidad: '%',
+        parseFn: function(texto) {
+            // "6% con resultado compatible..." → 6
+            var m = texto.match(/([\d]+(?:[.,]\d+)?)\s*%/);
+            if (!m) m = texto.match(/([\d]+(?:[.,]\d+)?)/);
+            return { valor: m ? parseFloat(m[1].replace(',', '.')) : null };
+        }
+    },
+    predimed: {
+        nombre: 'PREDIMED',
+        nombreCompleto: 'PREDIMED — Adherencia a dieta mediterránea',
+        icon: '🥗',
+        iconBg: '#f0fdf4',
+        accentColor: '#15803d',
+        descripcion: 'Escala 0–14. ≥9 puntos = alta adherencia a dieta mediterránea.',
+        umbral: [
+            { label: 'Alta adherencia (≥9)', min: 9, max: 14, color: '#16a34a', bg: '#f0fdf4' },
+            { label: 'Adherencia intermedia (7–8)', min: 7, max: 9, color: '#d97706', bg: '#fffbeb' },
+            { label: 'Baja adherencia (<7)', min: 0, max: 7, color: '#dc2626', bg: '#fef2f2' }
+        ],
+        corte: 9,
+        corteMax: 14,
+        corteLabel: 'Corte: 9/14',
+        parseFn: function(texto) {
+            // "Puntuación media 7 sobre 14" → 7
+            var sobre = texto.match(/([\d]+(?:[.,]\d+)?)\s+sobre/i);
+            if (sobre) return { valor: parseFloat(sobre[1].replace(',', '.')) };
+            var m = texto.match(/([\d]+(?:[.,]\d+)?)/);
+            return { valor: m ? parseFloat(m[1].replace(',', '.')) : null };
+        }
+    }
+};
+
+// ── Leer datos ────────────────────────────────────────────────────────────────
+function _getParam(name) {
+    var m = new URLSearchParams(window.location.search).get(name);
+    return m ? m.toLowerCase() : null;
+}
+
+function _leerDatos() {
+    var raw = null;
+    try { raw = localStorage.getItem('compas_monitor_escala'); } catch(e){}
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch(e) { return null; }
+}
+
+// ── Identificar umbral activo según valor ─────────────────────────────────────
+function _umbralActivo(umbrales, valor) {
+    if (valor == null) return -1;
+    for (var i = 0; i < umbrales.length; i++) {
+        var u = umbrales[i];
+        if (valor >= u.min && valor < u.max) return i;
+    }
+    // último umbral (max inclusive)
+    if (valor >= umbrales[umbrales.length - 1].min) return umbrales.length - 1;
+    return -1;
+}
+
+// ── Barra de referencia ───────────────────────────────────────────────────────
+function _renderRefBar(valor, meta) {
+    if (valor == null) return '';
+    var min  = meta.corteMin || 0;
+    var max  = meta.corteMax || 100;
+    var rango = max - min;
+    var pct  = Math.min(100, Math.max(0, Math.round((valor - min) / rango * 100)));
+    var corteIdx = meta.corte != null ? Math.round((meta.corte - min) / rango * 100) : null;
+
+    var umbrales = meta.umbral || [];
+    var activo = _umbralActivo(umbrales, valor);
+    var fillColor = activo >= 0 ? umbrales[activo].color : '#64748b';
+
+    var barraHtml =
+        '<div class="ref-bar-wrap">' +
+        '<div class="ref-bar-label">' +
+            '<span>' + (meta.unidad === '%' ? '0%' : String(min)) + '</span>' +
+            '<span style="font-weight:700;color:' + fillColor + ';">' +
+                (meta.unidad === '%' ? valor.toFixed(1) + '%' : valor.toFixed(1)) +
+            '</span>' +
+            '<span>' + (meta.unidad === '%' ? '100%' : String(max)) + '</span>' +
+        '</div>' +
+        '<div class="ref-bar-track">' +
+            '<div class="ref-bar-fill" style="width:' + pct + '%;background:' + fillColor + ';"></div>' +
+            (corteIdx != null
+                ? '<div class="ref-bar-marker" style="left:' + corteIdx + '%;">' +
+                  '<div class="ref-bar-marker-label">' + (meta.corteLabel || 'Corte') + '</div>' +
+                  '</div>'
+                : '') +
+        '</div>' +
+        '</div>';
+    return barraHtml;
+}
+
+// ── Render SF-12 (doble puntuación PCS+MCS) ───────────────────────────────────
+function _renderSF12(parsed, meta, escala) {
+    var pcs = parsed.pcs, mcs = parsed.mcs;
+    var hayPCS = pcs != null && !isNaN(pcs);
+    var hayMCS = mcs != null && !isNaN(mcs);
+
+    if (!hayPCS && !hayMCS) return _renderGenerico(null, meta, escala);
+
+    var html = '';
+
+    // Función para un bloque de componente
+    function bloqueComponente(label, val, max, cutoff, desc) {
+        var pct = Math.min(100, Math.max(0, Math.round(val / max * 100)));
+        var corteIdx = cutoff != null ? Math.round(cutoff / max * 100) : null;
+        var color = val >= cutoff ? '#16a34a' : val >= cutoff - 10 ? '#d97706' : '#dc2626';
+        var bg = val >= cutoff ? '#f0fdf4' : val >= cutoff - 10 ? '#fffbeb' : '#fef2f2';
+        return '<div style="margin-bottom:0.8rem;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.3rem;">' +
+                '<span style="font-size:0.82rem;font-weight:700;color:#1e293b;">' + label + '</span>' +
+                '<span style="font-size:1.5rem;font-weight:800;color:' + color + ';">' + val.toFixed(1) + '<span style="font-size:0.65rem;color:' + color + ';opacity:.7;">/100</span></span>' +
+            '</div>' +
+            '<div style="height:10px;background:#e5e7eb;border-radius:5px;overflow:visible;position:relative;">' +
+                '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:5px;"></div>' +
+                (corteIdx != null
+                    ? '<div style="position:absolute;top:-3px;bottom:-3px;left:' + corteIdx + '%;width:2px;background:rgba(0,0,0,0.25);border-radius:1px;">' +
+                      '<div style="position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:0.6rem;white-space:nowrap;color:#64748b;">Ref. 50</div></div>'
+                    : '') +
+            '</div>' +
+            '<div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">' + desc + '</div>' +
+            '</div>';
+    }
+
+    html += bloqueComponente(
+        'PCS — Componente Físico',
+        pcs, 100, 45,
+        pcs < 45 ? '⚠️ Por debajo del punto de corte (<45)' : pcs < 50 ? 'Ligeramente bajo (referencia: 50)' : '✔ En rango normativo'
+    );
+    if (hayMCS) {
+        html += bloqueComponente(
+            'MCS — Componente Mental',
+            mcs, 100, 45,
+            mcs < 45 ? '⚠️ Por debajo del punto de corte (<45)' : mcs < 50 ? 'Ligeramente bajo (referencia: 50)' : '✔ En rango normativo'
+        );
+    }
+    return html;
+}
+
+// ── Render genérico para Duke, CAGE, PREDIMED ─────────────────────────────────
+function _renderGenerico(valor, meta, escala) {
+    if (valor == null) {
+        return '<div style="text-align:center;color:#94a3b8;font-size:0.82rem;padding:1rem 0;">' +
+            'No se pudo extraer un valor numérico del resultado registrado.<br>' +
+            '<span style="font-size:0.75rem;">Comprueba el formato en "Resultado principal".</span></div>';
+    }
+    var html = _renderRefBar(valor, meta);
+
+    var umbrales = meta.umbral || [];
+    var activo = _umbralActivo(umbrales, valor);
+
+    html += '<div class="umbral-list" style="margin-top:0.65rem;">';
+    umbrales.forEach(function(u, i) {
+        var esActivo = i === activo;
+        html += '<div class="umbral-item' + (esActivo ? ' umbral-activo' : '') + '" style="' +
+            'background:' + (esActivo ? u.bg : '#f8fafc') + ';' +
+            'border:1px solid ' + (esActivo ? u.color + '55' : '#f0f0f0') + ';">' +
+            '<div class="umbral-dot" style="background:' + u.color + ';' + (esActivo ? 'box-shadow:0 0 0 2px ' + u.color + '44;' : '') + '"></div>' +
+            '<span style="flex:1;color:' + (esActivo ? '#1e293b' : '#64748b') + ';">' + u.label + '</span>' +
+            (esActivo ? '<span style="font-size:0.7rem;font-weight:700;color:' + u.color + ';">▶ Actual</span>' : '') +
+            '</div>';
+    });
+    html += '</div>';
+    return html;
+}
+
+// ── Render principal ──────────────────────────────────────────────────────────
+function renderMonitor() {
+    var tipo = _getParam('tipo');
+    var datos = _leerDatos();
+
+    var meta = tipo ? ESCALAS_META[tipo] : null;
+    var escala = datos ? datos.escala : null;
+    var municipioNombre = datos ? (datos.municipioNombre || datos.municipio || '') : '';
+
+    // Actualizar topbar
+    if (meta) {
+        var badge = document.getElementById('badge-escala');
+        badge.textContent = meta.icon + ' ' + meta.nombre;
+        badge.style.background = meta.accentColor;
+    }
+    document.getElementById('topbar-mun').textContent = municipioNombre ? '📍 ' + municipioNombre : '';
+    document.getElementById('header-sub').textContent = 'Monitor · ' + (meta ? meta.nombre : 'Escala diagnóstica');
+
+    var root = document.getElementById('root-content');
+
+    // Sin datos en localStorage
+    if (!escala || !meta) {
+        root.innerHTML = '<div class="sin-datos">' +
+            '<div class="emoji">📋</div>' +
+            '<div><strong>Sin datos disponibles</strong></div>' +
+            '<p style="margin-top:0.5rem;font-size:0.82rem;">Regresa a COMPÁS y registra los datos de la escala antes de abrir el monitor.</p>' +
+            '<a href="javascript:history.back()">← Volver a COMPÁS</a>' +
+            '</div>';
+        return;
+    }
+
+    var resultado_txt = escala.resultado_principal || '';
+    var interpretacion_txt = escala.interpretacion || '';
+    var observaciones_txt = escala.observaciones || '';
+
+    // Parsear valor numérico
+    var parsed = meta.parseFn(resultado_txt);
+    var valor = parsed ? parsed.valor : null;
+
+    // Umbral activo global
+    var umbrales = meta.umbral || [];
+    var activo = _umbralActivo(umbrales, valor);
+    var uActivo = activo >= 0 ? umbrales[activo] : null;
+
+    // Badge de estado
+    var estadoHtml = '';
+    if (uActivo) {
+        estadoHtml = '<span style="display:inline-block;background:' + uActivo.bg + ';color:' + uActivo.color + ';' +
+            'padding:0.35rem 0.9rem;border-radius:999px;font-size:0.78rem;font-weight:700;' +
+            'border:1px solid ' + uActivo.color + '44;margin-top:0.5rem;">' + uActivo.label + '</span>';
+    }
+
+    // Render del bloque de resultado visual
+    var visualHtml = '';
+    if (tipo === 'sf12') {
+        visualHtml = _renderSF12(parsed, meta, escala);
+    } else {
+        visualHtml = _renderGenerico(valor, meta, escala);
+    }
+
+    // Metadata
+    var metaHtml = '<div class="meta-grid">';
+    if (escala.tamano_muestra) metaHtml += '<div class="meta-item"><div class="meta-key">Muestra</div><div class="meta-val">n = ' + escala.tamano_muestra + '</div></div>';
+    if (escala.anio_estudio) metaHtml += '<div class="meta-item"><div class="meta-key">Año</div><div class="meta-val">' + escala.anio_estudio + '</div></div>';
+    if (escala.fuente_estudio) metaHtml += '<div class="meta-item" style="grid-column:1/-1;"><div class="meta-key">Fuente / Estudio</div><div class="meta-val" style="font-weight:400;">' + escala.fuente_estudio + '</div></div>';
+    metaHtml += '</div>';
+
+    // Actualizar topbar n
+    if (escala.tamano_muestra) {
+        document.getElementById('topbar-n').textContent = '👥 n = ' + escala.tamano_muestra;
+    }
+
+    // Referencia clínica (tabla de umbrales en formato legible)
+    var refHtml = '<div class="umbral-list">';
+    umbrales.forEach(function(u, i) {
+        var esActivo = i === activo;
+        refHtml += '<div class="umbral-item' + (esActivo ? ' umbral-activo' : '') + '" style="' +
+            'background:' + (esActivo ? u.bg : '#f8fafc') + ';' +
+            'border:1px solid ' + (esActivo ? u.color + '55' : '#f0f0f0') + ';">' +
+            '<div class="umbral-dot" style="background:' + u.color + ';"></div>' +
+            '<span style="flex:1;color:' + (esActivo ? '#1e293b' : '#64748b') + ';font-size:0.78rem;">' + u.label + '</span>' +
+            (esActivo ? '<span style="font-size:0.7rem;font-weight:700;color:' + u.color + ';">◀ resultado actual</span>' : '') +
+            '</div>';
+    });
+    refHtml += '</div>';
+
+    // Descripción técnica del instrumento
+    var descTecnica = {
+        sf12:    'SF-12: 12 ítems que miden dos componentes de calidad de vida: PCS (físico) y MCS (mental). Puntuaciones 0–100. Punto de corte poblacional ≈ 50 (media normativa). Valores < 45 indican deterioro relevante.',
+        duke:    'Duke-UNC-11: 11 ítems que evalúan apoyo social confidencial y afectivo. Puntuación total 11–55 pts. Punto de corte: < 32 indica bajo apoyo social percibido.',
+        cage:    'CAGE: 4 ítems de cribado de consumo de riesgo de alcohol. Se notifica como % de población con ≥ 2 respuestas positivas. Es un instrumento de orientación comunitaria, no diagnóstico clínico individual.',
+        predimed:'PREDIMED: 14 ítems de adherencia a dieta mediterránea (Martínez-González et al.). Puntuación 0–14. < 9 = baja adherencia, ≥ 9 = alta adherencia. Validado en estudio PREDIMED España.'
+    };
+
+    var html = '<div class="main-grid">';
+
+    // Card 1: Resultado principal + visualización
+    html += '<div class="card" style="grid-column:1/-1;">' +
+        '<div class="card-header">' +
+            '<div class="card-icon" style="background:' + meta.iconBg + ';">' + meta.icon + '</div>' +
+            '<div>' +
+                '<div class="card-title">' + meta.nombreCompleto + '</div>' +
+                '<div class="card-subtitle">' + meta.descripcion + '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="card-body">' +
+            '<div style="display:flex;gap:1rem;flex-wrap:wrap;">' +
+                '<div style="flex:1;min-width:250px;">' +
+                    '<div style="font-size:0.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:0.35rem;">Resultado registrado</div>' +
+                    '<div style="font-size:0.9rem;color:#1e293b;font-weight:600;padding:0.5rem 0.75rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;line-height:1.5;">' + (resultado_txt || '—') + '</div>' +
+                    (estadoHtml ? '<div style="margin-top:0.5rem;">' + estadoHtml + '</div>' : '') +
+                '</div>' +
+                '<div style="flex:1.4;min-width:250px;">' +
+                    '<div style="font-size:0.72rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:0.35rem;">Visualización</div>' +
+                    visualHtml +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '</div>';
+
+    // Card 2: Interpretación
+    html += '<div class="card">' +
+        '<div class="card-header">' +
+            '<div class="card-icon" style="background:#f0fdf4;">📝</div>' +
+            '<div><div class="card-title">Interpretación</div><div class="card-subtitle">Valoración registrada en COMPÁS</div></div>' +
+        '</div>' +
+        '<div class="card-body">' +
+            '<div class="interpretacion-box">' + (interpretacion_txt || '<em style="color:#94a3b8;">Sin interpretación registrada.</em>') + '</div>' +
+            (observaciones_txt
+                ? '<div class="obs-box" style="margin-top:0.65rem;"><div class="obs-label">📌 Observaciones</div>' + observaciones_txt + '</div>'
+                : '') +
+        '</div>' +
+        '</div>';
+
+    // Card 3: Referencia clínica
+    html += '<div class="card">' +
+        '<div class="card-header">' +
+            '<div class="card-icon" style="background:#fef9c3;">📐</div>' +
+            '<div><div class="card-title">Referencia clínica</div><div class="card-subtitle">Umbrales validados del instrumento</div></div>' +
+        '</div>' +
+        '<div class="card-body">' + refHtml + '</div>' +
+        '</div>';
+
+    // Card 4: Metadatos del estudio
+    html += '<div class="card">' +
+        '<div class="card-header">' +
+            '<div class="card-icon" style="background:#f0f9ff;">📁</div>' +
+            '<div><div class="card-title">Datos del estudio</div><div class="card-subtitle">Fuente, año y muestra</div></div>' +
+        '</div>' +
+        '<div class="card-body">' +
+            (escala.tamano_muestra || escala.anio_estudio || escala.fuente_estudio ? metaHtml : '<div style="font-size:0.8rem;color:#94a3b8;">Sin metadatos registrados.</div>') +
+        '</div>' +
+        '</div>';
+
+    // Card 5: Descripción técnica (full width)
+    html += '<div class="card card-full">' +
+        '<div class="card-header">' +
+            '<div class="card-icon" style="background:#fdf4ff;">🧪</div>' +
+            '<div><div class="card-title">Instrumento: ' + meta.nombre + '</div><div class="card-subtitle">Descripción técnica y validación</div></div>' +
+        '</div>' +
+        '<div class="card-body">' +
+            '<div style="font-size:0.82rem;color:#334155;line-height:1.65;">' + (descTecnica[tipo] || meta.descripcion) + '</div>' +
+        '</div>' +
+        '</div>';
+
+    html += '</div>'; // end main-grid
+
+    html += '<div class="footer-info">Monitor generado el ' + new Date().toLocaleDateString('es-ES') +
+        ' · Datos registrados en COMPÁS · monitor_escalas.html · COMPÁS Sistema de Información para la Salud Local</div>';
+
+    root.innerHTML = html;
+
+    // Actualizar título de la pestaña
+    document.title = 'Monitor ' + meta.nombre + ' · ' + municipioNombre + ' · COMPÁS';
+}
+
+// ── Arrancar ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    renderMonitor();
+});
+</script>
+</body>
+</html>
