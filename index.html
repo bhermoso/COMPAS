@@ -16627,6 +16627,11 @@ function inicializarHojaRuta() {
 
     db.ref('estrategias/' + estrategiaActual + '/municipios/' + m + '/hojaRuta').once('value', snap => {
 
+        if (getMunicipioActual() !== m) {
+            console.warn('[COMPÁS AM] inicializarHojaRuta: callback tardío para "' + m + '". Descartado.');
+            return;
+        }
+
         console.log('  Firebase hojaRuta respondió:', snap.exists() ? 'tiene datos' : 'vacío');
 
         if (!snap.exists()) {
@@ -16643,6 +16648,8 @@ function inicializarHojaRuta() {
 
         cargarHojaRuta();
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] inicializarHojaRuta: error Firebase para "' + m + '":', err);
     });
 
 }
