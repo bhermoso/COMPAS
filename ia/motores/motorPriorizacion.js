@@ -78,6 +78,38 @@
 import { crearMotor } from '../motorBase.js';
 import { crearResultadoValidacion } from '../validacionIA.js';
 import { calcularScoreSFA } from '../modeloSFA.js';
+import { TAXONOMIA_TEMAS } from '../../dominio/priorizacion/TaxonomiaTemas.js';
+import { ESTRUCTURA_DETERMINANTES } from '../../dominio/determinantes/EstructuraDeterminantes.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOOKUP código → texto (construido una vez desde ESTRUCTURA_DETERMINANTES)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mapa plano { código: texto } derivado de ESTRUCTURA_DETERMINANTES.
+ * Permite testear el texto de un determinante contra TAXONOMIA_TEMAS.keyReg
+ * sin acceder a window ni al DOM.
+ * @private
+ */
+const _LOOKUP_TEXTO_DET = (function () {
+    const lookup = {};
+    Object.values(ESTRUCTURA_DETERMINANTES).forEach(area => {
+        if (!area || area._metadatos !== undefined) return; // saltar _metadatos
+        // area1: indicadores directos
+        if (Array.isArray(area.indicadores)) {
+            area.indicadores.forEach(ind => { if (ind.codigo) lookup[ind.codigo] = ind.texto; });
+        }
+        // area2, area3: indicadores dentro de grupos
+        if (Array.isArray(area.grupos)) {
+            area.grupos.forEach(g => {
+                if (Array.isArray(g.indicadores)) {
+                    g.indicadores.forEach(ind => { if (ind.codigo) lookup[ind.codigo] = ind.texto; });
+                }
+            });
+        }
+    });
+    return Object.freeze(lookup);
+}());
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS DE PRIORIZACIÓN (únicos valores admitidos por regla de dominio)
@@ -251,9 +283,9 @@ function _obtenerAreasBase(contextoIA) {
  * Si el área viene de analisisPrevio, extrae el score epidemiológico del motor v2.
  * Si el área es una categoría CMI, usa la proporción de determinantes en esa categoría.
  *
- * ⚠️ LIMITACIÓN: la conversión determinante→área de salud requiere un mapa de
- *    correspondencia que está en TAXONOMIA_TEMAS del monolito (l.24248).
- *    Mientras no se extraiga ese mapa, el score se aproxima globalmente.
+ * Cuando el área tiene entrada en TAXONOMIA_TEMAS, usa _LOOKUP_TEXTO_DET para
+ * contar cuántos determinantes presentes coinciden con el keyReg del área.
+ * Si el área no está en TAXONOMIA_TEMAS, mantiene la señal global de 0.30.
  *
  * @param {object} area
  * @param {object} contextoIA
@@ -285,9 +317,28 @@ function _scoreEpidemiologico(area, contextoIA) {
         }
     }
 
-    // Fallback: ¿hay determinantes? Usamos su presencia como señal mínima
-    const nDet = Object.keys(contextoIA.determinantes || {}).length;
-    return nDet > 0 ? 0.30 : 0;
+    // Fallback mejorado: matching código→texto→keyReg usando TAXONOMIA_TEMAS
+    const dets = contextoIA.determinantes || {};
+    const codigos = Object.keys(dets);
+    if (codigos.length === 0) return 0;
+
+    const taxArea = TAXONOMIA_TEMAS[area.id];
+    if (taxArea && taxArea.keyReg) {
+        // Contar determinantes presentes cuyo texto coincide con el área
+        const coincidentes = codigos.filter(cod => {
+            const texto = _LOOKUP_TEXTO_DET[cod];
+            return texto && taxArea.keyReg.test(texto);
+        });
+        // Score proporcional: cada 5 coincidencias = score 1.0 (umbral conservador)
+        if (coincidentes.length > 0) {
+            return parseFloat(Math.min(1, coincidentes.length / 5).toFixed(3));
+        }
+        // Área conocida en taxonomía pero sin coincidencias → señal mínima
+        return 0.05;
+    }
+
+    // Área sin entrada en TAXONOMIA_TEMAS → señal global (comportamiento anterior)
+    return 0.30;
 }
 
 /**
@@ -535,7 +586,7 @@ function _normalizarSalidaPriorizacion(areasConScore, tipo, contextoIA, fuentesU
             disponible:  !!(contextoIA.fuentes.tieneDet || contextoIA.analisisPrevio),
             peso:        areasConScore[0].pesos && areasConScore[0].pesos.epidemiologico,
             descripcion: 'Determinantes EAS registrados. Proxy de carga de enfermedad del municipio.',
-            limitacion:  'El mapping determinante→área requiere TAXONOMIA_TEMAS del monolito (pendiente de extraer).',
+            limitacion:  'El mapping determinante→área requiere referenciasEAS (labels de código) en ContextoIA. TAXONOMIA_TEMAS ya extraída.',
         },
         {
             id:          'cmi',

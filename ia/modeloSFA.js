@@ -45,8 +45,7 @@
  *   ANALYTIC_CONFIG (10 dims) → Ver adaptarModeloHeredado('ANALYTIC_CONFIG')
  *   COMPAS_PESOS_SFA (6 dims) → Ver adaptarModeloHeredado('COMPAS_PESOS_SFA')
  *
- *   El mapeo es PROVISIONAL hasta que se audite el contenido exacto de esas
- *   configuraciones en el monolito. Ver MODELO_SFA_UNIFICADO.md.
+ *   El mapeo fue AUDITADO el 2026-03-14. Ver A1 en PLAN_TRANSICION_MONOLITO.md.
  *
  * ══════════════════════════════════════════════════════════════════════════════
  * MÓDULO PURO: Sin DOM. Sin Firebase. Sin efectos secundarios.
@@ -522,63 +521,56 @@ function _construirAdvertenciasSFA(ausentes, contextoIA) {
 /**
  * Mapeo provisional de ANALYTIC_CONFIG (10 dimensiones) al modelo unificado (8 dimensiones).
  *
- * ⚠️ PENDIENTE DE AUDITORÍA:
- *   Las dimensiones exactas de ANALYTIC_CONFIG están en el monolito (l.24220)
- *   y no se han auditado todavía. Este mapeo es PROVISIONAL basado en la
- *   estructura SFA documentada para herramientas de salud pública.
- *   Actualizar cuando se audite el monolito.
+ * AUDITADO (2026-03-14): claves reales en COMPAS.html L.48190
  *
- * Estructura esperada de ANALYTIC_CONFIG (10 dimensiones SFA):
- *   Basado en la literatura SFA (Antonovsky) y el contexto EPVSA:
- *   1. Carga epidemiológica → D1
- *   2. Factores de riesgo conductual → D3 (determinantes)
- *   3. Enfermedades crónicas → D2 (CMI eventos no transmisibles)
- *   4. Salud mental → D2 (CMI eventos no transmisibles)
- *   5. Prevención → D2 (CMI prevención)
- *   6. Determinantes sociales → D3
- *   7. Participación comunitaria → D6
- *   8. Equidad → D4
- *   9. Capacidad institucional → D7
- *   10. Convergencia EPVSA → D8
+ * ANALYTIC_CONFIG (10 dimensiones) — modelo anterior, menos el motor v3:
+ *   score_epidemiologico (0.22)           → D1
+ *   score_ciudadano (0.20)                → D6
+ *   score_inequidad (0.18)                → D4
+ *   score_evidencia_complementaria (0.12) → D5
+ *   score_impacto (0.10)                  → D2
+ *   score_factibilidad (0.08)             → D7
+ *   score_activos (0.05)                  → D8 (aproximación)
+ *   score_consistencia (0.03)             → D8
+ *   score_riesgo_inaccion (0.01)          → D4 (floor ético)
+ *   score_alineacion_epvsa (0.01)         → D8
  */
 const _MAPEO_ANALYTIC_CONFIG = Object.freeze({
     // dim_analytic_config_key → id_unificado
-    // PROVISIONAL: estos nombres son suposiciones pendientes de validar
-    carga_epidemiologica:         DIM.D1_EPIDEMIOLOGIA,
-    factores_riesgo_conductual:   DIM.D3_DETERMINANTES_SOCIALES,
-    enfermedades_cronicas:        DIM.D2_TENDENCIAS_CMI,
-    salud_mental:                 DIM.D2_TENDENCIAS_CMI,      // fusión en D2
-    prevencion:                   DIM.D2_TENDENCIAS_CMI,      // fusión en D2
-    determinantes_sociales:       DIM.D3_DETERMINANTES_SOCIALES,
-    participacion_comunitaria:    DIM.D6_PARTICIPACION,
-    equidad:                      DIM.D4_INEQUIDAD,
-    capacidad_institucional:      DIM.D7_FACTIBILIDAD,
-    convergencia_epvsa:           DIM.D8_CONVERGENCIA,
+    // AUDITADO: claves reales de ANALYTIC_CONFIG (COMPAS.html L.48190)
+    score_epidemiologico:           DIM.D1_EPIDEMIOLOGIA,
+    score_ciudadano:                DIM.D6_PARTICIPACION,
+    score_inequidad:                DIM.D4_INEQUIDAD,
+    score_evidencia_complementaria: DIM.D5_EVIDENCIA_CUALITATIVA,
+    score_impacto:                  DIM.D2_TENDENCIAS_CMI,
+    score_factibilidad:             DIM.D7_FACTIBILIDAD,
+    score_activos:                  DIM.D8_CONVERGENCIA,    // activos comunitarios → convergencia estratégica
+    score_consistencia:             DIM.D8_CONVERGENCIA,    // consistencia entre fuentes → convergencia
+    score_riesgo_inaccion:          DIM.D4_INEQUIDAD,       // riesgo de inacción → floor ético inequidad
+    score_alineacion_epvsa:         DIM.D8_CONVERGENCIA,    // alineación EPVSA → convergencia estratégica
 });
 
 /**
  * Mapeo provisional de COMPAS_PESOS_SFA (6 dimensiones) al modelo unificado.
  *
- * ⚠️ PENDIENTE DE AUDITORÍA:
- *   Las dimensiones de COMPAS_PESOS_SFA no han sido auditadas en el monolito.
- *   Este mapeo es una hipótesis de trabajo.
+ * AUDITADO (2026-03-14): claves reales en COMPAS.html L.53237
  *
- * Estructura esperada de COMPAS_PESOS_SFA (6 dimensiones):
- *   1. Carga de enfermedad → D1 + D2
- *   2. Determinantes → D3
- *   3. Prevención → D2
- *   4. Participación → D6
- *   5. Inequidad → D4
- *   6. Capacidad / convergencia → D7 + D8
+ * COMPAS_PESOS_SFA (6 dimensiones) — modelo canónico actual (motor v3):
+ *   epi (0.28)         → D1  | ciudadano (0.22)  → D6
+ *   inequidad (0.20)   → D4  | evidencia (0.15)  → D5
+ *   impacto (0.10)     → D2  | convergencia (0.05) → D8
+ *   Sin equivalente para D3 (determinantes EAS) y D7 (factibilidad).
  */
 const _MAPEO_COMPAS_PESOS_SFA = Object.freeze({
-    // PROVISIONAL: pendiente de auditar
-    carga_enfermedad:    [DIM.D1_EPIDEMIOLOGIA, DIM.D2_TENDENCIAS_CMI],  // dos dimensiones
-    determinantes:       DIM.D3_DETERMINANTES_SOCIALES,
-    prevencion:          DIM.D2_TENDENCIAS_CMI,
-    participacion:       DIM.D6_PARTICIPACION,
-    inequidad:           DIM.D4_INEQUIDAD,
-    capacidad:           [DIM.D7_FACTIBILIDAD, DIM.D8_CONVERGENCIA],     // dos dimensiones
+    // AUDITADO: claves reales de COMPAS_PESOS_SFA (COMPAS.html L.53237)
+    // COMPAS_PESOS_SFA es la versión canónica actual (evolución de ANALYTIC_CONFIG)
+    epi:         DIM.D1_EPIDEMIOLOGIA,
+    ciudadano:   DIM.D6_PARTICIPACION,
+    inequidad:   DIM.D4_INEQUIDAD,
+    evidencia:   DIM.D5_EVIDENCIA_CUALITATIVA,
+    impacto:     DIM.D2_TENDENCIAS_CMI,
+    convergencia:DIM.D8_CONVERGENCIA,
+    // D3 (determinantes), D7 (factibilidad) no tienen equivalente en este modelo
 });
 
 /**
