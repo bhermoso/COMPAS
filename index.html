@@ -55741,7 +55741,7 @@ function ibse_cargarCSV(input) {
 
                     factorPersona:   calc.factorPersona,
 
-                    total:           calc.total,
+                    ibse_total:      calc.total,
 
                     fuente:    'csv_redcap',
 
@@ -56046,6 +56046,8 @@ function ibse_enviarRespuesta() {
     var calc = calcularIBSE(datos);
 
     Object.assign(datos, calc);
+
+    datos.ibse_total = calc.total;   // alias esperado por monitor_ibse.html
 
     if (typeof db !== 'undefined') {
 
