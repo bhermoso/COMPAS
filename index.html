@@ -14729,6 +14729,8 @@ function cargarMunicipiosDisponibles() {
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] cargarMunicipiosDisponibles: error Firebase:', err);
     });
 
 }
@@ -33271,6 +33273,8 @@ function reanudarSesionVotacion() {
 
             setupVotacionListener(municipio);
 
+        }).catch(function(err) {
+            console.error('[COMPÁS] vrelas_reanudarSesion: error Firebase para "' + municipio + '":', err);
         });
 
 }
@@ -55224,10 +55228,14 @@ function ibseMonitor_abrir() {
 
                 }
 
+            }).catch(function(err) {
+                console.error('[COMPÁS] ibseMonitor_abrir: error Firebase legacy para "' + mun + '":', err);
             });
 
         }
 
+    }).catch(function(err) {
+        console.error('[COMPÁS] ibseMonitor_abrir: error Firebase para "' + mun + '":', err);
     });
 
 }
