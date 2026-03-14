@@ -1492,6 +1492,7 @@ function procesarCSV(event) {
                         };
                         const calcs = calcularIBSE(datos);
                         Object.assign(datos, calcs);
+                        datos.ibse_total = calcs.total != null ? calcs.total : (calcs.ibse_total || 0);
                         ref.push(datos);
                         contador++;
                     }
@@ -1521,9 +1522,11 @@ function exportarCSV() {
             r.record_id, r.sexo, r.edad,
             r.ibse_deprimido, r.ibse_feliz, r.ibse_solo, r.ibse_disfrutar,
             r.ibse_energia, r.ibse_tranquilo, r.ibse_optimista, r.ibse_bienmismo,
-            r.factor_vinculo.toFixed(2), r.factor_situacion.toFixed(2),
-            r.factor_control.toFixed(2), r.factor_persona.toFixed(2),
-            r.ibse_total.toFixed(2), r.timestamp
+            (r.factor_vinculo  != null ? r.factor_vinculo  : r.factorVinculo   || 0).toFixed(2),
+            (r.factor_situacion != null ? r.factor_situacion : r.factorSituacion || 0).toFixed(2),
+            (r.factor_control   != null ? r.factor_control   : r.factorControl   || 0).toFixed(2),
+            (r.factor_persona   != null ? r.factor_persona   : r.factorPersona   || 0).toFixed(2),
+            (r.ibse_total != null ? r.ibse_total : r.total || 0).toFixed(2), r.timestamp
         ].join(','));
     });
     
