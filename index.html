@@ -58377,7 +58377,7 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl1 && _rfEl1.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(){});
+    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
 
 
 
@@ -58407,7 +58407,7 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl2 && _rfEl2.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(){});
+    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
 
 
 
@@ -58431,7 +58431,7 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         };
 
-    }).catch(function(){});
+    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
 
 
 
@@ -58473,7 +58473,7 @@ function COMPAS_cargarPrioridadesFirebase(municipio) {
 
         if (_rfEl4 && _rfEl4.innerHTML.trim()) { try { renderizarSeccionPriorizacion(); } catch(e) {} }
 
-    }).catch(function(){});
+    }).catch(function(err){ console.error('[COMPÁS] COMPAS_cargarPrioridadesFirebase: error Firebase para "' + municipio + '":', err); });
 
 }
 
