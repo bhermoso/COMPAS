@@ -50803,7 +50803,9 @@ function renderizarResultadoIA(r) {
 
     document.getElementById('ia-resultado').style.display = 'block';
 
-    document.getElementById('ia-fecha-generacion').textContent = 'Generado: ' + new Date().toLocaleString('es-ES');
+    var _fgStr = r && r.fechaGeneracion ? new Date(r.fechaGeneracion).toLocaleString('es-ES') : new Date().toLocaleString('es-ES');
+
+    document.getElementById('ia-fecha-generacion').textContent = 'Generado: ' + _fgStr;
 
 
 
